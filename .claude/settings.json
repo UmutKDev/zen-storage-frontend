@@ -1,0 +1,41 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(bun install)",
+      "Bash(bun run dev)",
+      "Bash(bun run build)",
+      "Bash(bun run start)",
+      "Bash(bun run lint)",
+      "Bash(bun run generate:service:test)",
+      "Bash(bunx tsc --noEmit)",
+      "Bash(bunx shadcn:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git show:*)",
+      "Bash(git branch:*)",
+      "Bash(git stash list:*)",
+      "Bash(find . -type f:*)",
+      "Bash(find . -type d:*)",
+      "Bash(rg:*)",
+      "Bash(ls:*)",
+      "Bash(wc:*)"
+    ],
+    "deny": [
+      "Read(//Users/umut.kiziloglu/Documents/Projects/Personal/nextjs-storage/.env)",
+      "Read(//Users/umut.kiziloglu/Documents/Projects/Personal/nextjs-storage/.env.local)",
+      "Read(//Users/umut.kiziloglu/Documents/Projects/Personal/nextjs-storage/.env.production)",
+      "Read(//Users/umut.kiziloglu/Documents/Projects/Personal/nextjs-storage/.env.development)",
+      "Edit(service/generates/**)",
+      "Bash(rm -rf:*)",
+      "Bash(git push --force:*)",
+      "Bash(git push origin main:*)"
+    ],
+    "ask": [
+      "Bash(git push:*)",
+      "Bash(bun add:*)",
+      "Bash(bun remove:*)",
+      "Bash(bunx shadcn@latest add:*)"
+    ]
+  }
+}
