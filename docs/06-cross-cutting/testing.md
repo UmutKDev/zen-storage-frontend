@@ -37,5 +37,28 @@
 - Prefer behavior assertions over snapshots; snapshot only stable, intentional UI.
 - Each bug fix adds a regression test.
 
-## 5. CI
+## 5. Infrastructure & file paths
+
+The `tests/` tree is stood up at **P0** from day one — no per‑phase plumbing, no per‑feature provider wrappers.
+
+```
+tests/
+├── setup.ts                                  # vitest setup; registers the MSW server (beforeAll/afterEach/afterAll)
+├── test-utils.tsx                            # exports renderWithProviders (QueryClient + Session + Theme + MotionConfig)
+├── fixtures/<resource>.fixtures.ts           # typed by @/service/models — HAND-ROLLED DTOs ARE FORBIDDEN
+├── msw/
+│   ├── server.ts                             # setupServer(...handlers)
+│   └── handlers/<resource>.handlers.ts       # one file per resource
+└── e2e/<flow>.spec.ts                        # Playwright
+```
+
+- **Unit/component tests co‑locate next to source**: `Thing.test.ts(x)` lives beside `Thing.tsx`. Only fixtures, MSW, shared utils, and e2e specs live under `tests/`.
+- **Fixtures must be typed via `@/service/models`** — never invent shapes. Lint rejects hand‑rolled fixture types with the reason: _"Fixtures must be typed via @/service/models."_ (Same rule as feature code — DTOs are generated.)
+- MSW handlers return objects assignable to those generated models; if a model is wrong, fix the spec/regeneration, not the fixture.
+
+### renderWithProviders is the only provider wrapper
+
+**Each feature's component tests MUST import `renderWithProviders` from `@/tests/test-utils` — do NOT create per‑feature provider wrappers (drift risk).** If a test needs an extra provider, extend `renderWithProviders` (opt‑in option) so every test benefits and the wrappers cannot diverge from `app/providers.tsx`.
+
+## 6. CI
 - Lint + type‑check (`tsc --noEmit`) + unit/component on PR; e2e on a nightly or pre‑merge lane. (Set up in Phase 0/CI.)

@@ -8,6 +8,16 @@
 > **Update rule:** edit the relevant phase summary or its `phases/` file — **don't rewrite** — and add a Changelog line.
 
 ## Changelog
+- **2026-05-31 (folder-structure plan locked)** — Aligned phase summaries with the locked **Strict Feature‑Sliced + Hard
+  Barrels** plan (Winner A + 4 grafts). P0 expanded to the full build order: `service/Instance` + interceptor split +
+  `service/token-sources.ts`, `lib/api/{ApiError,envelope,query-keys,invalidators,error-toast,idempotency,abort,pagination}`,
+  `lib/{auth,i18n,motion,flags,observability,socket,shortcuts,validation,seo,utils}`, `components/ui` shadcn primitives
+  (button/dialog/dropdown-menu/command/tooltip/input/sonner via MCP), `stores/{workspace,ui}`, `config/*`, `types/*`,
+  `app/providers.tsx` + route‑group skeletons, `app/{sitemap,robots,manifest,opengraph-image,not-found,error}`,
+  `middleware.ts` + `instrumentation.ts` (5‑line shims), `eslint.config.mjs` FULL enforce, `tests/*` infra; favicon to
+  `public/`. P2 replaces `components/layout/` with **`features/shell/`**. P3 notes feature‑local stores (uploads in
+  upload/, selection in operations/, viewPrefs in browse/). P5 wires `registerSecureFolderTokenSource` to its real
+  getter (no‑op since P0). P8 activates **`features/shell/components/WorkspaceSwitcher.tsx`**.
 - **2026-05-30 (scope round)** — Broadened scope + sharpened MVP. Added [MVP-DEFINITION](../00-overview/MVP-DEFINITION.md)
   (MVP #1 priority = rock‑solid storage core) and a [backend-gaps matrix](../07-decisions/backend-gaps.md). New
   frontend‑only MVP scope: command palette + shortcuts, observability, feature flags, onboarding (woven into Phases 0/3/7).
@@ -88,11 +98,32 @@ may be reordered. Phase 8 needs no refactor because the team plumbing is laid in
 Each summary is intentionally short — **the authoritative detail is in the linked file.**
 
 ### Phase 0 — Foundation + Design System → [details](./phases/phase-0-foundation.md)
-A runnable, **team‑ready skeleton**: dependencies, conventions, the **premium shadcn + framer‑motion design/motion
-system**, light/dark theming, i18n scaffold (EN), the **generated‑client wiring + improved axios `Instance`**, the
-**envelope/typed‑error/toast layer**, the **socket.io client lifecycle**, routing skeleton with folder deep‑linking, and
-the providers. **No feature screens, no team UI.** This phase de‑risks the bleeding‑edge stack (Next 16.2 + React 19 +
-Auth.js v5).
+A runnable, **team‑ready skeleton**. The full P0 surface lands here:
+
+- **Data layer:** `service/Instance.ts` (~30‑line composition), the interceptor split
+  `service/interceptors/{session,team,secure-folder,idempotency,envelope}.ts`, and the inverted‑deps seam
+  `service/token-sources.ts` (`registerSecureFolderTokenSource` is a no‑op until Phase 5 wires the real getter).
+- **`lib/api/`:** `ApiError`, `envelope`, `query-keys` (`scopedKey(scope, …)`), `invalidators`, `error-toast`,
+  `idempotency` (UUID v7), `abort` (`composeSignals`, `withTimeout`), `pagination`.
+- **`lib/` cross‑cutting:** `auth`, `i18n`, `motion` (tokens/variants/`useReducedMotion`), `flags`, `observability`,
+  `socket`, `shortcuts`, `validation` (global zod primitives), `seo`, `utils`.
+- **Design system kernel:** `components/ui/` shadcn primitives pulled via the **shadcn MCP** —
+  button/dialog/dropdown-menu/command/tooltip/input/sonner — plus premium wrappers + barrel.
+- **Global stores:** `stores/workspace.store.ts` (drives `X-Team-Id` + key scope) and `stores/ui.store.ts` — the only
+  global stores at MVP.
+- **`config/*`** (env/constants/flags.defaults) and **`types/*`** (env/next-auth/global ambient types).
+- **App seams:** `app/providers.tsx` (Query/Session/Theme/Motion/Toaster + token‑source registers), route‑group
+  skeletons under `(public|auth|app)`, and `app/{sitemap,robots,manifest,opengraph-image,not-found,error}` delegating to
+  `lib/seo`.
+- **Root file seams:** `middleware.ts` and `instrumentation.ts` as ~5‑line shims into `lib/auth/middleware` and
+  `lib/observability/instrumentation`.
+- **`eslint.config.mjs`** with **FULL enforcement** (boundaries + entry‑point + no‑restricted‑imports/syntax — not
+  warn‑then‑error).
+- **Tests infra:** `tests/setup.ts`, `tests/test-utils.tsx` (`renderWithProviders`), `tests/fixtures/` typed off
+  `@/service/models`, `tests/msw/{server,handlers}`, and `tests/e2e/`.
+- **Public assets:** favicon moves to `public/`, not `app/`.
+
+**No feature screens, no team UI.** De‑risks the bleeding‑edge stack (Next 16.2 + React 19 + Auth.js v5).
 
 ### Phase 1 — Auth → [details](./phases/phase-1-auth.md)
 Full **session‑based auth**: Auth.js v5 credentials wrapping the multi‑step flow (`Login/Check` → `Login` →
@@ -100,15 +131,23 @@ Full **session‑based auth**: Auth.js v5 credentials wrapping the multi‑step 
 route protection for `(app)`.
 
 ### Phase 2 — App Shell + Account (Personal) → [details](./phases/phase-2-shell-account.md)
-The authenticated **shell** (sidebar/topbar, theme toggle, profile menu, notification bell) and the **Account** area:
-profile + avatar, security (change password, 2FA, passkeys, session history), and a read‑only subscription view.
-**No team switch.**
+The authenticated **shell** as a feature: **`features/shell/`** (replaces the old `components/layout/`) ships
+`AppShell`, `Sidebar`, `Topbar`, `BreadcrumbSlot`, `CommandBarSlot`, and an inert `WorkspaceSwitcher` slot (activated in
+Phase 8). Plus the **Account** area: profile + avatar, security (change password, 2FA, passkeys, session history), and a
+read‑only subscription view. **No team switch.**
 
 ### Phase 3 — Storage Core (Personal) → [details](./phases/phase-3-storage-core.md)
-The storage browser end‑to‑end: list & smart grid, breadcrumb deep‑linking, usage bar, the **upload pipeline**
-(multipart + presigned, queue/tray, progress, pause/cancel/retry, file‑drop, folder upload), create file/folder,
+The storage browser end‑to‑end under nested sub‑features **`features/storage/{browse,upload,operations,search,shared}/`**
+plus **`features/command-palette/`** and **`components/patterns/*`**: list & smart grid, breadcrumb deep‑linking, usage
+bar, the **upload pipeline** (multipart + presigned, queue/tray, progress, pause/cancel/retry, file‑drop, folder upload —
+the ONE allow‑listed `fetch` lives at `features/storage/upload/api/presigned-put.ts`), create file/folder,
 rename/move/delete, **multi‑select + bulk + drag‑and‑drop move**, the **conflict‑resolution dialog**, search (global vs
 current), and filter/sort. **Quota pre‑flight** blocks with an upgrade hint.
+
+**Feature‑local stores land here, not in `stores/`:**
+- `features/storage/upload/stores/uploads.store.ts`
+- `features/storage/operations/stores/selection.store.ts`
+- `features/storage/browse/stores/viewPrefs.store.ts` (sessionStorage)
 
 ### Phase 4 — Preview + Share → [details](./phases/phase-4-preview-share.md)
 The **preview modal** (image/video/PDF/text/**audio**/**office**) with toolbar and arrow‑key navigation; image CDN scaling +
@@ -118,7 +157,9 @@ scaled‑vs‑original download; the **text/code editor** (CodeMirror + lock + h
 ### Phase 5 — Secure Folders → [details](./phases/phase-5-secure-folders.md)
 **Encrypted** folders (create/convert/decrypt, unlock/lock) and **hidden** folders (hide/unhide, `Shift Shift` reveal,
 conceal), backed by the in‑memory **session‑token lifecycle** (ancestor lookup, TTL re‑prompt, explicit lock,
-clear‑on‑logout/tab‑close) and the `Instance` header injection.
+clear‑on‑logout/tab‑close) and the `Instance` header injection. This is the phase where
+`registerSecureFolderTokenSource` (the no‑op seam stubbed in P0) gets its **real getter**, wired from
+`features/secure-folders/stores/secureFolders.store.ts` through `app/providers.tsx`.
 
 ### Phase 6 — Advanced → [details](./phases/phase-6-advanced.md)
 **Duplicate scan**, **archive** create/extract (with preview + selective extract), **AV scan status** gating, and the
@@ -132,7 +173,9 @@ and **observability verification**. **MVP ships at the end of this phase.**
 
 ### Phase 8 — Teams Integration (post‑MVP) → [details](./phases/phase-8-teams.md)
 Flip on the **team layer** with zero refactor: workspace store + Personal↔Team switch, end‑to‑end `X-Team-Id`, team
-CRUD, members (roles), invitations, and team storage/quota with permission‑denied states.
+CRUD, members (roles), invitations, and team storage/quota with permission‑denied states. The **`WorkspaceSwitcher`**
+slot — inert since Phase 2 — activates at
+**`features/shell/components/WorkspaceSwitcher.tsx`**, driven by `stores/workspace.store.ts`.
 
 ### Phase 9 — Organization & Discovery (post‑MVP, backend‑gated) → [details](./phases/phase-9-organization.md)
 Build **favorites/recents**, **tags/labels**, and account‑wide **storage insights** — **backend‑first** (each needs a new

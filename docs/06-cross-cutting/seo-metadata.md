@@ -16,8 +16,8 @@
 ## 3. Site‑level
 - `robots.txt` (allow public, disallow `(app)` paths).
 - `sitemap.xml` for public routes.
-- Favicon/app icons already present (`app/favicon.ico`); add full icon set + manifest if PWA‑ish polish is wanted
-  (optional, post‑MVP).
+- Favicon/app icons live at `public/favicon.ico` (moved in P0; keeps `app/` thin per Next‑16 conventions); add full
+  icon set + manifest if PWA‑ish polish is wanted (optional, post‑MVP).
 
 ## 4. Performance ↔ SEO
 - LCP/CLS on landing matter for SEO — see [performance](./performance.md). RSC for fast first paint where possible.

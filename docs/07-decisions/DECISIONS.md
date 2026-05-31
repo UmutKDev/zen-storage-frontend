@@ -62,3 +62,21 @@
 - **Avatar (Q7):** `Account/Upload/Image` **exists but is inactive** → avatar upload is **post‑MVP**; ship read‑only
   avatar now. Tracked in [backend-gaps](./backend-gaps.md).
 - **Sharing (Q1 resolved):** `Cloud/PresignedUrl` is the share mechanism; no separate share backend planned.
+
+## Folder structure plan (locked 2026-05-31)
+
+- **D‑F1** — **Approach A (strict feature‑sliced + hard barrels) wins** over B (pragmatic layered) and C (domain packages). Highest aggregate across dx/scale/docFit/enforcement lenses; lowest foundational risk per the adversarial critic. See [ARCHITECTURE](../02-architecture/ARCHITECTURE.md#folder-structure).
+- **D‑F2** — **Instance lives at `service/Instance.ts`** (reconfirms the "Resolved notes" entry above). Factory import path wins; never relocate under `lib/api/`.
+- **D‑F3** — **Interceptors split** into `service/interceptors/{session,team,secure-folder,idempotency,envelope}.ts`; `Instance.ts` is a ~30‑line composer. No 200‑line monolith. See [data-layer](../02-architecture/data-layer.md).
+- **D‑F4** — **Inverted‑deps seam** for the secure‑folder token: `service/token-sources.ts` exposes `registerSecureFolderTokenSource(getter)`, called once from `app/providers.tsx`. **`service/` NEVER imports `@/features/`.** See [secure-folder-lifecycle](../02-architecture/secure-folder-lifecycle.md).
+- **D‑F5** — **`features/shell/` replaces `components/layout/`.** The shell IS a feature — it owns the workspace‑switcher slot, command‑bar slot, and breadcrumb slot. No top‑level `components/layout/` directory.
+- **D‑F6** — **Feature‑LOCAL stores** (`uploads`, `selection`, `viewPrefs`, `secureFolders`) live inside their owning feature, **not** in global `stores/`. Global `stores/` at MVP contains only `workspace.store.ts` + `ui.store.ts`.
+- **D‑F7** — **Hard barrels:** a feature or sub‑feature is only enterable through its `index.(ts|tsx)`. Enforced by ESLint `boundaries/entry-point`.
+- **D‑F8** — **No `export *` anywhere** — explicit named re‑exports only. Enforced by `no-restricted-syntax` (AST rule on `ExportAllDeclaration`).
+- **D‑F9** — **ESLint at P0 = FULL ENFORCE (error level, not warn).** The architecture is policed by lint from day one; no soft ramp‑up.
+- **D‑F10** — **THE ONE sanctioned non‑factory call:** `features/storage/upload/api/presigned-put.ts`. Allowlisted in `eslint.config.mjs` with a top‑of‑file comment pointing back here. No other `fetch`/`axios` may exist.
+- **D‑F11** — **Idempotency‑key single source:** `lib/api/idempotency.ts` (UUID v7, `newIdempotencyKey()`). **AbortSignal helpers:** `lib/api/abort.ts` (`composeSignals`, `withTimeout`). Interceptors and feature mutations import from here only.
+- **D‑F12** — **ADR convention:** `docs/07-decisions/<NNN>-<slug>.md` (3‑digit zero‑padded, kebab‑case). Code cross‑references via `// see docs/07-decisions/...`.
+- **D‑F13** — **Favicon lives in `public/favicon.ico`,** NOT `app/favicon.ico`. Keeps `app/` thin per Next 16 conventions.
+- **D‑F14** — **Default Server Components everywhere.** `'use client'` lands at the feature component boundary (the `*Client` suffix), **never on the page**. Pages and layouts stay server‑rendered; `screens/*Screen.tsx` is a server container that mounts a `<*Client>` child.
+- **D‑F15** — **Next‑16 root files (`middleware.ts`, `instrumentation.ts`) are ≤5‑line shims;** real logic lives in `lib/auth/` and `lib/observability/`.

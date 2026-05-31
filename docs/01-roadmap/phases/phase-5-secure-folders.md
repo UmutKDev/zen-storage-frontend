@@ -18,8 +18,9 @@ header injection (`X-Folder-Session` / `X-Hidden-Session`).
 ## Task breakdown
 
 ### 5.1 — Token store & lifecycle → see [secure-folder-lifecycle](../../02-architecture/secure-folder-lifecycle.md)
-- [ ] `stores/secureFolders` (zustand), **in‑memory only, never persisted** (no localStorage). Two namespaces:
+- [ ] `features/secure-folders/stores/secureFolders.store.ts` (zustand), **in‑memory only, never persisted** (no localStorage). Two namespaces:
       encrypted (`X-Folder-Session`) and hidden (`X-Hidden-Session`).
+- [ ] The store lives inside the `features/secure-folders/` feature (not in the global `stores/`); ESLint guards ban `persist`, `localStorage`, `sessionStorage`, and `cookie` access in that exact file.
 - [ ] Store `{ token, expiresAt }` keyed by the returned root folder path.
 - [ ] **Ancestor‑aware lookup:** a request for `a/b/c` uses the nearest valid ancestor token.
 - [ ] **TTL expiry → transparent re‑prompt** (passphrase dialog) on 403/expired.
@@ -27,8 +28,8 @@ header injection (`X-Folder-Session` / `X-Hidden-Session`).
 - [ ] Path‑*marks* (which folders are encrypted/hidden) may persist to `sessionStorage`; **tokens never do**.
 
 ### 5.2 — Instance header injection
-- [ ] For `/Api/Cloud/*` calls, the `Instance` attaches the right secure header based on the request path + ancestor
-      token (the hook point was reserved in Phase 0).
+- [ ] For `/Api/Cloud/*` calls, the secure-folder header (`X-Folder-Session` / `X-Hidden-Session`) is attached by `service/interceptors/secure-folder.ts`, which reads tokens via the seam `service/token-sources.ts.registerSecureFolderTokenSource(getter)` registered from `app/providers.tsx`. `service/` never imports `@/features/secure-folders`.
+- [ ] Ancestor matching uses `lib/utils/paths.ts.isAncestor` (shared helper, unit-tested).
 
 ### 5.3 — Encrypted folders
 - [ ] Create encrypted (`Cloud/Directory` with `IsEncrypted` + `X-Folder-Passphrase` ≥ 8) — finishes the Phase‑3 stub.

@@ -19,6 +19,30 @@
 | **Q12** | **Tags/labels API** (entity + CRUD + filter) | Organize beyond folders. | **Decided: will build, backend‑first; post‑MVP.** | API team (owner) | Phase 9 | **Planned** — not built yet. |
 | **Q13** | **Account‑wide insights/aggregate endpoint** | Storage breakdown / largest files. | **Decided: will build, backend‑driven; post‑MVP.** MVP shows only the usage bar (totals). | API team (owner) | Phase 9 | **Planned** — not built yet. |
 
+## From folder-structure plan (to resolve before P0 lock-in)
+
+> Yes/no decisions surfaced by the locked folder-structure plan. Recommended defaults inline; flip to **DECIDED** in
+> [DECISIONS.md](./DECISIONS.md) once chosen. Resolve **before** P0 ESLint lock-in (boundaries + entry-point full
+> error). See also: [ARCHITECTURE.md](../02-architecture/ARCHITECTURE.md), [data-layer](../02-architecture/data-layer.md).
+
+| # | Question | Default / proposal | Resolve by |
+|---|---|---|---|
+| **Q14** | Does Auth.js v5 (credentials) need `middleware.ts` matcher rules to protect `(app)/**`, or do we rely on per-segment `lib/auth/guards.ts` redirects? | **Per-segment guards** — `middleware.ts` stays a ~5-line shim to `lib/auth/middleware`; segment‑level `lib/auth/guards.ts` redirects keep the auth boundary inside the React tree (session is server‑read via `lib/auth/server.ts`). Add a matcher only if a measured perf/UX gap appears. | P0 / P1 |
+| **Q15** | Should `prefetch<Resource>` helpers live in `features/<f>/api/<f>.queries.ts` (current) or in `features/<f>/api/<f>.server.ts` with `import 'server-only'` (safer; doubles file count)? | **Co-locate in `<f>.queries.ts`** — single source per resource; server‑only callers gate via `import 'server-only'` at the call site (screen/page). Re‑evaluate if a client component accidentally pulls server‑only code. | P0 |
+| **Q16** | Tailwind v4 token registration: all in `app/globals.css` `@theme` (single source) or split with `lib/motion/tokens.ts` re-export? | **Single source in `app/globals.css` `@theme`** — matches the plan's "SINGLE token source" rule. `lib/motion/tokens.ts` exposes **motion durations/easings only** (JS-consumed), never colors. | P0 |
+| **Q17** | Intercepting route `@modal/(.)preview/[key]` + `[[...path]]` catch-all — does it play correctly in Next 16.2? Needs a quick P0 spike. | **Spike in P0**, decide in P4. Fallback: query-param modal under `app/(app)/storage/[[...path]]/` (see Q9). | P0 spike → P4 |
+| **Q18** | MSW v2 with Next-16 instrumentation: does `tests/msw/server.ts` need to mount via `instrumentation.ts` for SSR tests, or is `tests/setup.ts` (Vitest) sufficient? | **Start with `tests/setup.ts` only** (Vitest jsdom env). Add an `instrumentation.ts` mount path only when an SSR test actually needs intercept — keep the prod `instrumentation.ts` shim untouched. | P0 |
+| **Q19** | Do we need a `features/<f>/api/<f>.ws.ts` convention (per-feature socket listeners) in addition to `features/notifications/lib/handlers/`? | **No, not at MVP.** `features/notifications/` stays the hub; cross‑feature invalidations go through `lib/api/invalidators.ts`. Promote to a per‑feature `.ws.ts` only if a second feature owns a non‑notification socket channel. | P6 |
+| **Q20** | Hex literal regex `/^#[0-9a-fA-F]{3,8}$/` — validate it doesn't false-positive on legitimate string IDs starting with `#` before P0 lock-in. | **Audit in P0** before flipping to error. If false positives surface (e.g. anchor fragments, test fixtures), tighten to a token‑boundary form or scope the rule to `.tsx`/`.ts` excluding `tests/fixtures/**`. | P0 |
+
+### Previously-resolved (folder-structure plan)
+
+- ✅ **Instance location**: `lib/api/Instance.ts` vs `service/Instance.ts` → **`service/Instance.ts`** (factory import wins; `service/` is the leaf). See [DECISIONS.md](./DECISIONS.md).
+- ✅ **Interceptor layout**: monolith vs split → **split** under `service/interceptors/{session,team,secure-folder,idempotency,envelope}.ts`.
+- ✅ **Secure-folder token seam**: `service/token-sources.ts` getter, registered from `app/providers.tsx` — `service/` never imports `@/features/`.
+- ✅ **Shell ownership**: `components/layout/` → **`features/shell/`** (shell is a feature; owns `WorkspaceSwitcher` slot).
+- ✅ **Feature-local stores**: `uploads`, `selection`, `viewPrefs`, `secureFolders` live under their feature, **not** in global `stores/`. Globals at MVP are `stores/{workspace,ui}.store.ts` only.
+
 ## How to use this file
 - When a question is answered, **move it to [DECISIONS.md](./DECISIONS.md)** (as a D‑entry) and link the commit/phase.
 - New questions discovered during implementation get added here with the same columns.

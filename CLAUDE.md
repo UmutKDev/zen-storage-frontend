@@ -48,23 +48,31 @@ API fact, [`05-api`](./docs/05-api/API-INVENTORY.md) wins.
 4. **`ownerId`, never `userId`** for the storage‑owner value (`user.Id` *or* `team/{TeamId}`). It shows up as the
    query‑key **scope** and `X-Team-Id` handling. Treating it as a user UUID breaks team storage.
 5. **Secure‑folder tokens are NEVER persisted** (no localStorage/sessionStorage/cookie). In‑memory only,
-   ancestor‑aware, cleared on logout + tab close. → [`secure-folder-lifecycle`](./docs/02-architecture/secure-folder-lifecycle.md).
+   ancestor‑aware, cleared on logout + tab close. The token reaches the `Instance` via the **inverted‑deps seam**
+   (`service/token-sources.ts` — `registerSecureFolderTokenSource`); `service/` never imports `@/features/`.
+   → [`secure-folder-lifecycle`](./docs/02-architecture/secure-folder-lifecycle.md).
 6. **No hardcoded user‑facing copy.** All strings via i18n keys (EN at MVP). → [`i18n`](./docs/06-cross-cutting/i18n.md).
 7. **No raw hex / arbitrary colors** in components. Use semantic Tailwind tokens. **Every** animation respects
    `prefers-reduced-motion`. Pull shadcn primitives via the **shadcn MCP**, then wrap. → [`design-system`](./docs/03-design-system/DESIGN-SYSTEM.md).
 8. **Don't build team UI before Phase 8** — but keep everything team‑ready (header + key scope). → [`team-readiness`](./docs/02-architecture/team-readiness.md).
 9. **The envelope/error layer is the `Instance`**, not per call. It unwraps `Result`, maps typed `ApiError`, toasts,
    `401→re-auth`; `403`/`409` pass through to feature handlers.
+10. **ESLint boundaries are enforced from P0 in FULL ERROR mode** (eslint-plugin-boundaries + entry-point +
+    no-restricted-imports + no-restricted-syntax). The architecture is lint-policed, not goodwill-policed.
 
 ## Folder structure (target — built across phases)
 
 ```
 app/(public|auth|app)/        route groups; app/(app)/storage/[[...path]]  folder deep-linking
+middleware.ts                 ~5-line shim → lib/auth/middleware
+instrumentation.ts            ~5-line shim → lib/observability/instrumentation
 lib/{api,auth,i18n,motion,utils}
-service/{Instance.ts, factories.ts, generates/}   generates/ = build output, never hand-edit
-features/{storage,preview,document-editor,notifications,account,auth,teams}
+service/{Instance.ts, factories.ts, token-sources.ts, interceptors/, generates/}
+                              token-sources.ts = inverted-deps seam; generates/ = build output, never hand-edit
+features/{shell,storage,preview,document-editor,notifications,account,auth,teams}
+                              shell/ owns AppShell/Sidebar/Topbar/WorkspaceSwitcher (replaces components/layout/)
 components/ui/                shadcn primitives (via MCP) + premium wrappers
-stores/                       zustand: workspace, secureFolders, uploads, selection, ui
+stores/                       GLOBAL zustand only: workspace, ui (uploads/selection/viewPrefs/secureFolders are feature-local)
 hooks/
 ```
 Full version + rationale: [`docs/02-architecture/ARCHITECTURE.md`](./docs/02-architecture/ARCHITECTURE.md#folder-structure).
