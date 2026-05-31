@@ -39,18 +39,27 @@ This rebuild sits between three codebases. Knowing which is which prevents most 
 
 ## What "MVP" means here
 
-**MVP = the entire Personal experience, polished.** Concretely, MVP is **Phases 0–7**: foundation, auth, account,
-storage core, preview/share, secure folders, advanced features, and public pages + polish. **Teams (Phase 8) is
-explicitly post‑MVP** but every data‑fetching and storage‑owner decision is made *team‑ready* now so Phase 8 needs no
-refactor (see [`02-architecture/team-readiness.md`](../02-architecture/team-readiness.md)).
+**MVP = the entire Personal experience, polished**, with a **rock‑solid storage core as the #1 priority.** Concretely,
+MVP is **Phases 0–7**: foundation, auth, account, storage core, preview/share, secure folders, advanced features, and
+public pages + polish. **Teams (Phase 8) and the backend‑gated organization features (Phase 9) are explicitly post‑MVP**,
+but everything is architected so they need no refactor.
 
-Deliberately **out** of MVP:
-- **Teams UI** — architected for, shipped last.
+> 📌 The sharp, decided MVP scope — priority order, in/out cut line, quality bar, and which *new* features are MVP vs
+> backend‑gated — lives in **[MVP-DEFINITION.md](./MVP-DEFINITION.md)**. Read it before debating scope.
+
+**Added this round (MVP):** command palette + keyboard shortcuts, observability (error monitoring + analytics), feature
+flags, and onboarding/first‑run — all **frontend‑only** (no backend dependency). Plus client‑side **storage insights**
+(current folder) and a local **favorites/recents** interim.
+
+Deliberately **out** of MVP (post‑MVP):
+- **Teams UI** — architected for, shipped last ([phase-8](../01-roadmap/phases/phase-8-teams.md)).
+- **Tags/labels, synced favorites/recents, global insights** — **the backend doesn't support these today**; see
+  [backend-gaps](../07-decisions/backend-gaps.md) and [phase-9](../01-roadmap/phases/phase-9-organization.md).
 - **Trash / recycle bin** — not in the API yet; delete UX is designed so a future trash/restore slots in.
-- **Real share backend** (link expiry / permissions / public ACL) — none exists today; MVP "Share" is a presigned URL.
-- **Checkout / plan management** — Pricing is a showcase page in "coming soon" state.
-- **Developer API / webhooks UI** — the Account ▸ API Keys surface is scaffolded but post‑MVP.
-- **Second language** — i18n is structured now; only English ships at MVP.
+- **Avatar upload** — endpoint exists but is **inactive**; read‑only avatar at MVP, upload activates post‑backend (Q7).
+- **PWA / offline** — larger effort, low MVP value ([pwa-offline](../06-cross-cutting/pwa-offline.md)).
+- **Checkout / plan management** — Pricing is a "coming soon" showcase.
+- **Developer API / webhooks UI** — scaffolded, post‑MVP. **Second language** — i18n structured now, EN ships.
 
 ## Non‑negotiable principles
 
@@ -84,6 +93,6 @@ Deliberately **out** of MVP:
 - **Multipart upload edge cases:** abort/retry/idempotency correctness.
 - **Secure‑folder tokens:** never‑persist guarantee, ancestor lookup, TTL re‑prompt loops.
 - **Realtime job lifecycle:** missed socket events, reconnect correctness (mitigated by polling fallback).
-- **CDN image resizing (`?w=&h=`):** `UNVERIFIED` infra behavior — confirm before relying on it (Phase 4).
+- **CDN image resizing (`?w=&h=`):** ✅ resolved — supported via `cdn.storage.umutk.me` → wsrv.nl (object URLs HMAC‑signed by rustfs).
 
 See the full list in [`01-roadmap/ROADMAP.md`](../01-roadmap/ROADMAP.md#global-risks) and per‑phase risk sections.

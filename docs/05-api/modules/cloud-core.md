@@ -33,8 +33,13 @@
 ## Key model — `CloudObjectModel` (`cloud.model.ts`)
 `Name, Extension, MimeType, Path:CloudPathModel, Metadata:Record, LastModified, ETag, Size`.
 - Image `Metadata.Width/Height` set by `cloud.metadata.service.ts` (sharp).
-- `CloudPathModel.Url` resolved to CDN via `CDNPathResolver`. **`?w=&h=` resizing is a CDN feature, not an API param** —
-  **`UNVERIFIED`** that CloudFront honors it ([Q5](../../07-decisions/open-questions.md)); fall back to original.
+- `CloudPathModel.Url` resolved to the CDN via `CDNPathResolver`. **CDN = `cdn.storage.umutk.me`.** Every object is served
+  from there; the storage backend is **rustfs**, so the returned URL is already **HMAC‑signed** (don't strip/rebuild it —
+  use the URL as given).
+- **`?w=&h=` resizing IS supported ✅ (verified, [Q5](../../07-decisions/open-questions.md)):** the CDN reverse‑proxies
+  images through **[wsrv.nl](https://wsrv.nl)**, which honors `?w` / `?h` (and other wsrv params). So image scaling +
+  scaled‑vs‑original download are real, not assumed. `imageCdn.ts` builds these URLs; treat the HMAC‑signed base URL as
+  opaque and append the resize query.
 
 ## Usage notes
 - **Share (MVP)** = `GET /PresignedUrl` (time‑limited); no dedicated share controller exists

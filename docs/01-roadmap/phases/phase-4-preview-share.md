@@ -12,7 +12,8 @@ restore), browse **version history**, and **share** via presigned URL.
 **In:** preview modal + toolbar; arrow‑key navigation across previewable items; image CDN scaling + scaled‑vs‑original
 download; video & PDF preview; text/code editor (CodeMirror) with lock + heartbeat + draft + unsaved‑changes guard;
 version history + restore (files + documents with diff); Share (presigned URL).
-**Out:** audio + office‑doc preview (post‑MVP, see open Q4); a real share backend (none exists).
+**Out:** audio + office‑doc preview (post‑MVP, see open Q4). Sharing = presigned URL (**resolved**, no managed share
+backend planned — [sharing](../../04-features/sharing.md)).
 
 ## Task breakdown
 
@@ -26,7 +27,8 @@ version history + restore (files + documents with diff); Share (presigned URL).
 - [ ] `imageCdn.ts` `getImageCdnUrl` → CDN `?w=&h=` from `Metadata.Width/Height` (thumb / preview / fullscreen targets).
 - [ ] SVG/ICO unscaled.
 - [ ] **Download: scaled vs original** — offered **only** when the image has width/height metadata.
-- [ ] ⚠ CDN `?w=&h=` honoring is **`UNVERIFIED`** — confirm infra before relying; fall back to original.
+- [ ] CDN `?w=&h=` is **supported ✅** (`cdn.storage.umutk.me` → wsrv.nl reverse proxy; base URL HMAC‑signed via rustfs).
+      Build resize URLs by appending the query to the opaque signed URL. ([Q5](../../07-decisions/open-questions.md) resolved.)
 
 ### 4.3 — Video & PDF preview
 - [ ] `LazyPreview` variants; presigned URL source; unsupported‑codec message; large‑PDF lazy load.
@@ -64,11 +66,11 @@ version history + restore (files + documents with diff); Share (presigned URL).
 |---|---|
 | Lock contention (423) UX | Clear read‑only banner + retry/lock‑status display. |
 | Draft throttle (429) | Debounce to the 1/10s window; queue the latest. |
-| CDN `?w=&h=` `UNVERIFIED` | Infra check this phase; fallback to original URLs. |
+| CDN resize quirks (wsrv.nl params/limits) | Resize is supported; just validate the exact wsrv param mapping + signed‑URL passthrough. |
 | AV pending/infected gating | Centralize gate via `Cloud/Scan/Status` (shared with Phase 6). |
 
 ## Rollback / fallback
-If CDN resizing isn't honored, serve originals (drop the scaled option, keep download). If document locking proves
+If a specific wsrv resize param misbehaves, serve originals for that case (keep download). If document locking proves
 fragile, degrade to read‑only preview for text until stabilized.
 
 ## Exit criteria

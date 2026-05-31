@@ -11,9 +11,11 @@
 ## Profile — `account/profile`
 **Layout:** `container-md` form + avatar.
 **Components:** `form` (rhf+zod), avatar uploader.
-**Endpoints:** `Account/Profile` (read), `Account/Edit` (update), `Account/Upload/Image` (avatar).
-**States/edge:** optimistic edit + rollback; avatar upload error; validation; **re‑fetch profile after avatar upload**
-(response shape `UNVERIFIED` — [open Q7](../07-decisions/open-questions.md)).
+**Endpoints:** `Account/Profile` (read), `Account/Edit` (update). **`Account/Upload/Image` (avatar) is INACTIVE on the
+backend → post‑MVP** ([backend-gaps](../07-decisions/backend-gaps.md), [Q7](../07-decisions/open-questions.md)).
+**Avatar:** **show** the current avatar (read); the **upload action is disabled/hidden behind a flag** until the backend
+activates the endpoint — then wire `useUploadAvatar` + re‑fetch profile. Don't ship a non‑functional upload button.
+**States/edge:** optimistic profile edit + rollback; validation; avatar read‑only (upload deferred).
 
 ## Security — `account/security` (tabbed/sectioned)
 | Section | Components | Endpoints | States / edge cases |

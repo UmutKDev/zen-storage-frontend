@@ -25,7 +25,7 @@ trapped.
 ## By type
 | Type | Component | Source | Notes |
 |---|---|---|---|
-| Image | `LazyPreview` image | CDN `?w=&h=` from `Metadata.Width/Height` | thumb/preview/fullscreen targets; SVG/ICO unscaled; **download scaled vs original** (only if metadata). CDN resize `UNVERIFIED` → fallback original. |
+| Image | `LazyPreview` image | CDN `?w=&h=` from `Metadata.Width/Height` | thumb/preview/fullscreen targets; SVG/ICO unscaled; **download scaled vs original** (only if metadata). CDN resize **supported ✅** via `cdn.storage.umutk.me` → wsrv.nl ([Q5](../07-decisions/open-questions.md)); base URL is HMAC‑signed (rustfs) — treat as opaque, append resize query. |
 | Video | `LazyPreview` video | presigned URL | unsupported‑codec message |
 | PDF | `LazyPreview` pdf | presigned URL | large‑PDF lazy load |
 | Text/code | `features/document-editor` (CodeMirror) | `Documents/Content` | see editing below |
@@ -44,7 +44,8 @@ docs `/Documents/Versions(/Diff/Restore)`. **States:** empty history; restore co
 
 ## Share (MVP)
 **Toolbar Share** → `Cloud/PresignedUrl` → Web Share API / copy link. Note the **TTL**; no permission/expiry config
-(future, [Q1](../07-decisions/open-questions.md)). Copy‑success toast.
+(future, [Q1](../07-decisions/open-questions.md)). Copy‑success toast. Full spec (presigned MVP + real‑link design that's
+backend‑gated): **[sharing](./sharing.md)**.
 
 ## Out of MVP
 Audio + office‑doc preview (open Q4) — design the type switch so they can slot in later.

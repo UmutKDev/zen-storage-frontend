@@ -17,7 +17,8 @@
 ## 2. Techniques
 - **Route code‑splitting** via App Router segments; heavy areas lazy‑loaded.
 - **Lazy CodeMirror** — only load the editor when a text file is opened ([preview](../04-features/preview.md)).
-- **Image strategy:** lazy‑load thumbnails; request CDN‑scaled sizes (`?w=&h=` — `UNVERIFIED`, fall back to original);
+- **Image strategy:** lazy‑load thumbnails; request **CDN‑scaled sizes** (`?w=&h=` **supported** via `cdn.storage.umutk.me`
+  → wsrv.nl; base URL HMAC‑signed via rustfs — treat as opaque, append resize query);
   responsive sizes for grid vs preview vs fullscreen.
 - **List virtualization** (`@tanstack/react-virtual`) for storage list/grid, notifications, large duplicate groups.
 - **Query caching** (TanStack) with sensible `staleTime`; avoid waterfalls; prefetch on hover where it helps.

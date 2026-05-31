@@ -26,11 +26,12 @@ per‑module detail. **Awaiting approval to begin Phase 0.**
 | 1 | Auth | ⏳ | session‑id multi‑step flow |
 | 2 | App Shell + Account | ⏳ | no team switch |
 | 3 | Storage Core | ⏳ | upload pipeline is the heavy lift |
-| 4 | Preview + Share | ⏳ | Share = presigned URL; CDN resize `UNVERIFIED` |
+| 4 | Preview + Share | ⏳ | Share = presigned URL ✓; CDN resize via wsrv.nl ✓ (both resolved) |
 | 5 | Secure Folders | ⏳ | token never‑persist guarantee |
 | 6 | Advanced | ⏳ | socket‑first + poll for jobs |
-| 7 | Public & Polish | ⏳ | **MVP completes here** |
-| 8 | Teams (LAST) | ⏳ | architect‑for now, build last |
+| 7 | Public & Polish | ⏳ | **MVP completes here** (+ onboarding, observability finish) |
+| 8 | Teams (post‑MVP) | ⏳ | architect‑for now, build last |
+| 9 | Organization & Discovery (post‑MVP) | ⏳ | **backend‑gated**: favorites/recents/tags/global‑insights/real‑share |
 
 ## Current scaffold state (v2)
 - **Installed:** `next@16.2.6`, `react@19.2.4`, `react-dom@19.2.4`; dev: `@openapitools/openapi-generator-cli`,
@@ -54,4 +55,5 @@ per‑module detail. **Awaiting approval to begin Phase 0.**
 
 ## Blockers / waiting on
 - **User approval** of the planning round.
-- **API team** on Q1 (real share backend) and Q2 (webhook HMAC) — non‑blocking for MVP.
+- **API team** on the backend‑gated org features (Q10 favorites, Q11 recents, Q12 tags, Q13 insights) + Q2 (webhook HMAC)
+  + activating the avatar endpoint (Q7) — all **non‑blocking for MVP**. (Q1 sharing + Q5 CDN resize are resolved.)

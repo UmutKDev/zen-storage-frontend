@@ -10,9 +10,11 @@
 | GET | `/Profile` | — | `AccountProfileResponseModel` | Read Account |
 | PUT | `/Edit` | `AccountPutBodyRequestModel` | `boolean` | Update Account |
 | PUT | `/ChangePassword` | `AccountChangePasswordRequestModel` | `boolean` | Update Account |
-| POST | `/Upload/Image` | multipart (avatar) | `boolean` / url **`UNVERIFIED`** | Update Account |
+| POST | `/Upload/Image` | multipart (avatar) | **INACTIVE — not usable yet** | Update Account |
 
-> Avatar response shape is `UNVERIFIED` ([Q7](../../07-decisions/open-questions.md)) — **re‑fetch profile after upload**.
+> **Avatar upload is INACTIVE** on the backend → **post‑MVP** ([Q7](../../07-decisions/open-questions.md),
+> [backend-gaps](../../07-decisions/backend-gaps.md)). Ship a **read‑only** avatar; hide/disable the upload control until
+> the endpoint is activated, then wire `useUploadAvatar` + re‑fetch profile.
 
 ## Account Security — `@Controller('Account/Security')` → `/Api/Account/Security/*` {#account-security}
 

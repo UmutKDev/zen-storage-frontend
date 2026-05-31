@@ -16,7 +16,9 @@ This folder is organized as a **deep, navigable hierarchy** — not a flat pile 
 | If you want to… | Open |
 |---|---|
 | Understand the project at a glance | [`00-overview/PROJECT-OVERVIEW.md`](./00-overview/PROJECT-OVERVIEW.md) |
+| **Know the MVP scope & #1 priority** | [`00-overview/MVP-DEFINITION.md`](./00-overview/MVP-DEFINITION.md) |
 | See the full phased plan & status | [`01-roadmap/ROADMAP.md`](./01-roadmap/ROADMAP.md) |
+| Know what the **backend can't do yet** | [`07-decisions/backend-gaps.md`](./07-decisions/backend-gaps.md) |
 | Implement the next phase | the matching file in [`01-roadmap/phases/`](./01-roadmap/phases/) |
 | Know how the frontend is wired | [`02-architecture/ARCHITECTURE.md`](./02-architecture/ARCHITECTURE.md) |
 | Build UI that matches the look/feel | [`03-design-system/DESIGN-SYSTEM.md`](./03-design-system/DESIGN-SYSTEM.md) |
@@ -35,6 +37,7 @@ docs/
 │
 ├── 00-overview/                  WHAT & WHY
 │   ├── PROJECT-OVERVIEW.md        product, the 3 code layers, MVP definition, success criteria
+│   ├── MVP-DEFINITION.md          sharp MVP scope: #1 priority, in/out cut line, quality bar
 │   ├── GLOSSARY.md                shared vocabulary (owner vs user, envelope, secure folder…)
 │   ├── CONVENTIONS.md             naming, query keys, folders, commits, PascalCase rule
 │   └── DOC-WORKFLOW.md            how to read & update these docs; the phase workflow
@@ -45,7 +48,8 @@ docs/
 │   └── phases/
 │       ├── phase-0-foundation.md       phase-1-auth.md            phase-2-shell-account.md
 │       ├── phase-3-storage-core.md     phase-4-preview-share.md   phase-5-secure-folders.md
-│       └── phase-6-advanced.md         phase-7-public-polish.md   phase-8-teams.md
+│       ├── phase-6-advanced.md         phase-7-public-polish.md   phase-8-teams.md
+│       └── phase-9-organization.md     (post-MVP, backend-gated)
 │
 ├── 02-architecture/             HOW IT IS WIRED
 │   ├── ARCHITECTURE.md            index: tech stack + folder structure + how the pieces connect
@@ -62,7 +66,7 @@ docs/
 │
 ├── 03-design-system/            HOW IT LOOKS & MOVES  (separate, on purpose)
 │   ├── DESIGN-SYSTEM.md           index + premium-shadcn philosophy + intake via shadcn MCP
-│   ├── foundations/               color.md · typography.md · spacing-layout.md · elevation-borders.md
+│   ├── foundations/               color.md · typography.md · spacing-layout.md · elevation-borders.md · glassmorphism.md
 │   ├── motion/                    tokens.md · variants.md · reduced-motion.md
 │   ├── components/                primitives.md · patterns.md
 │   └── theming.md                 light/dark, system preference, token mapping
@@ -71,7 +75,8 @@ docs/
 │   ├── FEATURE-MAP.md             master feature → screen → endpoint → state index
 │   ├── auth.md · account.md
 │   ├── storage-browse.md · storage-upload.md · storage-operations.md · storage-search-filter.md
-│   ├── preview.md · secure-folders.md · advanced.md · public.md · teams.md
+│   ├── preview.md · sharing.md · secure-folders.md · advanced.md · public.md · teams.md
+│   └── quick-access.md · tags.md · storage-insights.md · onboarding.md   (🟡 some backend-gated)
 │
 ├── 05-api/                      THE CONTRACT  (source of truth = nestjs-storage)
 │   ├── API-INVENTORY.md           index: global conventions + feature cross-map
@@ -81,9 +86,11 @@ docs/
 │
 ├── 06-cross-cutting/            APPLIES EVERYWHERE
 │   ├── i18n.md · accessibility.md · performance.md · testing.md · seo-metadata.md
+│   └── keyboard-shortcuts.md · observability.md · feature-flags.md · pwa-offline.md
 │
 └── 07-decisions/               THE WHY
     ├── DECISIONS.md               decided log (with rationale + consequences)
+    ├── backend-gaps.md            feature ↔ API support matrix (what the backend can't do yet)
     └── open-questions.md          open Qs with owner, impact, default, phase-to-resolve
 ```
 

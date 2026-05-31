@@ -38,6 +38,14 @@ polish; full empty/error/loading coverage everywhere; SEO/metadata for public pa
 ### 7.6 — SEO / metadata → see [seo-metadata](../../06-cross-cutting/seo-metadata.md)
 - [ ] Next metadata API for public routes; titles/descriptions/OG; robots/sitemap basics.
 
+### 7.7 — Onboarding & observability finish (added scope)
+- [ ] **Onboarding / first‑run**: welcome, guided empty states, first‑upload coachmarks — dismissible, flagged,
+      reduced‑motion aware. See [onboarding](../../04-features/onboarding.md).
+- [ ] **Observability verification**: errors report with readable stacks + **no PII**; analytics honors opt‑out/DNT and
+      is off in dev. See [observability](../../06-cross-cutting/observability.md).
+- [ ] **PWA / offline is explicitly post‑MVP** ([pwa-offline](../../06-cross-cutting/pwa-offline.md)) — confirm nothing
+      in this phase blocks it (clean Instance/Query cache boundary; secure data never cached).
+
 ## Endpoints used
 `Subscription/My` (+ plan list if exposed). Contracts: [subscription](../../05-api/modules/subscription.md).
 

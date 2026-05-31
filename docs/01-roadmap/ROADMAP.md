@@ -8,6 +8,12 @@
 > **Update rule:** edit the relevant phase summary or its `phases/` file — **don't rewrite** — and add a Changelog line.
 
 ## Changelog
+- **2026-05-30 (scope round)** — Broadened scope + sharpened MVP. Added [MVP-DEFINITION](../00-overview/MVP-DEFINITION.md)
+  (MVP #1 priority = rock‑solid storage core) and a [backend-gaps matrix](../07-decisions/backend-gaps.md). New
+  frontend‑only MVP scope: command palette + shortcuts, observability, feature flags, onboarding (woven into Phases 0/3/7).
+  New **Phase 9 — Organization & Discovery** (post‑MVP, **backend‑gated**: favorites/recents/tags/global‑insights/real
+  share). New feature specs (quick-access, tags, storage-insights, onboarding, sharing) + platform docs
+  (keyboard-shortcuts, observability, feature-flags, pwa-offline). Scope decisions logged D‑S1..D‑S8.
 - **2026-05-30 (restructure)** — Reorganized docs into a deep category hierarchy; each phase expanded into its own
   detailed file under `phases/`; added per‑feature specs, a separate design system, per‑module API docs, and
   cross‑cutting plans. No phase scope changed; detail greatly increased.
@@ -25,10 +31,14 @@
 | 4 | Preview + Share | [phase-4](./phases/phase-4-preview-share.md) | ⏳ |
 | 5 | Secure Folders | [phase-5](./phases/phase-5-secure-folders.md) | ⏳ |
 | 6 | Advanced | [phase-6](./phases/phase-6-advanced.md) | ⏳ |
-| 7 | Public & Polish | [phase-7](./phases/phase-7-public-polish.md) | ⏳ |
-| 8 | Teams (LAST) | [phase-8](./phases/phase-8-teams.md) | ⏳ |
+| 7 | Public & Polish (**MVP done**) | [phase-7](./phases/phase-7-public-polish.md) | ⏳ |
+| 8 | Teams (post‑MVP) | [phase-8](./phases/phase-8-teams.md) | ⏳ |
+| 9 | Organization & Discovery (post‑MVP, **backend‑gated**) | [phase-9](./phases/phase-9-organization.md) | ⏳ |
 
 Legend: ⏳ not started · 🚧 in progress · ✅ done · 🚫 blocked.
+
+> **MVP = Phases 0–7** (Personal, polished; #1 priority = storage core). **Post‑MVP = Phases 8–9.** Full cut line:
+> [MVP-DEFINITION](../00-overview/MVP-DEFINITION.md). Backend‑blocked items: [backend-gaps](../07-decisions/backend-gaps.md).
 
 ---
 
@@ -117,12 +127,21 @@ fallback** for live jobs.
 
 ### Phase 7 — Public & Polish (MVP complete) → [details](./phases/phase-7-public-polish.md)
 The **public pages** (landing, features, pricing "coming soon") plus the cross‑app polish pass: responsiveness,
-accessibility baseline, performance budget, animation polish, full state‑matrix coverage, and SEO/metadata. **MVP ships
-at the end of this phase.**
+accessibility baseline, performance budget, animation polish, full state‑matrix coverage, SEO/metadata, **onboarding**,
+and **observability verification**. **MVP ships at the end of this phase.**
 
-### Phase 8 — Teams Integration (LAST) → [details](./phases/phase-8-teams.md)
+### Phase 8 — Teams Integration (post‑MVP) → [details](./phases/phase-8-teams.md)
 Flip on the **team layer** with zero refactor: workspace store + Personal↔Team switch, end‑to‑end `X-Team-Id`, team
 CRUD, members (roles), invitations, and team storage/quota with permission‑denied states.
+
+### Phase 9 — Organization & Discovery (post‑MVP, backend‑gated) → [details](./phases/phase-9-organization.md)
+Turn the MVP's client‑side interims into real, synced features **once the backend exposes the APIs**: synced
+**favorites/recents**, **tags/labels**, and account‑wide **storage insights**. Each task is gated
+on a missing endpoint ([backend-gaps](../07-decisions/backend-gaps.md)); MVP does not depend on this phase.
+
+> **Note on added MVP scope (this round):** command palette + keyboard shortcuts, observability, and feature flags land
+> in **Phase 0**; the command palette + client‑side favorites/recents/insights interim in **Phase 3**; onboarding +
+> observability finish in **Phase 7**. All are **frontend‑only**; the synced/server versions live in Phase 9.
 
 ---
 
@@ -135,7 +154,7 @@ CRUD, members (roles), invitations, and team storage/quota with permission‑den
 | **Multipart upload** edge cases (abort/retry/idempotency) | Data integrity, stuck uploads | Idempotency keys; explicit abort; resumable queue | 3 |
 | **Secure‑folder token** never‑persist + ancestor lookup | Security + UX loops | In‑memory store; `beforeunload`/sign‑out clear; ancestor resolver tests | 5 |
 | **Realtime job** missed events / reconnect | Stuck progress UI | Socket‑first + polling fallback reconciliation | 6 |
-| **CDN `?w=&h=` resizing** (`UNVERIFIED`) | Image scaling + scaled download | Infra check before relying; fallback to original | 4 |
+| ~~CDN `?w=&h=` resizing~~ | Image scaling + scaled download | ✅ **Resolved** — supported via `cdn.storage.umutk.me` → wsrv.nl (HMAC‑signed base URL) | 4 |
 | **No backend Share / Trash** | Feature gaps vs. expectations | Presigned‑URL share; delete UX leaves room for trash | 4 / 3 |
 | Scope creep in **polish** | Phase 7 overruns | Fixed checklist + performance budget | 7 |
 

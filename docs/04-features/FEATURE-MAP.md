@@ -17,11 +17,22 @@ Legend: 🟢 MVP · 🟡 MVP‑light / "coming soon" · ⚪ post‑MVP (Teams/de
 | Storage — upload | [storage-upload.md](./storage-upload.md) | 3 | `Cloud/Upload/*` |
 | Storage — operations | [storage-operations.md](./storage-operations.md) | 3 | `Cloud/Move`,`/Delete`,`/Update`,`Directory`,`Documents` |
 | Storage — search/filter | [storage-search-filter.md](./storage-search-filter.md) | 3 | `Cloud/Search` |
-| Preview & Share | [preview.md](./preview.md) | 4 | `Cloud/Find`,`/PresignedUrl`,`/Versions`,`Documents/*` |
+| Preview & edit | [preview.md](./preview.md) | 4 | `Cloud/Find`,`/PresignedUrl`,`/Versions`,`Documents/*` |
+| Sharing 🟢 | [sharing.md](./sharing.md) | 4 | `Cloud/PresignedUrl` (signed time‑limited link — **the** share mechanism) |
 | Secure folders | [secure-folders.md](./secure-folders.md) | 5 | `Cloud/Directory/Unlock`…`/Conceal` |
 | Advanced | [advanced.md](./advanced.md) | 6 | `Scan/Duplicate/*`,`Archive/*`,`Scan/Status`,`Notification/*` |
 | Public | [public.md](./public.md) | 7 | `Subscription/My` |
-| Teams (last) | [teams.md](./teams.md) | 8 | `Team/*` + `Cloud/*` under `X-Team-Id` |
+| Onboarding 🟢 | [onboarding.md](./onboarding.md) | 7 | none (frontend) |
+| Quick Access (favorites/recents) 🟡 | [quick-access.md](./quick-access.md) | 3 interim / 9 | **none — client‑side interim** ([backend-gaps](../07-decisions/backend-gaps.md)) |
+| Storage insights 🟡 | [storage-insights.md](./storage-insights.md) | 3 (current) / 9 (global) | `StorageUsage` + client compute; **global needs API** |
+| Tags / labels ⚪ | [tags.md](./tags.md) | 9 | **none — backend‑gated** |
+| Teams (post‑MVP) | [teams.md](./teams.md) | 8 | `Team/*` + `Cloud/*` under `X-Team-Id` |
+| Organization & Discovery (post‑MVP) | [phase-9](../01-roadmap/phases/phase-9-organization.md) | 9 | **backend‑gated** (favorites/recents/tags/insights/share) |
+
+> ⚠ **Backend support:** several of the above (favorites, recents, tags, global insights) have **no API today**, and
+> **avatar upload exists but is inactive** — see [backend-gaps](../07-decisions/backend-gaps.md). They ship as a labeled
+> client‑side interim or are deferred; we never fake server‑backed behavior. (Sharing = presigned URL, resolved;
+> image CDN resize via wsrv.nl, resolved.)
 
 ## Cross‑cutting (apply to every area) 🟢
 | Concern | Where | Doc |

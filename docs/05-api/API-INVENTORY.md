@@ -5,7 +5,10 @@
 > [open-questions](../07-decisions/open-questions.md).
 >
 > **Last verified:** 2026-05-30 (controllers re‑confirmed present + route decorators match). **Stack:** NestJS 11,
-> PostgreSQL/TypeORM + MongoDB (audit/notifications) + Redis (BullMQ/cache), S3 + CloudFront, ClamAV.
+> PostgreSQL/TypeORM + MongoDB (audit/notifications) + Redis (BullMQ/cache), **S3‑compatible object storage (rustfs)**,
+> ClamAV. **Objects are served from the CDN `cdn.storage.umutk.me`** (HMAC‑signed URLs; image resize via a **wsrv.nl**
+> reverse proxy supporting `?w`/`?h`). (Backend code may still reference "S3 + CloudFront" generically; the deployed CDN
+> is the above.)
 
 ## Module docs
 | Module | File | Base path |

@@ -90,6 +90,15 @@ deep‑linking; providers (Query / Session / Notification / Theme).
 - [ ] Compose providers (Theme → Query → Session → Notification) in the app shell.
 - [ ] `.env` (`NEXT_PUBLIC_API_URL`) + env validation.
 
+### 0.9 — Platform foundations (flags, observability, shortcuts)
+- [ ] **Feature flags** (`lib/flags`): typed registry + `useFlag`/`isEnabled`; env + local override; default‑off for
+      unfinished/backend‑gated work. See [feature-flags](../../06-cross-cutting/feature-flags.md).
+- [ ] **Observability**: error reporter (Sentry‑style) wired to React error boundaries + the Instance `ApiError` path,
+      with **PII scrubbing** (no tokens/passphrases/bodies); analytics scaffold (off in dev, opt‑out + DNT). Behind
+      flags. See [observability](../../06-cross-cutting/observability.md).
+- [ ] **Keyboard‑shortcut system foundation**: central scoped registry + a "?" help overlay hook (the command palette
+      itself lands in Phase 3). See [keyboard-shortcuts](../../06-cross-cutting/keyboard-shortcuts.md).
+
 ## Endpoints used
 None called for features. **Smoke‑test only:** one `Account/Profile` GET through the `Instance` to prove the full path
 (headers → unwrap → typed data). See [API: account](../../05-api/modules/account.md).
