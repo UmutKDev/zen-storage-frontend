@@ -19,12 +19,12 @@
 ## 3. Initial flags
 | Flag | Gates | Default |
 |---|---|---|
-| `quickAccess` | favorites/recents interim ([quick-access](../04-features/quick-access.md)) | off → on when ready |
 | `commandPalette` | Cmd/Ctrl‑K palette ([keyboard-shortcuts](./keyboard-shortcuts.md)) | on (MVP) |
 | `onboarding` | first‑run flow ([onboarding](../04-features/onboarding.md)) | on (MVP) |
 | `analytics` | product analytics ([observability](./observability.md)) | off in dev, on in prod w/ opt‑out |
-| `insightsGlobal` | account‑wide insights ([storage-insights](../04-features/storage-insights.md)) | off (needs API Q13) |
-| `tags` | tags/labels ([tags](../04-features/tags.md)) | off (needs API Q12) |
+| `quickAccess` | favorites/recents ([quick-access](../04-features/quick-access.md)) | off (post‑MVP, needs API Q10/Q11) |
+| `insightsGlobal` | storage insights ([storage-insights](../04-features/storage-insights.md)) | off (post‑MVP, needs API Q13) |
+| `tags` | tags/labels ([tags](../04-features/tags.md)) | off (post‑MVP, needs API Q12) |
 
 ## 4. Rules
 - A flag gates **UI surface**, not data correctness — never ship a flag that, when on, fakes a missing backend.

@@ -29,7 +29,7 @@ conflict handling · quota enforcement** — smooth even in large folders. (Phas
 - Auth (register, multi‑step login incl. 2FA + passkey, reset, full sign‑out teardown).
 - App shell + Account/Security + read‑only subscription view.
 - **Storage core** (the whole of §2).
-- Preview (image/video/PDF/text) + text editing (lock/draft/version restore) + **Share via presigned URL**.
+- Preview (image/video/PDF/text/**audio**/**office** — office best‑effort) + text editing (lock/draft/version restore) + **Share via presigned URL**.
 - Secure folders (encrypted + hidden) with the in‑memory token lifecycle.
 - Advanced: duplicate scan, archive, AV status, notification inbox.
 - Public pages (landing/features/pricing "coming soon") + responsiveness + a11y baseline + performance budget +
@@ -43,27 +43,27 @@ conflict handling · quota enforcement** — smooth even in large folders. (Phas
 | **Observability** (error monitoring + product analytics) | ✅ MVP | Frontend‑only; set up Phase 0, verified Phase 7. [observability](../06-cross-cutting/observability.md) |
 | **Feature flags** | ✅ MVP | Frontend‑only (no backend module); Phase 0. [feature-flags](../06-cross-cutting/feature-flags.md) |
 | **Onboarding / first‑run** | ✅ MVP | Frontend‑only; Phase 7. [onboarding](../04-features/onboarding.md) |
-| **Storage insights (current‑folder, client‑side)** | 🟡 MVP‑light | Type breakdown + largest files computed client‑side; **global/aggregate needs a backend endpoint** → post‑MVP. [storage-insights](../04-features/storage-insights.md) |
+| **Preview: audio + office** | ✅ MVP | **Resolved (Q4):** added to image/video/PDF/text. Office is best‑effort client render + download fallback. Phase 4. [preview](../04-features/preview.md) |
 | **Sharing (presigned URL)** | ✅ MVP | **Resolved (Q1):** `Cloud/PresignedUrl` *is* the share mechanism — a signed, time‑limited link (HMAC via rustfs). No separate share backend planned; managed permissions/revoke are out of scope. [sharing](../04-features/sharing.md) |
-| **Favorites + Recents** | 🟡 client‑side interim | **No backend endpoints** → optional local‑only (per‑device) interim in Phase 3; full sync is post‑MVP. [quick-access](../04-features/quick-access.md) |
+| **Favorites / Recents / Tags / Insights** | ❌ post‑MVP | **Decided (Q10–Q13):** all **backend‑first** — need real APIs before any UI; **no MVP interim**. → [phase-9](../01-roadmap/phases/phase-9-organization.md), [backend-gaps](../07-decisions/backend-gaps.md). |
 
 ## 5. Out of MVP (post‑MVP)
 | Item | Why out | Where |
 |---|---|---|
 | **Teams** | Personal‑first decision; architected for, shipped last | [phase-8](../01-roadmap/phases/phase-8-teams.md) |
-| **Tags / labels** | **No backend support**; needs an API | [phase-9](../01-roadmap/phases/phase-9-organization.md) |
-| **Favorites/Recents (synced)** | No backend; only client‑side interim in MVP | [phase-9](../01-roadmap/phases/phase-9-organization.md) |
-| **Global storage insights** | Needs an aggregate endpoint | [phase-9](../01-roadmap/phases/phase-9-organization.md) |
+| **Favorites / Recents** | **No backend API**; backend‑first, **no MVP interim** (Q10/Q11) | [phase-9](../01-roadmap/phases/phase-9-organization.md) |
+| **Tags / labels** | **No backend API**; needs entity + CRUD (Q12) | [phase-9](../01-roadmap/phases/phase-9-organization.md) |
+| **Storage insights** | **No aggregate endpoint** (Q13); backend‑driven | [phase-9](../01-roadmap/phases/phase-9-organization.md) |
 | **Trash / recycle bin** | Not in the API | design leaves room (D4) |
 | **Pricing checkout / plan management** | Out of scope | Pricing stays "coming soon" |
 | **PWA / offline** | Larger effort, low MVP value | [pwa-offline](../06-cross-cutting/pwa-offline.md) (post‑MVP) |
 | **Developer API / webhooks UI** | Not user‑facing MVP | scaffold only |
 | **2nd language** | i18n structured now, EN ships | — |
 
-> ⚠ **Backend reality:** several *new end‑user* features (favorites, recents, tags, global insights)
-> are **not supported by the backend today.** They are documented so the UI is designed correctly, but they are
-> **gated on backend work** and tracked in [backend-gaps](../07-decisions/backend-gaps.md). We do **not** fake
-> server‑backed features; where useful we ship an explicit **client‑side interim** (clearly per‑device) and flag the gap.
+> ⚠ **Backend reality:** several *new end‑user* features (favorites, recents, tags, insights) are **not supported by the
+> backend today.** Decision (Q10–Q13): they will be built **backend‑first** and are **post‑MVP — with no client‑side
+> interim** (we don't fake server‑backed state; D‑S8). They're documented so the UI drops in cleanly once the APIs exist;
+> tracked in [backend-gaps](../07-decisions/backend-gaps.md).
 
 ## 6. The MVP quality bar (definition of done)
 MVP is "done" only when, across **every** surface:

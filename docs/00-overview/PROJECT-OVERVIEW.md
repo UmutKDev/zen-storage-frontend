@@ -16,7 +16,7 @@ The product surface, end to end:
 - **Account** — profile, security (change password, 2FA/TOTP, passkeys, session history), subscription view.
 - **Storage** — list & smart‑grid browsing, breadcrumb deep‑linking, usage bar, upload pipeline, create file/folder,
   rename/move/delete, multi‑select + bulk, drag‑and‑drop move, search (global vs current folder), filter & sort.
-- **Preview & edit** — image/video/PDF/text modal, in‑browser code editing (CodeMirror with lock + draft), version
+- **Preview & edit** — image/video/PDF/text/audio/office modal, in‑browser code editing (CodeMirror with lock + draft), version
   history + restore, share (presigned URL).
 - **Secure folders** — encrypted folders (passphrase) and hidden folders (`Shift Shift` reveal), with a short‑lived
   in‑memory session‑token lifecycle.
@@ -48,8 +48,8 @@ but everything is architected so they need no refactor.
 > backend‑gated — lives in **[MVP-DEFINITION.md](./MVP-DEFINITION.md)**. Read it before debating scope.
 
 **Added this round (MVP):** command palette + keyboard shortcuts, observability (error monitoring + analytics), feature
-flags, and onboarding/first‑run — all **frontend‑only** (no backend dependency). Plus client‑side **storage insights**
-(current folder) and a local **favorites/recents** interim.
+flags, onboarding/first‑run — all **frontend‑only** — plus **audio + office preview** (Q4). **Favorites, recents, tags,
+and storage insights are post‑MVP** (backend‑first, no interim — Q10–Q13). See [MVP-DEFINITION](./MVP-DEFINITION.md).
 
 Deliberately **out** of MVP (post‑MVP):
 - **Teams UI** — architected for, shipped last ([phase-8](../01-roadmap/phases/phase-8-teams.md)).
@@ -80,7 +80,7 @@ Deliberately **out** of MVP (post‑MVP):
 - A user can register/sign in (incl. 2FA & passkey), manage their account & security, and stay signed in across reloads.
 - A user can browse, upload (large files via multipart, with a resilient queue), create, rename, move, delete (single &
   bulk), search, filter, and sort their files — smoothly, even in large folders.
-- A user can preview image/video/PDF/text, edit text safely (locking + drafts + version restore), and share via link.
+- A user can preview image/video/PDF/text/audio/office, edit text safely (locking + drafts + version restore), and share via link.
 - A user can create encrypted and hidden folders and work inside them within the token lifecycle.
 - A user can run duplicate scans and archive operations with live progress, see AV status, and receive notifications.
 - Public pages (landing/features/pricing) are live; the whole app is responsive, accessible (baseline), themed

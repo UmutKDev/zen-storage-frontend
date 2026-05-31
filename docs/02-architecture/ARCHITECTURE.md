@@ -10,6 +10,7 @@
 
 | Concern | File | One‑liner |
 |---|---|---|
+| **Folder structure** | [folder-structure.md](./folder-structure.md) | Feature‑sliced, layered tree + import boundaries + "where does X go?" |
 | **Data layer** | [data-layer.md](./data-layer.md) | Generated client + the single axios `Instance` + envelope/error layer |
 | **State** | [state-management.md](./state-management.md) | TanStack Query keys + Zustand stores |
 | **Routing** | [routing-deep-linking.md](./routing-deep-linking.md) | Route groups + folder deep‑linking + preview modal routing |
@@ -45,6 +46,9 @@
 > Current scaffold only has `next`, `react`, `react-dom` + dev tooling installed. Everything else lands in **Phase 0**.
 
 ## 2. Folder structure {#folder-structure}
+
+> **Summary below — the full, authoritative plan (feature‑sliced anatomy, import boundaries, "where does X go?", build
+> order) is in [folder-structure.md](./folder-structure.md).**
 
 ```
 app/                         # routes (App Router)

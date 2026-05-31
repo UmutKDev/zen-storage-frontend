@@ -10,10 +10,11 @@ restore), browse **version history**, and **share** via presigned URL.
 
 ## Scope
 **In:** preview modal + toolbar; arrow‑key navigation across previewable items; image CDN scaling + scaled‑vs‑original
-download; video & PDF preview; text/code editor (CodeMirror) with lock + heartbeat + draft + unsaved‑changes guard;
-version history + restore (files + documents with diff); Share (presigned URL).
-**Out:** audio + office‑doc preview (post‑MVP, see open Q4). Sharing = presigned URL (**resolved**, no managed share
-backend planned — [sharing](../../04-features/sharing.md)).
+download; video, PDF, **audio**, and **office (docx/xlsx/pptx)** preview ([Q4 resolved](../../07-decisions/open-questions.md));
+text/code editor (CodeMirror) with lock + heartbeat + draft + unsaved‑changes guard; version history + restore (files +
+documents with diff); Share (presigned URL).
+**Out:** nothing major. Office is **best‑effort** (client render + download fallback). Sharing = presigned URL
+(**resolved**, no managed share backend planned — [sharing](../../04-features/sharing.md)).
 
 ## Task breakdown
 
@@ -30,8 +31,12 @@ backend planned — [sharing](../../04-features/sharing.md)).
 - [ ] CDN `?w=&h=` is **supported ✅** (`cdn.storage.umutk.me` → wsrv.nl reverse proxy; base URL HMAC‑signed via rustfs).
       Build resize URLs by appending the query to the opaque signed URL. ([Q5](../../07-decisions/open-questions.md) resolved.)
 
-### 4.3 — Video & PDF preview
-- [ ] `LazyPreview` variants; presigned URL source; unsupported‑codec message; large‑PDF lazy load.
+### 4.3 — Video, PDF, audio & office preview
+- [ ] `LazyPreview` variants (video / PDF / **audio** player); presigned URL source; unsupported‑codec message;
+      large‑PDF lazy load.
+- [ ] **Office** (`OfficePreview`): best‑effort **client render** — docx via a converter (mammoth→HTML), xlsx via
+      SheetJS→table, pptx limited; **graceful "download to view" fallback** when unsupported. Server‑side
+      convert‑to‑PDF is the future robust path (backend is ours). See [preview](../../04-features/preview.md).
 
 ### 4.4 — Text/code editor → see [documents](../../05-api/modules/documents.md)
 - [ ] CodeMirror editor; load `Cloud/Documents/Content` (+ draft).
@@ -53,7 +58,9 @@ backend planned — [sharing](../../04-features/sharing.md)).
 `/Versions/Restore`. Contracts: [cloud-core](../../05-api/modules/cloud-core.md), [documents](../../05-api/modules/documents.md).
 
 ## Acceptance‑test checklist
-- [ ] All four preview types open (image/video/PDF/text); fullscreen + close work; deep‑link to a preview works.
+- [ ] All preview types open (image/video/PDF/text/**audio**/**office**); fullscreen + close work; deep‑link works.
+- [ ] Audio plays (play/pause/seek/volume). Office: docx + xlsx render best‑effort; pptx renders or shows the **download
+      fallback**; unsupported office files always offer download.
 - [ ] Arrow keys navigate previewable items only.
 - [ ] Images render scaled; scaled‑vs‑original download appears only with metadata; original always works.
 - [ ] Editing acquires a lock; a second user is read‑only (423); heartbeat keeps the lock; draft auto‑saves (throttled);
@@ -68,6 +75,7 @@ backend planned — [sharing](../../04-features/sharing.md)).
 | Draft throttle (429) | Debounce to the 1/10s window; queue the latest. |
 | CDN resize quirks (wsrv.nl params/limits) | Resize is supported; just validate the exact wsrv param mapping + signed‑URL passthrough. |
 | AV pending/infected gating | Centralize gate via `Cloud/Scan/Status` (shared with Phase 6). |
+| **Office preview fidelity** (esp. pptx) | Best‑effort client render + **download fallback**; plan a server convert‑to‑PDF later (backend is ours). Don't block the phase on perfect office rendering. |
 
 ## Rollback / fallback
 If a specific wsrv resize param misbehaves, serve originals for that case (keep download). If document locking proves

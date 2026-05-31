@@ -23,15 +23,15 @@ Legend: 🟢 MVP · 🟡 MVP‑light / "coming soon" · ⚪ post‑MVP (Teams/de
 | Advanced | [advanced.md](./advanced.md) | 6 | `Scan/Duplicate/*`,`Archive/*`,`Scan/Status`,`Notification/*` |
 | Public | [public.md](./public.md) | 7 | `Subscription/My` |
 | Onboarding 🟢 | [onboarding.md](./onboarding.md) | 7 | none (frontend) |
-| Quick Access (favorites/recents) 🟡 | [quick-access.md](./quick-access.md) | 3 interim / 9 | **none — client‑side interim** ([backend-gaps](../07-decisions/backend-gaps.md)) |
-| Storage insights 🟡 | [storage-insights.md](./storage-insights.md) | 3 (current) / 9 (global) | `StorageUsage` + client compute; **global needs API** |
-| Tags / labels ⚪ | [tags.md](./tags.md) | 9 | **none — backend‑gated** |
+| Quick Access (favorites/recents) ⚪ | [quick-access.md](./quick-access.md) | 9 | **none — backend‑first, post‑MVP, no interim** (Q10/Q11) |
+| Storage insights ⚪ | [storage-insights.md](./storage-insights.md) | 9 | **needs aggregate API** (Q13); only `StorageUsage` totals today |
+| Tags / labels ⚪ | [tags.md](./tags.md) | 9 | **none — backend‑gated** (Q12) |
 | Teams (post‑MVP) | [teams.md](./teams.md) | 8 | `Team/*` + `Cloud/*` under `X-Team-Id` |
 | Organization & Discovery (post‑MVP) | [phase-9](../01-roadmap/phases/phase-9-organization.md) | 9 | **backend‑gated** (favorites/recents/tags/insights/share) |
 
 > ⚠ **Backend support:** several of the above (favorites, recents, tags, global insights) have **no API today**, and
 > **avatar upload exists but is inactive** — see [backend-gaps](../07-decisions/backend-gaps.md). They ship as a labeled
-> client‑side interim or are deferred; we never fake server‑backed behavior. (Sharing = presigned URL, resolved;
+> deferred (backend‑first, no interim); we never fake server‑backed behavior. (Sharing = presigned URL, resolved;
 > image CDN resize via wsrv.nl, resolved.)
 
 ## Cross‑cutting (apply to every area) 🟢

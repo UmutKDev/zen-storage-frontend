@@ -111,7 +111,7 @@ rename/move/delete, **multi‑select + bulk + drag‑and‑drop move**, the **co
 current), and filter/sort. **Quota pre‑flight** blocks with an upgrade hint.
 
 ### Phase 4 — Preview + Share → [details](./phases/phase-4-preview-share.md)
-The **preview modal** (image/video/PDF/text) with toolbar and arrow‑key navigation; image CDN scaling +
+The **preview modal** (image/video/PDF/text/**audio**/**office**) with toolbar and arrow‑key navigation; image CDN scaling +
 scaled‑vs‑original download; the **text/code editor** (CodeMirror + lock + heartbeat + draft + unsaved‑changes guard);
 **version history + restore** (files + documents with diff); and **Share** via presigned URL.
 
@@ -135,13 +135,14 @@ Flip on the **team layer** with zero refactor: workspace store + Personal↔Team
 CRUD, members (roles), invitations, and team storage/quota with permission‑denied states.
 
 ### Phase 9 — Organization & Discovery (post‑MVP, backend‑gated) → [details](./phases/phase-9-organization.md)
-Turn the MVP's client‑side interims into real, synced features **once the backend exposes the APIs**: synced
-**favorites/recents**, **tags/labels**, and account‑wide **storage insights**. Each task is gated
-on a missing endpoint ([backend-gaps](../07-decisions/backend-gaps.md)); MVP does not depend on this phase.
+Build **favorites/recents**, **tags/labels**, and account‑wide **storage insights** — **backend‑first** (each needs a new
+API; **no MVP interim**, decided Q10–Q13). Gated on missing endpoints ([backend-gaps](../07-decisions/backend-gaps.md));
+MVP does not depend on this phase.
 
 > **Note on added MVP scope (this round):** command palette + keyboard shortcuts, observability, and feature flags land
-> in **Phase 0**; the command palette + client‑side favorites/recents/insights interim in **Phase 3**; onboarding +
-> observability finish in **Phase 7**. All are **frontend‑only**; the synced/server versions live in Phase 9.
+> in **Phase 0**; the command palette in **Phase 3**; **audio + office preview** in **Phase 4** (Q4); onboarding +
+> observability finish in **Phase 7**. All MVP additions are **frontend‑only**. Favorites/recents/tags/insights are
+> **post‑MVP (Phase 9), backend‑first**.
 
 ---
 

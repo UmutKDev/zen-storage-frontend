@@ -53,6 +53,7 @@ docs/
 │
 ├── 02-architecture/             HOW IT IS WIRED
 │   ├── ARCHITECTURE.md            index: tech stack + folder structure + how the pieces connect
+│   ├── folder-structure.md        feature-sliced tree + import boundaries + "where does X go?"
 │   ├── data-layer.md              generated client + axios Instance + envelope/error layer
 │   ├── state-management.md        TanStack Query keys + Zustand stores
 │   ├── routing-deep-linking.md    App Router route groups + folder deep-linking + modals

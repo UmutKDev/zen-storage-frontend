@@ -57,14 +57,13 @@ duplicate scan / archive (Phase 6); team context UI (Phase 8).
 - [ ] Search with **scope toggle** (global vs current folder, **default current**) via `Cloud/Search` (Path +
       Extension); no‑results state.
 
-### 3.8 — Command palette + Quick Access interim (added scope)
+### 3.8 — Command palette (added scope)
 - [ ] **Command palette** (Cmd/Ctrl‑K) over the shortcut foundation from Phase 0: navigate + actions + fuzzy
       current‑folder search (+ "search everywhere"). See [keyboard-shortcuts](../../06-cross-cutting/keyboard-shortcuts.md).
-- [ ] **Favorites + Recents — client‑side, per‑device interim** behind the `quickAccess` flag; validated via `Cloud/Find`
-      so stale entries prune. **No backend API** — clearly labeled "on this device". See
-      [quick-access](../../04-features/quick-access.md) + [backend-gaps](../../07-decisions/backend-gaps.md).
-- [ ] **Storage insights (current folder, client‑side)**: type breakdown + largest files computed from the listing;
-      global scope stays disabled (needs API). See [storage-insights](../../04-features/storage-insights.md).
+
+> **Favorites / Recents / Tags / Storage insights are NOT in MVP** (decided): they require backend APIs first and are
+> deferred to **[Phase 9](./phase-9-organization.md)** — no client‑side interim. See
+> [backend-gaps](../../07-decisions/backend-gaps.md).
 
 ## Endpoints used
 `Cloud/List`, `/List/Directories`, `/List/Objects`, `/List/Breadcrumb`, `/Search`, `/User/StorageUsage`, `/Move`,

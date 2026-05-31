@@ -17,15 +17,21 @@
 | `border` | hairlines/dividers | `#e4e4e7` | `#262626` |
 | `input` | input borders | `#e4e4e7` | `#2a2a2a` |
 | `ring` | focus ring | accent @ 60% | accent @ 60% |
-| `accent` | brand/primary action | `#4f46e5` (indigo) | `#6366f1` |
-| `accent-foreground` | text on accent | `#ffffff` | `#ffffff` |
+| `accent` | brand / primary action (**Claude‑style orange**) | `#d97757` | `#e0937a` |
+| `accent-foreground` | text on accent | `#ffffff` | `#1a1410` |
 | `success` | positive/clean state | `#16a34a` | `#22c55e` |
 | `warning` | quota 80/90, caution | `#d97706` | `#f59e0b` |
-| `danger` | destructive/error/infected | `#dc2626` | `#ef4444` |
+| `danger` | destructive/delete/error/infected | `#dc2626` | `#ef4444` |
 | `info` | neutral notices | `#2563eb` | `#3b82f6` |
 
-> Values are a **starting palette** (neutral + indigo accent, matching shadcn "neutral"). Finalize hexes in Phase 0; the
-> *token names* are the contract — features depend on names, not values.
+> **Palette direction (decided):** a **monochrome base** — black / white / grays for all structure (background, surfaces,
+> borders, text). **Color is reserved for actions & states**, not decoration: `danger` (delete/destructive) red,
+> `warning` amber, `success` green, `info` blue, and a **single warm accent** (Claude‑style orange `#d97757`) used
+> sparingly for the primary action / focus. Finalize exact hexes in Phase 0; **token names are the contract**.
+>
+> ⚠ **Contrast:** white on `#d97757` is borderline — for **filled** accent controls, deepen the shade toward
+> `#c2410c` (or use a dark `accent-foreground`) to hit AA; use the lighter `#d97757` for accents/text‑on‑neutral. Validate
+> in Phase 0 ([accessibility](../../06-cross-cutting/accessibility.md)).
 
 ### Glass surface tokens (signature look)
 Floating **chrome and overlays** use translucent **glass** fills layered on top of these solid tokens — `--glass-chrome-bg`,
@@ -54,8 +60,8 @@ See [state-matrix](../../02-architecture/state-matrix.md).
   --background:#ffffff; --foreground:#171717;
   --surface:#fafafa; --surface-elevated:#ffffff;
   --muted:#f4f4f5; --muted-foreground:#71717a;
-  --border:#e4e4e7; --input:#e4e4e7; --ring:#6366f1;
-  --accent:#4f46e5; --accent-foreground:#ffffff;
+  --border:#e4e4e7; --input:#e4e4e7; --ring:#d97757;
+  --accent:#d97757; --accent-foreground:#ffffff;   /* deepen toward #c2410c for filled controls (AA) */
   --success:#16a34a; --warning:#d97706; --danger:#dc2626; --info:#2563eb;
 }
 .dark { /* dark overrides per table */ }
@@ -69,10 +75,11 @@ See [state-matrix](../../02-architecture/state-matrix.md).
 ```
 
 ## 4. Do / don't
-- ✅ `className="bg-surface text-foreground border border-border"`.
-- ✅ Use `accent` for the single primary action per view.
-- ✅ Use state tokens for state, never decoration.
+- ✅ **Monochrome by default:** structure is grayscale (`bg-background`/`bg-surface`/`text-foreground`/`border-border`).
+- ✅ Use the warm **`accent` (orange)** *sparingly* — the single primary action / focus per view.
+- ✅ Color = meaning: state tokens for state/actions (delete → `danger`), never decoration.
 - ❌ No raw hex / arbitrary `bg-[#...]` in components.
+- ❌ Don't paint surfaces/chrome with color — keep them neutral; let one accent + state colors do the talking.
 - ❌ Don't overload `accent` — destructive actions use `danger`, not accent.
 - ❌ Don't rely on color alone to convey state (pair with icon/text — a11y).
 

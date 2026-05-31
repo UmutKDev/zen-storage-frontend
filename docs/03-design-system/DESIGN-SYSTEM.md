@@ -42,7 +42,7 @@ tokens/variants. If a feature needs something new, **add it here first**, then u
 ## Token namespace overview
 
 ```
-color      → background / foreground / surfaces / border / accent / muted / state(success,warning,danger,info)
+color      → MONOCHROME base (black/white/grays) + ONE warm accent (Claude-style orange) + state(success,warning,danger,info); color reserved for actions/states
 glass      → glass-chrome / glass-overlay (bg alpha · blur · saturate · highlight border) — signature, chrome+overlays only
 type       → font sans/mono · size scale · weight · line-height · tracking
 space      → 4px-based scale · container widths · radii

@@ -1,8 +1,10 @@
 # Backend Gaps — feature ↔ API support matrix
 
 > **The honest list of what the backend does NOT support yet.** Several desired features have **no API today**; we
-> document them so the UI is designed right, but we **do not fake server‑backed behavior.** Where it adds value we ship a
-> clearly‑labeled **client‑side interim** (per‑device) and flag the gap for the API team.
+> document them so the UI is designed right, but we **do not fake server‑backed behavior.** For the current gated
+> features (favorites/recents/tags/insights) the decision is **backend‑first, post‑MVP, no client‑side interim**; in
+> general a feature is either **deferred** until its API exists or (rarely, only when genuinely useful) shipped as a
+> clearly‑labeled per‑device interim. Each gap is flagged for the API team below.
 >
 > Verified against `nestjs-storage` controllers (`src/modules/**/**.controller.ts`) + `src/entities` + `src/schemas` on
 > 2026-05-30. Companion: [API-INVENTORY](../05-api/API-INVENTORY.md) · [open-questions](./open-questions.md) ·
@@ -17,16 +19,16 @@
 
 | Feature | Backend status | Evidence (verified) | Frontend strategy |
 |---|---|---|---|
-| **Favorites / starred** | ❌ None | No `favorite/star/bookmark/pin` controller; no entity in `src/entities` | **Client‑side interim** (local, **per‑device**, not synced) in Phase 3 *optional*; synced version → [phase-9](../01-roadmap/phases/phase-9-organization.md), needs API. |
-| **Recents / recently opened** | ❌ None (data exists, unexposed) | No `recent` controller; **`audit-log.schema.ts` exists** (Mongo) but no user‑facing endpoint | **Client‑side interim** (local recents) in Phase 3 *optional*; server‑backed recents (from audit) → needs an endpoint, post‑MVP. |
+| **Favorites / starred** | ❌ None | No `favorite/star/bookmark/pin` controller; no entity in `src/entities` | **Post‑MVP, backend‑first — no MVP interim** (decided Q10). Build in [phase-9](../01-roadmap/phases/phase-9-organization.md) once a favorites API exists. |
+| **Recents / recently opened** | ❌ None (data exists, unexposed) | No `recent` controller; **`audit-log.schema.ts` exists** (Mongo) but no user‑facing endpoint | **Post‑MVP, backend‑first — no MVP interim** (decided Q11). Needs a recents endpoint (expose the audit log). [phase-9](../01-roadmap/phases/phase-9-organization.md). |
 | **Tags / labels** | ❌ None | No `tag/label` controller or entity (the 24 `tag` hits are `@ApiTags` Swagger decorators, not a feature) | **Deferred** to [phase-9](../01-roadmap/phases/phase-9-organization.md); needs entity + CRUD + filter API. No interim (tags must be durable/shared to be useful). |
 | **Storage insights — totals** | ✅ Supported | `Cloud/User/StorageUsage` (used/limit/%) | Use directly (usage bar + insights header). |
-| **Storage insights — by type / largest files (current folder)** | ⚠️ Partial | Listings expose `Size`/`Extension`/`MimeType`; no aggregate endpoint | **Client‑side compute** over the loaded folder listing (MVP‑light). |
-| **Storage insights — global/account‑wide aggregate** | ❌ None | No analytics/insights/aggregate controller | **Deferred**; needs an aggregate endpoint ([phase-9](../01-roadmap/phases/phase-9-organization.md)). |
+| **Storage insights (by type / largest / global)** | ❌ None (only totals) | `StorageUsage` gives totals; no aggregate/insights endpoint | **Post‑MVP, backend‑driven** (decided Q13). Needs an aggregate endpoint; built in [phase-9](../01-roadmap/phases/phase-9-organization.md). (Only the usage bar from totals ships at MVP.) |
 | **Duplicate‑based cleanup savings** | ✅ Supported | `Cloud/Scan/Duplicate/*` (groups + savings) | Feed the insights "cleanup" section (Phase 6). |
 | **Image CDN resize (`?w=&h=`)** | ✅ Supported | CDN `cdn.storage.umutk.me` reverse‑proxies images via **wsrv.nl**; object URLs are **HMAC‑signed** (rustfs) | Build scaled URLs by appending `?w/?h` to the opaque signed URL ([Q5](./open-questions.md) resolved). |
 | **Sharing** | ✅ Supported (by design) | `Cloud/PresignedUrl` — signed, time‑limited link | **This *is* the share mechanism** ([Q1](./open-questions.md) resolved); no managed share‑link backend planned. [sharing](../04-features/sharing.md). |
 | **Trash / recycle bin** | ❌ None | No trash endpoint (known) | **Not in MVP** (D4); delete UX leaves room for a future restore. |
+| **Pricing‑page endpoint** | ❌ None (planned) | No dedicated pricing endpoint today | **To be built** — a purpose‑built endpoint for the Pricing page's cards ([Q6](./open-questions.md)). Until then, render **static cards**; page stays "coming soon". |
 | **Onboarding / first‑run** | ✅ N/A (frontend) | — | Pure frontend; uses existing profile/usage reads. Phase 7. |
 | **Command palette + keyboard shortcuts** | ✅ N/A (frontend) | — | Pure frontend over existing endpoints (search, navigate, actions). Phases 0/3. |
 | **Observability (error monitoring + product analytics)** | ✅ N/A (frontend) | — | Third‑party SDKs client‑side; optional backend log sink later. Phase 0. |

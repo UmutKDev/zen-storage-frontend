@@ -19,5 +19,7 @@ MaxUploadSizeBytes?, MaxObjectCount?, Features(JSON e.g. {downloadSpeedBytesPerS
 
 ## MVP usage
 - **Account ▸ Subscription** shows `Subscription/My` (read‑only).
-- **Pricing page** is "coming soon": shows plans, **no checkout**. Whether a **public** plan‑list endpoint exists (vs
-  admin‑only `List`) is **open** ([Q6](../../07-decisions/open-questions.md)) — fall back to static cards.
+- **Pricing page** is "coming soon": shows plans, **no checkout**. **Decided ([Q6](../../07-decisions/open-questions.md)):**
+  a **dedicated pricing‑page endpoint** (purpose‑built for the page, name TBD e.g. `GET /Api/Subscription/Pricing`) will
+  feed the cards — **not yet built** ([backend-gaps](../../07-decisions/backend-gaps.md)); render **static cards** until
+  it ships. (The admin `List` is not the pricing source.)
