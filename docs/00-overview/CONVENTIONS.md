@@ -157,6 +157,7 @@ The folder structure is enforced — not aspirational. Ten hard rules:
 8. **Team UI inert before P8**: `features/teams/index.ts` exports no UI; `workspaceStore` is wired to the team
    interceptor from P0.
 9. **No `export *`** anywhere — explicit named re‑exports only (AST‑blocked).
+   > **Exception:** `service/models.ts` re-exports the entire generated client surface via `export * from "./generates"` (per-file ESLint override + D-F18). This is the only allowlisted instance outside generator output itself.
 10. **Secure‑folder store special‑case**: `features/secure-folders/stores/secureFolders.store.ts` may not import
     `zustand/middleware`'s `persist`, and may not touch `localStorage`, `sessionStorage`, or `document.cookie`.
 

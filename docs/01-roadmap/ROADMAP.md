@@ -14,7 +14,7 @@
   `lib/{auth,i18n,motion,flags,observability,socket,shortcuts,validation,seo,utils}`, `components/ui` shadcn primitives
   (button/dialog/dropdown-menu/command/tooltip/input/sonner via MCP), `stores/{workspace,ui}`, `config/*`, `types/*`,
   `app/providers.tsx` + route‑group skeletons, `app/{sitemap,robots,manifest,opengraph-image,not-found,error}`,
-  `middleware.ts` + `instrumentation.ts` (5‑line shims), `eslint.config.mjs` FULL enforce, `tests/*` infra; favicon to
+  `proxy.ts` + `instrumentation.ts` (5‑line shims), `eslint.config.mjs` FULL enforce, `tests/*` infra; favicon to
   `public/`. P2 replaces `components/layout/` with **`features/shell/`**. P3 notes feature‑local stores (uploads in
   upload/, selection in operations/, viewPrefs in browse/). P5 wires `registerSecureFolderTokenSource` to its real
   getter (no‑op since P0). P8 activates **`features/shell/components/WorkspaceSwitcher.tsx`**.
@@ -115,7 +115,7 @@ A runnable, **team‑ready skeleton**. The full P0 surface lands here:
 - **App seams:** `app/providers.tsx` (Query/Session/Theme/Motion/Toaster + token‑source registers), route‑group
   skeletons under `(public|auth|app)`, and `app/{sitemap,robots,manifest,opengraph-image,not-found,error}` delegating to
   `lib/seo`.
-- **Root file seams:** `middleware.ts` and `instrumentation.ts` as ~5‑line shims into `lib/auth/middleware` and
+- **Root file seams:** `proxy.ts` and `instrumentation.ts` as ~5‑line shims into `lib/auth/proxy` and
   `lib/observability/instrumentation`.
 - **`eslint.config.mjs`** with **FULL enforcement** (boundaries + entry‑point + no‑restricted‑imports/syntax — not
   warn‑then‑error).

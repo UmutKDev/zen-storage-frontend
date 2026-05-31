@@ -53,6 +53,18 @@ Contracts: [cloud-core](../../05-api/modules/cloud-core.md) (scan), [cloud-archi
 - [ ] Inbox lists history with unread badge; mark read / read‑all work; toasts fire per type; quota warnings show at
       80/90/100%.
 
+## Acceptance additions (audit HIGH/MEDIUM)
+
+Locked socket lifecycle obligations layered on top of the §6.1 plumbing — see [realtime-socket §4](../../02-architecture/realtime-socket.md) for the canonical spec.
+
+- [ ] **Socket lifecycle locked.** Singleton `io(NEXT_PUBLIC_SOCKET_URL + "/notifications", { auth, autoConnect: false })` in `lib/socket/client.ts`. `NotificationProvider` mounts in `app/providers.tsx` **after** session hydrated; `socket.connect()` only when session valid.
+- [ ] **Reconnect with exp backoff + jitter.** `reconnectionDelay: 1000`, `reconnectionDelayMax: 30000`, `randomizationFactor: 0.5`. Storm-pause: 3 disconnects in 10s → 30s pause before resuming.
+- [ ] **401 handling.** Server `connect_error` with `data.code === "AUTH_INVALID"` → `socket.disconnect()` + `socket.io.opts.reconnection = false` → trigger `lib/auth/client.ts::handleAuthFailure()` (deduped with REST 401).
+- [ ] **Sign-out teardown sequence (order asserted by spy).** `socket.disconnect()` → `queryClient.cancelMutations()` + `cancelQueries()` → `queryClient.clear()` + reset all stores → `signOut({redirect:false})` → `window.location.assign("/auth/login")`. Wrapped in `signOutAndCleanup()` with `signOutInFlight` boolean dedupe.
+- [ ] **Reconciliation on reconnect.** Server sends `{ last_event_id, now }` on `connect`; client compares with `notifications.store.lastSeenEventId`; gap → invalidate list queries depending on socket-emitted state (jobs, notifications inbox).
+- [ ] **Polling fallback.** If socket fails ≥ 5 times in 60s → `GET /Notifications/Recent` every 30s until socket recovers.
+- [ ] **Kill-socket acceptance test.** Given: archive job started via UI. When: at t=2s, DevTools Network → WS → close socket. Then: within 30s, polling fallback fires; job progress continues via poll; job reaches terminal state without UI hang; on socket reconnect, no duplicate progress notifications (deduped by `jobId` + monotonic key).
+
 ## Risks & mitigations
 | Risk | Mitigation |
 |---|---|

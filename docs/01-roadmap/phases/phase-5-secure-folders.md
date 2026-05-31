@@ -66,6 +66,74 @@ header injection (`X-Folder-Session` / `X-Hidden-Session`).
 If ancestor reuse is unreliable, fall back to per‑folder unlock prompts (slightly more friction, still correct). Marks
 in `sessionStorage` can be dropped (recompute from listings) without breaking security.
 
+## Acceptance additions (audit HIGH/MEDIUM)
+
+These items lock the audit findings into the phase exit gate. All checkboxes must be green before Phase 5 closes.
+
+### A1 — `pagehide` + `event.persisted` clears tokens
+- [ ] `secureFolders.store.ts` registers a `pagehide` listener (NOT `beforeunload` alone — Safari/iOS fire `pagehide`
+      reliably).
+- [ ] When `event.persisted === false` → clear ALL tokens (true tab close / nav away).
+- [ ] When `event.persisted === true` → tokens are preserved (page entered bfcache); restoring from bfcache MUST leave
+      the unlock state intact.
+- [ ] Verified manually via **DevTools → Application → Back/Forward Cache**: trigger bfcache eviction vs restore and
+      confirm token state matches each branch.
+
+### A2 — Cross-tab UX (no shared token state)
+- [ ] Tokens are tab-local — no `BroadcastChannel`, no `storage` event, no shared worker.
+- [ ] Scenario test: **Tab A unlocks `/work` → Tab B requests a child of `/work` → Tab B receives 403 → Tab B re-prompts
+      for passphrase.**
+- [ ] State matrix in [secure-folders feature spec](../../04-features/secure-folders.md) includes the variant
+      **"Locked (other tab unlocked)"** so designers/devs render the re-prompt affordance, not a generic error.
+
+### A3 — Unlock `onSuccess` sequencing
+- [ ] Order is fixed: **(1) write token to `secureFolders.store`** → **(2) `queryClient.invalidateQueries(...)`** for
+      affected `directories` keys.
+- [ ] Reversing the order causes a refetch that lacks the header and 403s — guarded by a unit test with a spy on both
+      `store.setToken` and `queryClient.invalidateQueries` asserting call order.
+
+### A4 — Conceal atomicity
+| Failure mode | Local token state | UX |
+|---|---|---|
+| Network failure (offline, timeout, abort) | **Preserved** — folder is still effectively unlocked locally | Toast: `"Conceal failed"` |
+| 5xx from backend | **Cleared locally** | Ambiguous toast: backend state unknown, treat as locked |
+| 2xx | Cleared locally | Success toast |
+
+- [ ] Mutation handler implements the matrix above explicitly (no "always clear" / "always preserve" shortcut).
+- [ ] Unit tests cover each row.
+
+### A5 — Encrypted folder socket events suppressed
+- [ ] Backend contract: **NO `FILE_*` socket events are emitted for paths under a locked encrypted folder** for clients
+      lacking the matching unlock token. (Server-side filter, not client-side drop.)
+- [ ] Contract verified via socket spy: subscribe in a session with no token → perform server-side mutations under a
+      locked path → assert zero `FILE_*` frames received.
+- [ ] If the spec lands incomplete, file a backend issue and gate Phase 5 exit on it.
+
+### A6 — `registerSecureFolderTokenSource` default no-op
+- [ ] `service/token-sources.ts` ships a default getter that returns `undefined`.
+- [ ] When `app/providers.tsx` has not (yet) called `registerSecureFolderTokenSource(...)`, the secure-folder
+      interceptor MUST NOT attach `X-Folder-Session` / `X-Hidden-Session` headers.
+- [ ] Unit test: import `service/Instance.ts` cold, fire a `/Api/Cloud/*` request, assert headers are absent.
+
+### A7 — Path marks vs tokens separation
+Two distinct stores, two distinct lifetimes:
+
+| Store | File | Persistence | Contents |
+|---|---|---|---|
+| Path marks | `features/secure-folders/stores/pathMarksCache.store.ts` | **Persisted** (`sessionStorage`) | `{ path → { isEncrypted, isHidden } }` — "is this folder locked?" marks for UX hints |
+| Tokens | `features/secure-folders/stores/secureFolders.store.ts` | **In-memory only** | `{ rootPath → { token, expiresAt } }` for both encrypted + hidden namespaces |
+
+- [ ] ESLint guard on `secureFolders.store.ts` bans `persist`, `localStorage`, `sessionStorage`, and `cookie`.
+- [ ] `pathMarksCache.store.ts` may persist freely — marks leak no secret material.
+- [ ] Listings reconcile marks on fetch; a missing/stale mark never blocks a real request.
+
+### A8 — DevTools introspection risk acknowledged
+- [ ] Top-of-file comment in `secureFolders.store.ts` references the accepted-risk note in
+      [secure-folder-lifecycle §12](../../02-architecture/secure-folder-lifecycle.md#12-accepted-risks) (tokens are
+      readable from DevTools by a user who already controls the page — out of scope for the threat model).
+- [ ] Comment is enforced by an ESLint `no-restricted-syntax` / file-header rule so it cannot silently disappear in a
+      refactor.
+
 ## Exit criteria
-Encrypted and hidden folders work end‑to‑end with a correct, never‑persisted token lifecycle. Then begin
-[Phase 6](./phase-6-advanced.md).
+Encrypted and hidden folders work end‑to‑end with a correct, never‑persisted token lifecycle, and **every checkbox in
+"Acceptance additions (audit HIGH/MEDIUM)" above is green**. Then begin [Phase 6](./phase-6-advanced.md).

@@ -73,7 +73,7 @@ For `/Api/Cloud/*` requests the interceptor calls the registered getter (one res
 ## 7. Clear‑all (mandatory)
 Clear **all** tokens on:
 - **Sign‑out** (part of the [auth teardown](./auth-integration.md#4-sign-out-full-teardown)).
-- **Tab close / unload** (`beforeunload`).
+- **Tab close** — see §11 for the exact event wiring (`pagehide` + `visibilitychange`, **never** `beforeunload`).
 
 ## 8. Query‑key integration
 Surfaces that depend on a token fold it into their query key (e.g. `[scope,'cloud','directories',path,hiddenToken]`) so
@@ -92,3 +92,131 @@ that passphrase appear (token folded into the directories query key). Conceal/lo
 - 403 vs wrong‑passphrase disambiguation — explicit handling to prevent loops.
 - Token‑source seam wiring — if `registerSecureFolderTokenSource` is not called from `app/providers.tsx`, the
   interceptor silently no‑ops; provider boot must register the getter (and tests should assert it).
+
+## 11. Tab close + bfcache
+Listen for **`visibilitychange`** and **`pagehide`** — **never `beforeunload`** (it blocks bfcache and fires
+unreliably on mobile Safari).
+
+Implementation lives in `features/secure-folders/lifecycle/tab-close.ts` and is registered once from
+`app/providers.tsx`.
+
+| Event | Condition | Action |
+|---|---|---|
+| `pagehide` | `event.persisted === false` | Tab is closing for real → **clear ALL tokens** (encrypted + hidden). |
+| `pagehide` | `event.persisted === true` | Page entering **bfcache** → **keep tokens**. A bfcache restore resurrects the in‑memory Zustand store intact, so the tokens are still valid (subject to TTL). |
+| `visibilitychange` | `document.visibilityState === 'hidden'` | **No‑op.** Backgrounding a tab is not closing it; clearing here would force a re‑prompt every time the user switches tabs. |
+
+```ts
+// features/secure-folders/lifecycle/tab-close.ts (shape)
+window.addEventListener('pagehide', (e) => {
+  if (!e.persisted) clearAllSecureFolderTokens();
+});
+window.addEventListener('visibilitychange', () => {
+  // intentionally empty — see table above
+});
+```
+
+## 12. Cross‑tab behavior (intentional per‑tab)
+Tokens are **per‑tab** at MVP. Unlocking `/work` in Tab A does **not** unlock it in Tab B; Tab B's next request to
+that subtree gets a `403` and triggers a fresh passphrase prompt.
+
+This is **intentional**, not a bug. **No `BroadcastChannel` at MVP** — cross‑tab token propagation expands the
+exfiltration surface (any open tab in the origin can read the token) for a small UX win.
+
+`state-matrix.md` adds a **"Locked (other tab unlocked)"** state row to make this visible to feature authors.
+
+**Post‑MVP:** a `BroadcastChannel('secure-folders')` sync, gated behind a per‑user settings toggle ("Share unlocked
+folders across tabs"). Default off.
+
+## 13. Unlock `onSuccess` sequencing (no race)
+The mutation's `onSuccess` MUST run in this order — reversing it produces an **infinite re‑prompt loop** because
+the refetch fires before the token is in the store, gets `403`, and re‑opens the dialog the user just dismissed.
+
+1. **Store update first (synchronous):** `setToken(namespace, path, token, expiresAt)`.
+2. **Then** `queryClient.invalidateQueries(...)` for the affected scope.
+3. **Then** apply any optimistic UI (badge flip, expand the now‑unlocked folder, etc.).
+
+```ts
+// features/secure-folders/hooks/useUnlock.ts (shape)
+onSuccess: (data, vars) => {
+  secureFolders.setToken('encrypted', data.EncryptedFolderPath, data.SessionToken, data.ExpiresAt); // 1
+  queryClient.invalidateQueries({ queryKey: ['cloud', 'directories', vars.Path] });                  // 2
+  ui.markUnlocked(data.EncryptedFolderPath);                                                         // 3
+}
+```
+
+**Phase 5 acceptance test** asserts this order with a spy on `setToken` / `invalidateQueries` and fails if
+invalidation is observed before the store write.
+
+## 14. Conceal atomicity + rollback
+Conceal/Lock is **not** a fire‑and‑forget client clear. The token only drops if the server confirms.
+
+| Outcome | Client action | UX |
+|---|---|---|
+| `2xx` success | `clearToken(namespace, path)` + `invalidateQueries` for that subtree. | Silent. Folder re‑locks/conceals. |
+| Network failure (no response) | **Leave the token in place.** | Toast: **"Conceal failed — try again."** Server session may still be live; clearing locally would desync. |
+| `5xx` | **Clear the token locally** (defensive — server state ambiguous). | Toast: **"Conceal may not have completed. Re‑verify from another device if needed."** |
+| `4xx` (other than auth) | Surface via feature handler (see §5 of [data-layer](./data-layer.md)). | Per‑error toast. |
+
+`state-matrix.md` adds a **"Concealing"** transient state to model the in‑flight window.
+
+## 15. Encrypted‑folder socket events (MVP)
+Live updates and secure folders interact at the **socket auth boundary**.
+
+**Backend contract (MVP):** the server **MUST NOT** emit `FILE_*` / `FOLDER_*` socket events whose payload path
+falls under a secure‑folder root *unless* the receiving socket connection holds a valid session token for that
+root. Otherwise the path itself leaks (filename, parent chain, mtime) to a connection that was never authorised
+to see it.
+
+**MVP simplification:** sockets don't carry per‑namespace tokens yet, so encrypted/hidden folders **do not emit
+live events**. Changes inside a secure folder surface on the **next refetch** (manual refresh, navigation,
+invalidation from a same‑tab mutation).
+
+**Revisit in Phase 6:** per‑namespace socket auth (token attached on `subscribe` / sent via a separate auth frame)
+so encrypted folders can join the live‑updates path without leaking metadata.
+
+## 16. React DevTools introspection (accepted risk)
+Zustand stores are introspectable via the React DevTools / Zustand DevTools extension. **Secure‑folder tokens are
+visible there** while the extension is attached.
+
+**Decision: accepted at MVP.** The threat is bounded:
+
+- Tokens are **TTL‑bounded** (15 min default) — exfiltration window is short.
+- **Trusted‑machine assumption.** A user with browser‑extension install rights on their own device is already
+  inside the trust boundary; DevTools also exposes the session cookie, the team‑id header, and every in‑flight
+  request body. Singling out secure‑folder tokens here would be theatre.
+- DevTools attachment **requires an active session** on the machine — there is no remote read path.
+
+**Post‑MVP hardening (tracked):**
+1. Wrap the token field in a getter that returns `undefined` in `process.env.NODE_ENV === 'production'` **and**
+   when the React DevTools global hook is detected (`window.__REACT_DEVTOOLS_GLOBAL_HOOK__`).
+2. Store tokens in a module‑private `Map` outside the Zustand state tree; expose only `resolveToken(path)` to
+   consumers, so DevTools sees the *existence* of an unlock but not the token bytes.
+
+## 17. `registerSecureFolderTokenSource` no‑op assertion (Phase 0)
+The token‑source seam ships in **Phase 0** with a default getter that returns `undefined`. This locks in the
+"interceptor exists, no‑ops until Phase 5" contract before any feature code can drift it.
+
+**Phase 0 task 0.5 acceptance** asserts, in order:
+
+1. `registerSecureFolderTokenSource` is **importable and callable** from `service/token-sources.ts`.
+2. With **no** registration call, the default getter returns `undefined` for any `(namespace, path)` query.
+3. The composed `Instance` issues a `/Api/Cloud/*` request and the secure‑folder interceptor attaches **no
+   `X-Folder-Session` and no `X-Hidden-Session` header**.
+
+Test file: `tests/service/secure-folder-interceptor.test.ts`.
+
+```ts
+// tests/service/secure-folder-interceptor.test.ts (shape)
+it('default getter returns undefined and interceptor adds no header', async () => {
+  const { getSecureFolderToken } = await import('@/service/token-sources');
+  expect(getSecureFolderToken('encrypted', '/anything')).toBeUndefined();
+
+  const req = await captureRequest(() => instance.get('/Api/Cloud/Directory/List'));
+  expect(req.headers).not.toHaveProperty('x-folder-session');
+  expect(req.headers).not.toHaveProperty('x-hidden-session');
+});
+```
+
+This test must keep passing through Phase 5 — once a real getter is registered in `app/providers.tsx`, the test
+remounts the seam without the registration to verify the no‑op default is still intact.

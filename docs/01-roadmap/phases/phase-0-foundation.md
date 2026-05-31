@@ -24,6 +24,62 @@ tests + MSW + Playwright scaffolds boot; `bunx tsc --noEmit` and `bun run lint` 
 
 ## Task breakdown
 
+### 0.0 — Auth.js v5 + Next 16.2 proxy spike (time‑boxed: 2 days)
+
+**Goal:** Verify Auth.js v5 (`next-auth@beta`) credentials flow runs end‑to‑end inside `proxy.ts` (Node runtime only — Edge is unsupported in Next 16.2's `proxy`). This is the **first** Phase‑0 task; it gates whether 0.7 / 0.8 / 0.10 wire Auth.js or the cookie‑session fallback.
+
+**Steps:**
+1. Cut a scratch branch off `v2` (`spike/auth-js-v5`). Throwaway — do **not** merge.
+2. `bun add next-auth@beta @auth/core`.
+3. Scaffold `app/api/auth/[...nextauth]/route.ts` + `lib/auth/config.ts` with a credentials provider (email + password → backend `Account/SignIn`).
+4. Implement the multi‑step login flow (credentials → optional 2FA challenge → session issuance).
+5. In `proxy.ts`, read the session via `auth()` from the v5 helper and enforce `(app)` route protection.
+6. Add `lib/auth/server.ts` that exposes a thin `getSession()` for **RSC** consumption (uses `auth()` server‑side).
+7. Wire sign‑out + race protection (concurrent sign‑out requests must not leak a stale session cookie).
+
+**Pass criteria checklist:**
+- [ ] `bun run build` succeeds with `next-auth@beta` on Next 16.2 / React 19.
+- [ ] Multi‑step login (credentials + 2FA) completes and issues a session.
+- [ ] `proxy.ts` enforces auth on `(app)/*` routes via `auth()` (no Edge runtime).
+- [ ] An RSC reads the session via `lib/auth/server.ts#getSession()` without hydration mismatch.
+- [ ] Sign‑out clears the session cookie; no leaked tokens under concurrent sign‑out races.
+
+**Fail fallback (locked as D‑A4 if any pass criterion fails):** Custom cookie‑session adapter:
+- `lib/auth/cookie-session.ts` — HMAC‑SHA256‑signed, `HttpOnly` + `Secure` + `SameSite=Strict`, 7‑day TTL.
+- `lib/auth/proxy.ts` — replaces the Auth.js guard, validates the signed cookie in `proxy.ts`.
+- `lib/auth/server.ts` — `getSession()` for RSC.
+- `lib/auth/client.ts` — React Context provider for client components.
+- `app/api/auth/[...session]/route.ts` — handlers for `/login`, `/logout`, `/refresh`.
+
+**Output:** Append a 5‑line summary to `docs/07-decisions/DECISIONS.md` under a new heading `## Auth strategy spike outcome (2026-06-01)` recording the outcome (Auth.js v5 confirmed **or** D‑A4 cookie‑session locked) and the exact reason.
+
+**Acceptance:** Spike outcome recorded in DECISIONS.md; either Auth.js v5 is locked for P1, or D‑A4 cookie‑session adapter is locked and P1 consumes it.
+
+### 0.0a — Security headers + CSP nonce wiring
+
+Per [security-headers](../../06-cross-cutting/security-headers.md). Lands **before** any feature ships so every response carries the baseline headers and every inline script flows through a per‑request nonce.
+
+**Steps:**
+1. `lib/security/headers.ts` — export `STATIC_HEADERS`:
+   - `Strict-Transport-Security: max-age=63072000; includeSubDomains; preload`
+   - `X-Content-Type-Options: nosniff`
+   - `X-Frame-Options: DENY`
+   - `Referrer-Policy: strict-origin-when-cross-origin`
+   - `Permissions-Policy: camera=(), microphone=(), geolocation=()`
+   - `Cross-Origin-Opener-Policy: same-origin`
+2. `lib/security/nonce.ts`:
+   - `getNonce()` — `await headers().get("x-nonce")` (RSC‑safe).
+   - `generateNonce()` — `crypto.randomBytes(16).toString("base64")` (16‑byte base64).
+3. `next.config.ts` — `async headers()` returns `STATIC_HEADERS` for the route pattern `/(.*)`.
+4. `proxy.ts` — generate a nonce per request, set the `x-nonce` **request** header (so RSC can read it), and set the `Content-Security-Policy` **response** header that references the nonce.
+5. `app/layout.tsx` — any `<script>` block uses `<script nonce={await getNonce()}>`.
+6. `tests/security/headers.smoke.ts` — boots the app, requests `/`, asserts every static header is present and the CSP includes `nonce-<base64>`.
+
+**Acceptance:**
+- `curl -I http://localhost:3000/` shows every header from `STATIC_HEADERS`.
+- The `Content-Security-Policy` response header contains `nonce-{16-byte-base64}` matching the request's `x-nonce`.
+- `bun run test tests/security/headers.smoke.ts` passes.
+
 ### 0.1 — Repo hygiene
 - [ ] `git mv app/favicon.ico public/favicon.ico` — favicon lives in `public/`, **never** in `app/`.
 - [ ] Delete the default `app/page.tsx`. The landing page lands in **Phase 7** (`features/marketing/*` →
@@ -70,7 +126,7 @@ tests + MSW + Playwright scaffolds boot; `bunx tsc --noEmit` and `bun run lint` 
       with explicit types. `query-keys.ts` exports `scopedKey(scope, ...parts)`. `idempotency.ts` exports
       `newIdempotencyKey()` (UUID v7, **single source**). `abort.ts` exports `composeSignals(...signals)` and
       `withTimeout(ms)`.
-- [ ] `lib/auth/{config,server,client,guards,middleware}.ts` — `server.ts` + `middleware.ts` start with
+- [ ] `lib/auth/{config,server,client,guards,proxy}.ts` — `server.ts` + `proxy.ts` start with
       `import 'server-only'`. Stubs only; real wiring lands in P1.
 - [ ] `lib/i18n/{config,t,dictionaries/en.json}` — `t(key)` returns the EN value; missing‑key warns in dev.
 - [ ] `lib/motion/{tokens,variants,useReducedMotion}.ts` — duration/easing tokens, shared variants (page, modal,
@@ -85,6 +141,28 @@ tests + MSW + Playwright scaffolds boot; `bunx tsc --noEmit` and `bun run lint` 
 - [ ] `lib/utils/{cn,format-bytes,format-date,paths}.ts`.
 - [ ] Each `lib/<area>/index.ts` — explicit named re‑exports only (no `export *`).
 - **Acceptance:** every path above exists; no `export *` anywhere in `lib/`; `bunx tsc --noEmit` clean.
+
+### 0.4a — Privacy & PII infrastructure stubs
+
+Per [privacy-compliance](../../06-cross-cutting/privacy-compliance.md). Privacy infrastructure lands in P0 so every later feature inherits PII scrubbing, consent gating, and a legal copy namespace by default.
+
+**Steps:**
+1. `lib/observability/scrubber.ts` — exports `scrub(payload)` and `scrubBreadcrumb(breadcrumb)`. Redacts every PII category before anything reaches the reporter:
+   - `email` (regex match anywhere in strings)
+   - `Path` and `Filename` (PascalCase API fields)
+   - tokens (`X-Session-Id`, `X-Folder-Session`, `X-Hidden-Session`, `Authorization`, `Cookie`, anything matching `*Token`/`*Key`)
+   - request/response **headers** that carry auth
+   - **S3 query strings** (presigned URLs — strip everything after `?`)
+2. `features/account/stores/consent.store.ts` — feature‑local Zustand store (NOT in `stores/`):
+   - Shape: `{ essential: true, functional: false, analytics: false }`.
+   - Action: `setConsent(category, value)` (`essential` is read‑only `true`).
+   - Persists to `localStorage` under a stable key and hydrates on mount.
+3. `lib/i18n/dictionaries/en.json` — add the `legal.*` namespace with placeholder copy (privacy policy heading, ToS heading, cookie banner copy, consent toggle labels). Real copy lands with the legal pages.
+
+**Acceptance:**
+- Scrubber unit tests cover every PII category above (email, Path, Filename, tokens, headers, S3 query strings) and assert the redaction.
+- `consent.store` hydrates from `localStorage` and survives a refresh in a smoke test.
+- `legal.*` namespace is present in `en.json` and `t('legal.privacy.heading')` returns the placeholder string.
 
 ### 0.5 — Global Zustand stores
 - [ ] `stores/workspace.store.ts` — `{ ownerId, teamId, switchTo(...) }`. Drives `X-Team-Id` and **every** query‑key
@@ -123,6 +201,22 @@ tests + MSW + Playwright scaffolds boot; `bunx tsc --noEmit` and `bun run lint` 
 - **Acceptance:** `next dev` boots; visiting `/`, `/auth/sign-in`, `/storage`, `/storage/a/b` all render empty‑but‑live
       route group shells.
 
+### 0.8a — Intercepting routes + catch-all spike (Q17)
+
+**Goal:** Verify Next 16.2 supports the combination `@modal/(.)preview/[key]` parallel-intercepting route + `[[...path]]` catch-all in the same `app/(app)/storage/` segment, BEFORE Phase 4 commits to this architecture.
+
+**Steps:**
+1. Scaffold a minimal `app/(app)/storage/[[...path]]/page.tsx` returning the path segments.
+2. Add `app/(app)/storage/@modal/(.)preview/[key]/page.tsx` that renders a stub modal.
+3. Add `app/(app)/storage/layout.tsx` accepting `{ children, modal }` props.
+4. Run `bun run dev`; navigate to `/storage/a/b/preview/some-key`.
+5. **Pass criteria:** The catch-all renders the underlying page AND the intercepted modal renders on top. Back-navigation reveals `/storage/a/b` without the modal.
+6. **Fail fallback:** Drop the intercepting modal in favor of a query-param modal (`?preview=key`) routed through `<PreviewModal />` mounted in the shell. Lock the fallback in DECISIONS.md as **D-F17** if the spike fails.
+
+**Acceptance:** Either confirms intercepting+catch-all combo works (locked into DECISIONS.md as resolved) OR the query-param fallback is locked as D-F17.
+
+**Output:** Append a 3-line summary to `docs/07-decisions/DECISIONS.md` under a new heading `## Next 16.2 spike outcomes (2026-05-31)`.
+
 ### 0.9 — `app/globals.css` (single token source)
 - [ ] Tailwind v4 `@theme` block — **the only place** semantic tokens are declared (color, surface, border, accent,
       state colors success/warning/danger/info; spacing, radius, shadow, type ramp).
@@ -134,7 +228,8 @@ tests + MSW + Playwright scaffolds boot; `bunx tsc --noEmit` and `bun run lint` 
 - **Acceptance:** any token referenced by a component resolves to a CSS variable defined in `globals.css`.
 
 ### 0.10 — Root seam files + SEO delegations
-- [ ] `middleware.ts` (repo root) — **≤ ~5‑line shim** re‑exporting from `lib/auth/middleware`.
+- [ ] `proxy.ts` (repo root) — **≤ ~5‑line shim** re‑exporting the `proxy` function from `lib/auth/proxy`
+      (Next 16.2 rename — the file is no longer middleware.ts, and Edge runtime is not supported in proxy).
 - [ ] `instrumentation.ts` (repo root) — **≤ ~5‑line shim** re‑exporting from `lib/observability/instrumentation`.
 - [ ] `app/sitemap.ts`, `app/robots.ts`, `app/manifest.ts`, `app/opengraph-image.tsx` — thin delegations to
       `lib/seo/{sitemap,robots,manifest,og}`.
@@ -191,6 +286,28 @@ tests + MSW + Playwright scaffolds boot; `bunx tsc --noEmit` and `bun run lint` 
 - [ ] `bun run lint` — clean.
 - **Acceptance:** both commands exit 0 on a freshly cloned tree.
 
+### 0.14a — Supply‑chain CI gates
+
+Per [dependency-policy](../../06-cross-cutting/dependency-policy.md). The supply chain is policed by CI from day one — dependency bumps, license drift, vulnerability surface, SBOM artifacts, bundle size, and Lighthouse budgets all gate PRs.
+
+**Steps:**
+1. `renovate.json` — group rules:
+   - **security** group: severity ≥ high → auto‑open PR immediately.
+   - **standard** group: minor/patch runtime deps, weekly.
+   - **dev tool** group: dev dependencies, weekly, batched.
+2. `.github/workflows/supply-chain.yml` — runs on every PR:
+   - `bun install --frozen-lockfile`
+   - `bun audit --severity high` (fail on any high/critical advisory)
+   - `bunx license-checker --onlyAllow "MIT;Apache-2.0;BSD-2-Clause;BSD-3-Clause;ISC;CC0-1.0;0BSD;Unlicense"` (fail on AGPL, GPL, unknown)
+   - `bunx @cyclonedx/cyclonedx-npm --output-file sbom.json` → upload `sbom.json` as a workflow artifact
+3. `package.json` — add `size-limit` and `@lhci/cli` as dev deps; add `.size-limit.json` with budgets per [performance](../../06-cross-cutting/performance.md) §2.
+4. `.github/workflows/perf-budget.yml` — runs `bunx size-limit` and `bunx lhci autorun` on PR; fails on budget breach.
+
+**Acceptance:**
+- A PR that deliberately imports a large module (e.g. `lodash` whole) → `size-limit` step fails.
+- A PR that adds an AGPL‑licensed dep → `license-checker` step fails.
+- `sbom.json` is uploaded as an artifact on every CI run and is downloadable from the workflow summary.
+
 ### 0.15 — Commits & push
 - [ ] Split into **logical commits**, each green on lint + types:
       `chore: move favicon to public, drop default landing` ·
@@ -220,6 +337,11 @@ None called for features. **Smoke‑test only:** one `Account/Profile` GET throu
 - [ ] Route groups resolve; `storage/[[...path]]` renders the skeleton for `/storage` and `/storage/a/b`.
 - [ ] `service/` directory contains **zero** imports from `@/features/*` (grep).
 - [ ] `bun run test` and `bun run test:e2e --list` exit 0.
+- [ ] 0.8a spike result recorded in DECISIONS.md (either intercepting+catch-all confirmed OR D-F17 query-param fallback locked).
+- [ ] **0.0** — Auth strategy spike outcome locked in DECISIONS.md (Auth.js v5 confirmed **or** D‑A4 cookie‑session adapter locked).
+- [ ] **0.0a** — Security headers smoke test green: every `STATIC_HEADERS` entry present on `/`, CSP carries a per‑request `nonce-{base64}`.
+- [ ] **0.4a** — Scrubber unit tests pass for every PII category (email, Path, Filename, tokens, headers, S3 query strings); `consent.store` persists across refresh; `legal.*` i18n namespace resolves.
+- [ ] **0.14a** — Supply‑chain CI green: `bun audit`, `license-checker`, `size-limit`, and Lighthouse budgets all pass; `sbom.json` uploaded as a workflow artifact.
 
 ## Risks & mitigations
 | Risk | Mitigation |

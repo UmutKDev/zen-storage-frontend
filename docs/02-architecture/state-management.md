@@ -90,6 +90,9 @@ Rules:
 - Only `stores/workspace.store.ts` and `stores/ui.store.ts` belong in the global `stores/` directory at MVP; everything
   else is feature‑local under `features/<f>/.../stores/`.
 - Sign‑out clears **all** stores (global + feature‑local) along with the Query cache and socket.
+- **`viewPrefs` vs theme asymmetry (intentional):** theme is OS‑level and persists globally via `next-themes` (user
+  identity preference); `viewPrefs` (grid/list, sort column) persists per‑folder via `sessionStorage` and resets
+  across browser sessions (working‑state per session).
 
 ## 4. Interaction example — delete a file (optimistic)
 
@@ -103,6 +106,73 @@ user clicks delete
        error   → rollback snapshot + toast (from ApiError)
        409     → open conflict dialog (rare for delete; relevant to move/upload)
 ```
+
+### Worked example — `useRenameFile`
+
+The full optimistic-mutation shape. Snapshot the **unwrapped** cache value, apply the optimistic edit,
+restore the snapshot on error, invalidate on settle. The `Idempotency-Key` header is minted per call.
+
+```ts
+// features/storage/operations/api/useRenameFile.ts
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { CloudFactory } from '@/service/factories';
+import { newIdempotencyKey } from '@/lib/api/idempotency';
+import { browseKeys } from '@/features/storage/browse/api/queryKeys';
+import { useWorkspaceScope } from '@/stores/workspace.store';
+import type { CloudListItem } from '@/service/generates';
+
+type RenameInput = { path: string; key: string; newName: string };
+
+export function useRenameFile() {
+  const qc = useQueryClient();
+  const scope = useWorkspaceScope();
+
+  return useMutation({
+    mutationFn: ({ path, key, newName }: RenameInput) =>
+      CloudFactory.move(
+        { Key: key, NewName: newName },
+        { headers: { 'Idempotency-Key': newIdempotencyKey() } },
+      ),
+
+    onMutate: async ({ path, key, newName }) => {
+      const listKey = browseKeys.list(scope, path);
+
+      // 1. Stop in-flight refetches so they can't clobber our optimistic write.
+      await qc.cancelQueries({ queryKey: listKey });
+
+      // 2. Snapshot the UNWRAPPED cache value (Instance already stripped Result<T>).
+      const previous = qc.getQueryData<CloudListItem[]>(listKey);
+
+      // 3. Apply the optimistic edit against the inner type.
+      qc.setQueryData<CloudListItem[]>(listKey, (curr) =>
+        curr?.map((it) => (it.Key === key ? { ...it, Name: newName } : it)),
+      );
+
+      return { previous, listKey };
+    },
+
+    onError: (_err, _vars, ctx) => {
+      // Restore exactly what we snapshotted; the error toast is raised by the Instance.
+      if (ctx) qc.setQueryData(ctx.listKey, ctx.previous);
+    },
+
+    onSettled: (_data, _err, { path }) => {
+      // Re-sync from the server on success AND error; never call invalidateQueries in onMutate.
+      qc.invalidateQueries({ queryKey: browseKeys.list(scope, path) });
+      qc.invalidateQueries({ queryKey: browseKeys.breadcrumb(scope, path) });
+    },
+  });
+}
+```
+
+### Pitfalls
+
+| Pitfall | Rule |
+|---|---|
+| Snapshotting the wrapped envelope | **NEVER** snapshot `Result<T>`. The cache stores the inner type — the Instance unwraps at the boundary. If you see `{ Success, Data, Errors }` in cache, the envelope unwrap is misconfigured: fix the interceptor, do not work around it in the hook. |
+| Writing before cancelling | **NEVER** skip `cancelQueries` before `setQueryData`. An in-flight refetch will land after your optimistic write and overwrite it, producing a visible flicker back to stale data. |
+| Invalidating in `onMutate` | **NEVER** call `invalidateQueries` in `onMutate` — it triggers an immediate refetch that races the optimistic update. Invalidation belongs in **`onSettled`** only (it fires for both success and error and re-syncs reality). |
+| Missing `Idempotency-Key` | **ALWAYS** include `Idempotency-Key` (via `newIdempotencyKey()`) for **Move / Delete / Update / CompleteMultipart**. A manual retry of a write without the key can double-apply on the backend. |
 
 ## 5. Open items
 - Exact mechanism to expose `Options.Count` to infinite queries (meta vs wrapper) — decide in Phase 3.

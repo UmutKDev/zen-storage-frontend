@@ -37,7 +37,7 @@ nextjs-storage/
 │   │   └── notifications/page.tsx
 │   └── api/auth/[...nextauth]/route.ts   # ONLY app/api at MVP
 │
-├── middleware.ts                         # ~5-line shim → lib/auth/middleware
+├── proxy.ts                              # ~5-line shim → lib/auth/proxy (Next 16.2 rename of middleware.ts; exports `proxy`)
 ├── instrumentation.ts                    # ~5-line shim → lib/observability/instrumentation
 │
 ├── features/                             # DOMAIN FEATURES — flat root, black-box modules
@@ -55,7 +55,7 @@ nextjs-storage/
 │
 ├── lib/
 │   ├── api/{ApiError,envelope,query-keys,invalidators,error-toast,idempotency,abort,pagination}.ts
-│   ├── auth/{config,server,client,guards,middleware}.ts
+│   ├── auth/{config,server,client,guards,proxy}.ts
 │   ├── i18n/{config,t,dictionaries/en.json}
 │   ├── motion/{tokens,variants,useReducedMotion}.ts
 │   ├── flags/{registry,useFlag}.ts
@@ -117,7 +117,7 @@ goes through `service/factories.ts` on the shared `Instance` ([data-layer](./dat
 - `providers.tsx` is `'use client'` — mounts Query/Session/Theme/Motion/Toaster and **registers token-sources**
   into `service/token-sources.ts`.
 - Root seams `sitemap.ts`, `robots.ts`, `manifest.ts`, `opengraph-image.tsx` are ~5-line shims that delegate to
-  `lib/seo/*`. Same for `middleware.ts` → `lib/auth/middleware` and `instrumentation.ts` → `lib/observability/instrumentation`.
+  `lib/seo/*`. Same for `proxy.ts` (Next 16.2 rename of `middleware.ts`; exports `proxy`) → `lib/auth/proxy` and `instrumentation.ts` → `lib/observability/instrumentation`.
 
 ## 4. `features/<name>/` — fixed anatomy
 
@@ -270,7 +270,7 @@ may bypass these barrels — `@/features/storage/upload/stores/uploads.store` is
 | Invalidation helpers | `lib/api/invalidators.ts` | named invalidators per resource |
 | Interceptor (session/team/etc.) | `service/interceptors/<name>.ts` | composed in `service/Instance.ts` |
 | Token-source registration seam | `service/token-sources.ts` | called from `app/providers.tsx` — service never imports features |
-| Auth.js config / server / client | `lib/auth/{config,server,client,guards,middleware}.ts` | `server.ts` and `middleware.ts` are `import 'server-only'` |
+| Auth.js config / server / client | `lib/auth/{config,server,client,guards,proxy}.ts` | `server.ts` and `proxy.ts` are `import 'server-only'` |
 | i18n key + EN copy | `lib/i18n/dictionaries/en.json` (+ `t()`) | no inline strings — see [i18n](../06-cross-cutting/i18n.md) |
 | Motion variant / token | `lib/motion/{variants,tokens}.ts` | gate with `useReducedMotion` |
 | Feature flag | `lib/flags/registry.ts` + `useFlag` | defaults in `config/flags.defaults.ts` |
@@ -337,7 +337,7 @@ These are the **10 hard rules**, ESLint-pinned at P0 (full error, not warn).
 
 | Phase | New folders / files |
 |---|---|
-| **P0** | `service/Instance.ts` + `service/interceptors/*` + `service/token-sources.ts`, `lib/{api,auth,i18n,motion,flags,observability,socket,shortcuts,seo,utils}/*`, `lib/validation/primitives.ts`, `components/ui` (button/dialog/dropdown-menu/command/tooltip/input/sonner via shadcn MCP), `stores/{workspace,ui}.store.ts`, `config/*`, `types/*`, `app/providers.tsx`, route-group skeletons, `app/{sitemap,robots,manifest,opengraph-image}`, `middleware.ts`, `instrumentation.ts`, `eslint.config.mjs` (FULL ENFORCE), `tests/*` |
+| **P0** | `service/Instance.ts` + `service/interceptors/*` + `service/token-sources.ts`, `lib/{api,auth,i18n,motion,flags,observability,socket,shortcuts,seo,utils}/*`, `lib/validation/primitives.ts`, `components/ui` (button/dialog/dropdown-menu/command/tooltip/input/sonner via shadcn MCP), `stores/{workspace,ui}.store.ts`, `config/*`, `types/*`, `app/providers.tsx`, route-group skeletons, `app/{sitemap,robots,manifest,opengraph-image}`, `proxy.ts` (Next 16.2 rename of `middleware.ts`; exports `proxy`), `instrumentation.ts`, `eslint.config.mjs` (FULL ENFORCE), `tests/*` |
 | **P1** | `features/auth/`, `app/(auth)/*`, `app/api/auth/[...nextauth]/route.ts` |
 | **P2** | `features/account/{profile,security,subscription}/`, `features/shell/`, `app/(app)/account/*` |
 | **P3** | `features/storage/{browse,upload,operations,search,shared}/`, `features/command-palette/`, `components/patterns/*`, feature-local stores (uploads, selection, viewPrefs) |
@@ -354,10 +354,10 @@ These are the **10 hard rules**, ESLint-pinned at P0 (full error, not warn).
 2. Exceptions: `error.tsx` (must be client) and `providers.tsx` (`'use client'`).
 3. `features/<f>/screens/*Screen.tsx` are Server Components; they mount `<*Client>` children at the interactive boundary.
 4. `'use client'` lives at the **feature component boundary**, not in the page.
-5. `lib/auth/server.ts` and `lib/auth/middleware.ts` start with `import 'server-only'`.
+5. `lib/auth/server.ts` and `lib/auth/proxy.ts` start with `import 'server-only'`.
 6. `service/Instance.ts` is **isomorphic** — on the server it reads from the registered session source, on the client
    it reads from Auth.js session.
-7. `middleware.ts` and `instrumentation.ts` at repo root are ≤10-line shims; real logic lives in `lib/`.
+7. `proxy.ts` (Next 16.2 rename of `middleware.ts`; exports `proxy`) and `instrumentation.ts` at repo root are ≤10-line shims; real logic lives in `lib/`.
 8. Root SEO files (`sitemap.ts`, `robots.ts`, `manifest.ts`, `opengraph-image.tsx`) are shims that delegate to `lib/seo/*`.
 9. `(app)/layout.tsx` is a Server Component that mounts `<AppShellClient/>` from `features/shell`.
 10. Data fetching inside a Server Component goes through `service/factories.ts` like any other call — the `Instance`
@@ -405,7 +405,7 @@ The current `v2` branch scaffold predates this plan. P0 brings it into complianc
    out of `stores/` and into their owning features. Only `stores/workspace.store.ts` and `stores/ui.store.ts` remain
    global.
 10. **Add `app/providers.tsx`** and rewrite `app/layout.tsx` to mount it. Move existing client-only setup into providers.
-11. **Add root file shims**: `middleware.ts`, `instrumentation.ts`, and `app/{sitemap,robots,manifest,opengraph-image}.tsx`,
+11. **Add root file shims**: `proxy.ts` (Next 16.2 rename of `middleware.ts`; exports `proxy`), `instrumentation.ts`, and `app/{sitemap,robots,manifest,opengraph-image}.tsx`,
     each delegating to `lib/`.
 12. **Move favicon to `public/favicon.ico`** (out of `app/`).
 13. **Add `tests/` scaffolding**: `setup.ts`, `test-utils.tsx` (renderWithProviders), `fixtures/`, `msw/{server,handlers}/`,
@@ -435,7 +435,7 @@ export default defineConfig([
     settings: {
       'boundaries/elements': [
         { type: 'app',        pattern: 'app/**' },
-        { type: 'middleware', pattern: '(middleware|instrumentation).ts' },
+        { type: 'proxy',      pattern: '(proxy|instrumentation).ts' },
         { type: 'feature',    pattern: 'features/*',   mode: 'folder', capture: ['name'] },
         { type: 'subfeature', pattern: 'features/*/*', mode: 'folder', capture: ['parent','name'] },
         { type: 'components', pattern: 'components/**' },
@@ -447,14 +447,14 @@ export default defineConfig([
         { type: 'types',      pattern: 'types/**' },
         { type: 'tests',      pattern: 'tests/**' },
       ],
-      'boundaries/include': ['app/**','middleware.ts','instrumentation.ts','features/**','components/**','lib/**','service/**','stores/**','hooks/**','config/**','types/**','tests/**'],
+      'boundaries/include': ['app/**','proxy.ts','instrumentation.ts','features/**','components/**','lib/**','service/**','stores/**','hooks/**','config/**','types/**','tests/**'],
     },
     rules: {
       'boundaries/element-types': ['error', {
         default: 'disallow',
         rules: [
           { from: 'app',        allow: ['feature','components','lib','service','stores','hooks','config','types'] },
-          { from: 'middleware', allow: ['lib','config','types'] },
+          { from: 'proxy',      allow: ['lib','config','types'] },
           { from: 'feature',    allow: ['feature','subfeature','components','lib','service','stores','hooks','config','types'] },
           { from: 'subfeature', allow: ['feature','subfeature','components','lib','service','stores','hooks','config','types'] },
           { from: 'components', allow: ['components','lib','hooks','config','types'] },
@@ -490,6 +490,11 @@ export default defineConfig([
   { files: ['features/storage/upload/api/presigned-put.ts'], rules: { 'no-restricted-syntax': ['error', { selector: 'ExportAllDeclaration' }] } },
   { files: ['app/globals.css','lib/motion/**','components/ui/**'], rules: { 'no-restricted-syntax': ['error', { selector: 'ExportAllDeclaration' }] } },
   { files: ['service/generates/**'], rules: { 'boundaries/element-types': 'off', 'boundaries/entry-point': 'off' } },
+  // service/models.ts is the SOLE allowlisted export * (D-F18); generates/ is generator output
+  {
+    files: ['service/models.ts', 'service/generates/**'],
+    rules: { 'no-restricted-syntax': 'off' },
+  },
   { files: ['features/**/api/**','features/**/types.ts'], rules: {
       'no-restricted-syntax': ['error',
         { selector: "TSInterfaceDeclaration[id.name=/.*(Dto|Request|Response)$/]", message: 'DTOs are generated.' },

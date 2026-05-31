@@ -99,3 +99,71 @@ to paged loading with a "load more" affordance (still using `Count`).
 A user can fully manage Personal files — browse/upload/create/rename/move/delete/bulk/search/filter — with conflicts
 handled, quotas enforced, and large folders smooth. Then begin [Phase 4](./phase-4-preview-share.md) and/or
 [Phase 5](./phase-5-secure-folders.md).
+
+## Acceptance additions (audit HIGH/MEDIUM)
+
+Locked decisions surfaced by the HIGH/MEDIUM audit. These extend §3 acceptance with concrete, testable contracts.
+
+### Upload pipeline hardening
+
+- [ ] **Upload concurrency caps locked.** 4 chunks/file, 3 files concurrent, 60MB total in-flight. Values live in
+      `lib/upload/config.ts` and are the single source of truth — no per-call overrides. See
+      [upload-pipeline §4](../../02-architecture/upload-pipeline.md).
+- [ ] **IndexedDB refresh resumability.** Mid-upload refresh → on reload `ListParts` reconciles → resume from the last
+      good part. Manual test: kill the tab at 50% on a multipart file; reopen the app; the upload completes without
+      restarting from part 1.
+- [ ] **AbortMultipartUpload server cleanup.** User cancel mid-upload triggers `POST /Cloud/Upload/Abort/{uploadId}`;
+      retried up to 3× with backoff if the network fails. No orphaned multipart uploads on S3.
+- [ ] **ETag persist + lost-ETag recovery.** Each part PUT's `ETag` is persisted to IndexedDB as it completes. A missing
+      `ETag` at `Complete` time triggers `ListParts` recovery to repopulate before `CompleteMultipartUpload` runs.
+- [ ] **Presigned PUT error mapping.** Behavior matches
+      [upload-pipeline §6.5](../../02-architecture/upload-pipeline.md):
+      - `403` → re-presign and retry the part.
+      - `404` → drop the queue entry (upload is gone server-side).
+      - `5xx` → exponential backoff.
+      - timeout → exponential backoff.
+      UX messaging mirrors the table in §6.5 verbatim.
+- [ ] **Zero-byte + MIME inference.** Empty file (`size === 0`) uses a single PUT — no `CreateMultipartUpload`. MIME
+      derives in order: `File.type` → extension lookup → `application/octet-stream`.
+
+### Conflict scope
+
+- [ ] **Conflict apply-to-batch scope.** "Apply to all" radius = **one user action** (one drag-drop or one bulk move).
+      Starting a new batch resets the dialog's remembered choice. No cross-action memory.
+
+### Large-list performance
+
+- [ ] **TanStack Virtual locked.** File lists with more than 100 entries are virtualized through
+      `components/patterns/virtual-list.tsx`. Below 100, rendering is direct. The threshold is a constant in the
+      pattern, not a per-call prop.
+
+### Mobile / touch
+
+- [ ] **Touch DnD alternative.** Long-press on a row (mobile) opens a bottom sheet with **Move to / Add files /
+      Delete**. Desktop DnD is unchanged; the sheet is the touch-only path.
+
+### Command palette ↔ selection contract
+
+- [ ] **⌘K reads `selectionStore.selectedKeys`.** Bulk actions exposed in the palette (e.g., "Delete selected", "Move
+      selected") operate on whatever the selection store currently holds. Acceptance: select 5+ files, open ⌘K, run
+      "Delete selected" → all 5 are deleted via the bulk path.
+
+### OwnerId & query-key scope
+
+- [ ] **OwnerId derivation.** `workspaceStore.scope` is computed **once** at session-ready as `user.Id` OR
+      `team/{TeamId}`. Every `queryKey` and every `X-Team-Id` header reads from this single source. No ad-hoc
+      derivation in features. See [team-readiness](../../02-architecture/team-readiness.md).
+
+### Server-only seam enforcement
+
+- [ ] **Server-only seam ESLint.** `lib/auth/server.ts` cannot be imported from any file with `"use client"` at the
+      top. ESLint (`no-restricted-imports` + `boundaries`) blocks the import at lint time with a clear error pointing
+      at the seam.
+
+| Cap | Value | Source |
+|---|---|---|
+| Chunks per file (parallel) | 4 | `lib/upload/config.ts` |
+| Files concurrent (parallel) | 3 | `lib/upload/config.ts` |
+| Total in-flight bytes | 60 MB | `lib/upload/config.ts` |
+| Virtual-list threshold | 100 entries | `components/patterns/virtual-list.tsx` |
+| Abort retries | 3 (backoff) | `features/storage/upload/abort.ts` |

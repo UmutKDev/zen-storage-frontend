@@ -63,7 +63,7 @@ app/                                  # ROUTING LAYER ONLY — thin pages/layout
     account/{profile,security,subscription}/
     notifications/
   api/auth/[...nextauth]/route.ts     # only app/api at MVP
-middleware.ts · instrumentation.ts    # ~5-line shims → lib/{auth,observability}/
+proxy.ts · instrumentation.ts    # ~5-line shims → lib/{auth,observability}/
 features/                             # DOMAIN FEATURES — flat root, black-box modules
   auth/ account/ shell/ storage/ command-palette/ preview/ document-editor/
   secure-folders/ advanced/ notifications/ onboarding/ marketing/ teams/ post-mvp/
@@ -77,7 +77,7 @@ components/
   icons/                              # custom SVG only
 lib/
   api/                                # ApiError, envelope, query-keys, invalidators, error-toast, idempotency, abort, pagination
-  auth/                               # config, server, client, guards, middleware
+  auth/                               # config, server, client, guards, proxy
   i18n/                               # config, t, dictionaries/en.json
   motion/                             # tokens, variants, useReducedMotion
   flags/ observability/ socket/ shortcuts/ seo/ validation/ utils/

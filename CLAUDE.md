@@ -32,6 +32,11 @@ frontend lives on the `main` branch and is reference‑only. **We build on the `
 | Feature/screen specs | [`docs/04-features/FEATURE-MAP.md`](./docs/04-features/FEATURE-MAP.md) |
 | API endpoint contracts | [`docs/05-api/API-INVENTORY.md`](./docs/05-api/API-INVENTORY.md) |
 | Decisions + open questions | [`docs/07-decisions/DECISIONS.md`](./docs/07-decisions/DECISIONS.md) |
+| Security headers (CSP, HSTS, Permissions-Policy) | [`docs/06-cross-cutting/security-headers.md`](./docs/06-cross-cutting/security-headers.md) |
+| Privacy compliance (KVKK + GDPR) | [`docs/06-cross-cutting/privacy-compliance.md`](./docs/06-cross-cutting/privacy-compliance.md) |
+| Performance budgets + virtualization | [`docs/06-cross-cutting/performance.md`](./docs/06-cross-cutting/performance.md) |
+| Supported browsers + mobile UX | [`docs/00-overview/SUPPORTED-BROWSERS.md`](./docs/00-overview/SUPPORTED-BROWSERS.md) |
+| Dependency supply-chain policy | [`docs/06-cross-cutting/dependency-policy.md`](./docs/06-cross-cutting/dependency-policy.md) |
 
 If this file and a doc ever conflict on a convention, [`CONVENTIONS.md`](./docs/00-overview/CONVENTIONS.md) wins; on an
 API fact, [`05-api`](./docs/05-api/API-INVENTORY.md) wins.
@@ -59,12 +64,18 @@ API fact, [`05-api`](./docs/05-api/API-INVENTORY.md) wins.
    `401→re-auth`; `403`/`409` pass through to feature handlers.
 10. **ESLint boundaries are enforced from P0 in FULL ERROR mode** (eslint-plugin-boundaries + entry-point +
     no-restricted-imports + no-restricted-syntax). The architecture is lint-policed, not goodwill-policed.
+11. **Next 16.2 rename: `middleware.ts` is now `proxy.ts`.** The exported function is `proxy`, not `middleware`. Edge runtime is NOT supported in proxy — it runs Node-only. → [`auth-integration`](./docs/02-architecture/auth-integration.md).
+12. **Strict CSP + nonce from day one.** Every response carries a per-request CSP nonce; inline `<script>`/`<style>` must consume it. `frame-ancestors 'none'`, `script-src 'self' 'nonce-…' 'strict-dynamic'`, no `unsafe-inline`, no `unsafe-eval`. Preview iframes (Phase 4) are `sandbox`ed with the minimum capability set. → [`security-headers`](./docs/06-cross-cutting/security-headers.md).
+13. **KVKK/GDPR-ready PII handling.** Cookie consent banner (essential always on, analytics opt-in only); `/privacy`, `/terms`, `/cookies` pages shipped in Phase 1; Sentry PII scrubber wired in Phase 0; Data Export + Delete Account UI delivered by Phase 7. → [`privacy-compliance`](./docs/06-cross-cutting/privacy-compliance.md).
+14. **Performance budgets enforced in CI.** Initial bundle ≤ 200 KB gzip; any file list > 100 entries must virtualize; LCP < 2.5s on the app shell. `size-limit` + Lighthouse CI gate every PR — budget regressions fail the build. → [`performance`](./docs/06-cross-cutting/performance.md).
+15. **Supported browsers locked.** Chrome / Safari / Firefox / Edge last 2 majors, iOS Safari 17+, Chrome Android. NO IE, NO legacy Edge, NO polyfills for unsupported engines. Touch DnD has an explicit alternative (long-press → bottom sheet). PWA is out of scope for MVP. → [`SUPPORTED-BROWSERS`](./docs/00-overview/SUPPORTED-BROWSERS.md).
+16. **Dependency supply-chain disciplined.** Renovate runs weekly with grouped PRs; `bun audit --severity high` fails CI; license allowlist is `MIT` / `Apache-2.0` / `BSD-*` / `ISC` only; an SBOM artifact is produced per build. Auth.js v5 + Next 16.2 beta status is acknowledged with a custom-cookie-session fallback path documented. → [`dependency-policy`](./docs/06-cross-cutting/dependency-policy.md).
 
 ## Folder structure (target — built across phases)
 
 ```
 app/(public|auth|app)/        route groups; app/(app)/storage/[[...path]]  folder deep-linking
-middleware.ts                 ~5-line shim → lib/auth/middleware
+proxy.ts                      ~5-line shim → lib/auth/proxy
 instrumentation.ts            ~5-line shim → lib/observability/instrumentation
 lib/{api,auth,i18n,motion,utils}
 service/{Instance.ts, factories.ts, token-sources.ts, interceptors/, generates/}
