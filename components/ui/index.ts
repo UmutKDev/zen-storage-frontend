@@ -48,3 +48,31 @@ export {
   TooltipProvider,
 } from "./tooltip";
 export { Toaster } from "./sonner";
+export { Label } from "./label";
+export { Separator } from "./separator";
+export {
+  Form,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormDescription,
+  FormMessage,
+  FormField,
+  useFormField,
+} from "./form";
+export {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+  InputOTPSeparator,
+} from "./input-otp";
+export { Alert, AlertTitle, AlertDescription } from "./alert";
+export {
+  Card,
+  CardHeader,
+  CardFooter,
+  CardTitle,
+  CardAction,
+  CardDescription,
+  CardContent,
+} from "./card";
