@@ -8,6 +8,11 @@
 > **Update rule:** edit the relevant phase summary or its `phases/` file — **don't rewrite** — and add a Changelog line.
 
 ## Changelog
+- **2026-06-06 (P0 security + privacy closed)** — Closed **0.0a** (security headers + per-request CSP **nonce** from the
+  proxy via `lib/security/*`; Report-Only at P0, enforcing flips in P7 — D‑P0.8) and **0.4a** (PII **scrubber** wired
+  into the reporter; **consent store** in `features/account/` + `legal.*` i18n; ESLint bans direct
+  `localStorage.setItem`). Verified via curl + a Playwright header spec + 12 vitest tests; `build`/`tsc`/`lint` green.
+  Remaining P0: 0.14a supply-chain CI, 0.8a intercepting-routes spike.
 - **2026-06-06 (Phase 0 core implemented)** — Stood up the runnable, team‑ready skeleton + design system on the
   bleeding‑edge stack (Next 16.2 / React 19 / next‑auth@5 beta / Tailwind v4 / framer‑motion / shadcn via MCP):
   `service/Instance` + 5 split interceptors + `token-sources` seam, full `lib/*` tree + global stores + config/types,
@@ -43,7 +48,7 @@
 ## Status snapshot
 | Phase | Title | Detailed plan | Status |
 |---|---|---|---|
-| 0 | Foundation + Design System | [phase-0](./phases/phase-0-foundation.md) | 🚧 core done (deferred: 0.0a/0.4a/0.14a/0.8a) |
+| 0 | Foundation + Design System | [phase-0](./phases/phase-0-foundation.md) | 🚧 core + security/privacy done (deferred: 0.14a CI, 0.8a spike) |
 | 1 | Auth | [phase-1](./phases/phase-1-auth.md) | ⏳ |
 | 2 | App Shell + Account | [phase-2](./phases/phase-2-shell-account.md) | ⏳ |
 | 3 | Storage Core | [phase-3](./phases/phase-3-storage-core.md) | ⏳ |

@@ -27,7 +27,7 @@ privacy/PII, 0.14a supply‑chain CI, 0.8a intercepting‑routes spike.
 ## Phase status
 | Phase | Title | Status | Notes |
 |---|---|---|---|
-| 0 | Foundation + Design System | 🚧 | Core skeleton + design system DONE (build/tsc/lint/test green; Auth.js v5 confirmed). Deferred: 0.0a/0.4a/0.14a/0.8a (D‑P0.7) |
+| 0 | Foundation + Design System | 🚧 | Core + design + **security headers (CSP nonce, report-only)** + **privacy (PII scrubber, consent)** DONE; all green. Deferred: 0.14a CI, 0.8a spike (D‑P0.7) |
 | 1 | Auth | ⏳ | session‑id multi‑step flow |
 | 2 | App Shell + Account | ⏳ | no team switch |
 | 3 | Storage Core | ⏳ | upload pipeline is the heavy lift |
@@ -60,6 +60,11 @@ privacy/PII, 0.14a supply‑chain CI, 0.8a intercepting‑routes spike.
    [folder structure](../02-architecture/folder-structure.md).
 
 ## Recent status entries
+- **2026-06-06 (pass 2)** — **Closed P0 security + privacy foundation (0.0a + 0.4a).** Security headers + per-request
+  CSP **nonce** emitted from the proxy via `lib/security/*` (Report-Only at P0 — enforcing flips in P7, D-P0.8); HSTS/CSP
+  prod-gated. PII **scrubber** (`lib/observability/scrubber.ts`) wired into the reporter; **consent store**
+  (`features/account/`, first feature barrel) + `legal.*` i18n; ESLint bans direct `localStorage.setItem`. Verified:
+  curl + Playwright header spec (3/3), 12 vitest tests, `build`/`tsc`/`lint` green. Remaining P0: 0.14a CI, 0.8a spike.
 - **2026-06-06** — **Phase 0 core implemented.** Deps installed (Next 16.2 / React 19 / next-auth@5 beta / Tailwind v4 /
   framer-motion / shadcn via MCP). Data layer (`Instance` + 5 interceptors + token-sources), full `lib/*`, stores,
   config/types, route groups + providers, design-token `globals.css` (semantic + shadcn bridge + glass + class-dark),
