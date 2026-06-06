@@ -5,11 +5,16 @@
 >
 > Legend: ⏳ not started · 🚧 in progress · ✅ done · 🚫 blocked.
 
-**Updated:** 2026-05-31 · **Branch:** `v2` · **Round:** Planning (no application code yet).
+**Updated:** 2026-06-06 · **Branch:** `v2` · **Round:** Phase 0 implementation (core skeleton + design system landed).
 
 ## Where we are
-Planning round **complete and expanded**. The docs are now a deep, navigable hierarchy with per‑phase, per‑feature,
-per‑module detail. **Awaiting approval to begin Phase 0.**
+**Phase 0 core landed.** The runnable, team‑ready skeleton + design system is in place and green on
+`build` / `tsc` / `lint` / `test`: the shared `Instance` + split interceptors + token‑source seam, the full `lib/*`
+tree, global stores, config/types, route groups + providers, the design‑token system (semantic + shadcn‑bridge tokens,
+glass utilities, class‑based dark mode, motion), shadcn primitives wrapped for the premium look, ESLint boundaries in
+FULL ERROR mode, and the test scaffold (Vitest/RTL/MSW/Playwright) with passing smoke tests. Auth.js v5 confirmed on
+Next 16.2 / React 19. **Deferred to a follow‑up P0 pass** (see DECISIONS D‑P0.7): 0.0a security headers/CSP, 0.4a
+privacy/PII, 0.14a supply‑chain CI, 0.8a intercepting‑routes spike.
 
 ## Planning round checklist — ✅ complete
 - [x] Explored 3 layers (API `nestjs-storage`, old frontend `main`, v2 scaffold) — read‑only
@@ -22,7 +27,7 @@ per‑module detail. **Awaiting approval to begin Phase 0.**
 ## Phase status
 | Phase | Title | Status | Notes |
 |---|---|---|---|
-| 0 | Foundation + Design System | ⏳ | Plan locked — awaiting implementation start; top risk = Auth.js v5 ↔ Next 16.2 |
+| 0 | Foundation + Design System | 🚧 | Core skeleton + design system DONE (build/tsc/lint/test green; Auth.js v5 confirmed). Deferred: 0.0a/0.4a/0.14a/0.8a (D‑P0.7) |
 | 1 | Auth | ⏳ | session‑id multi‑step flow |
 | 2 | App Shell + Account | ⏳ | no team switch |
 | 3 | Storage Core | ⏳ | upload pipeline is the heavy lift |
@@ -55,6 +60,12 @@ per‑module detail. **Awaiting approval to begin Phase 0.**
    [folder structure](../02-architecture/folder-structure.md).
 
 ## Recent status entries
+- **2026-06-06** — **Phase 0 core implemented.** Deps installed (Next 16.2 / React 19 / next-auth@5 beta / Tailwind v4 /
+  framer-motion / shadcn via MCP). Data layer (`Instance` + 5 interceptors + token-sources), full `lib/*`, stores,
+  config/types, route groups + providers, design-token `globals.css` (semantic + shadcn bridge + glass + class-dark),
+  wrapped shadcn primitives, ESLint boundaries (FULL ERROR, planted violations verified), test scaffold + 3 passing
+  smoke tests. `build`/`tsc`/`lint`/`test` all green. Deviations + spike outcome logged in DECISIONS (D-A4 confirmed,
+  D-P0.1–D-P0.7). Deferred blocks: 0.0a/0.4a/0.14a/0.8a.
 - **2026-05-31** — Folder structure plan locked (Approach A + 4 grafts from B/C). Authoritative spec:
   [`docs/02-architecture/folder-structure.md`](../02-architecture/folder-structure.md). P0 checklist:
   [`docs/01-roadmap/phases/phase-0-foundation.md`](./phases/phase-0-foundation.md). ESLint enforce mode: **full at P0**.

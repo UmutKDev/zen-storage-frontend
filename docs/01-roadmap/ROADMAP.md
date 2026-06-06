@@ -8,6 +8,15 @@
 > **Update rule:** edit the relevant phase summary or its `phases/` file — **don't rewrite** — and add a Changelog line.
 
 ## Changelog
+- **2026-06-06 (Phase 0 core implemented)** — Stood up the runnable, team‑ready skeleton + design system on the
+  bleeding‑edge stack (Next 16.2 / React 19 / next‑auth@5 beta / Tailwind v4 / framer‑motion / shadcn via MCP):
+  `service/Instance` + 5 split interceptors + `token-sources` seam, full `lib/*` tree + global stores + config/types,
+  route groups + `providers`, the design‑token `globals.css` (semantic + shadcn‑bridge tokens, glass utilities,
+  class‑based dark mode, motion), wrapped shadcn primitives, ESLint boundaries in **FULL ERROR** mode (planted
+  violations verified), and the Vitest/RTL/MSW/Playwright scaffold with passing smoke tests. **`build`/`tsc`/`lint`/`test`
+  all green; Auth.js v5 confirmed (D‑A4).** Deviations + spike outcome in [DECISIONS](../07-decisions/DECISIONS.md)
+  (D‑P0.1–D‑P0.7). **Deferred to a follow‑up P0 pass:** 0.0a security headers/CSP, 0.4a privacy/PII, 0.14a supply‑chain
+  CI, 0.8a intercepting‑routes spike.
 - **2026-05-31 (folder-structure plan locked)** — Aligned phase summaries with the locked **Strict Feature‑Sliced + Hard
   Barrels** plan (Winner A + 4 grafts). P0 expanded to the full build order: `service/Instance` + interceptor split +
   `service/token-sources.ts`, `lib/api/{ApiError,envelope,query-keys,invalidators,error-toast,idempotency,abort,pagination}`,
@@ -34,7 +43,7 @@
 ## Status snapshot
 | Phase | Title | Detailed plan | Status |
 |---|---|---|---|
-| 0 | Foundation + Design System | [phase-0](./phases/phase-0-foundation.md) | ⏳ not started |
+| 0 | Foundation + Design System | [phase-0](./phases/phase-0-foundation.md) | 🚧 core done (deferred: 0.0a/0.4a/0.14a/0.8a) |
 | 1 | Auth | [phase-1](./phases/phase-1-auth.md) | ⏳ |
 | 2 | App Shell + Account | [phase-2](./phases/phase-2-shell-account.md) | ⏳ |
 | 3 | Storage Core | [phase-3](./phases/phase-3-storage-core.md) | ⏳ |
