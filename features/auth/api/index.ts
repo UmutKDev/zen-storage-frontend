@@ -4,4 +4,6 @@ export {
   verify2FA,
   register,
   resetPassword,
+  passkeyLoginBegin,
+  passkeyLoginFinish,
 } from "./auth.mutations";

@@ -2,6 +2,7 @@ import { authenticationApiFactory } from "@/service/factories";
 import type {
   AuthenticationResponseModel,
   LoginCheckResponseModel,
+  PasskeyLoginBeginResponseModel,
 } from "@/service/models";
 
 /**
@@ -60,4 +61,28 @@ export async function resetPassword(email: string): Promise<boolean> {
     resetPasswordRequestModel: { Email: email },
   });
   return res.data as unknown as boolean;
+}
+
+/** Passkey login step 1 — WebAuthn challenge/options for the email. */
+export async function passkeyLoginBegin(
+  email: string,
+): Promise<PasskeyLoginBeginResponseModel> {
+  const res = await authenticationApiFactory.passkeyLoginBegin({
+    passkeyLoginBeginRequestModel: { Email: email },
+  });
+  return res.data as unknown as PasskeyLoginBeginResponseModel;
+}
+
+/** Passkey login step 2 — finish the ceremony; BYPASSES 2FA. */
+export async function passkeyLoginFinish(
+  email: string,
+  credential: unknown,
+): Promise<AuthenticationResponseModel> {
+  const res = await authenticationApiFactory.passkeyLoginFinish({
+    passkeyLoginFinishRequestModel: {
+      Email: email,
+      Credential: credential as object,
+    },
+  });
+  return res.data as unknown as AuthenticationResponseModel;
 }

@@ -10,6 +10,9 @@ const push = vi.fn();
 const loginCheck = vi.fn();
 const login = vi.fn();
 const verify2FA = vi.fn();
+const passkeyLoginBegin = vi.fn();
+const passkeyLoginFinish = vi.fn();
+const startAuthentication = vi.fn();
 
 vi.mock("next-auth/react", () => ({
   signIn,
@@ -19,12 +22,15 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ push, refresh: vi.fn() }),
   useSearchParams: () => new URLSearchParams(),
 }));
+vi.mock("@simplewebauthn/browser", () => ({ startAuthentication }));
 vi.mock("@/features/auth/api", () => ({
   loginCheck,
   login,
   verify2FA,
   register: vi.fn(),
   resetPassword: vi.fn(),
+  passkeyLoginBegin,
+  passkeyLoginFinish,
 }));
 
 const { LoginScreen } = await import("@/features/auth");
@@ -104,5 +110,45 @@ describe("LoginScreen multi-step flow", () => {
         expect.objectContaining({ sessionId: "final_sess" }),
       ),
     );
+  });
+
+  it("passkey path: begin → WebAuthn → finish → signIn, bypassing 2FA", async () => {
+    Object.defineProperty(window, "PublicKeyCredential", {
+      value: function PublicKeyCredential() {},
+      configurable: true,
+    });
+    loginCheck.mockResolvedValue({
+      HasPasskey: true,
+      HasTwoFactor: true, // passkey must bypass this
+      AvailableMethods: ["passkey", "password"],
+      TwoFactorMethod: "TOTP",
+    });
+    passkeyLoginBegin.mockResolvedValue({
+      Challenge: "c",
+      Options: { challenge: "c" },
+    });
+    startAuthentication.mockResolvedValue({ id: "cred-1" });
+    passkeyLoginFinish.mockResolvedValue({ SessionId: "pk_sess", ExpiresAt: "" });
+
+    const user = userEvent.setup();
+    renderWithProviders(<LoginScreen />);
+
+    await user.type(screen.getByLabelText("Email"), "u@e.co");
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+    await screen.findByLabelText("Password");
+    await user.click(screen.getByRole("button", { name: "Use a passkey" }));
+
+    await waitFor(() => expect(passkeyLoginBegin).toHaveBeenCalledWith("u@e.co"));
+    await waitFor(() => expect(startAuthentication).toHaveBeenCalled());
+    await waitFor(() =>
+      expect(passkeyLoginFinish).toHaveBeenCalledWith("u@e.co", { id: "cred-1" }),
+    );
+    await waitFor(() =>
+      expect(signIn).toHaveBeenCalledWith(
+        "credentials",
+        expect.objectContaining({ sessionId: "pk_sess" }),
+      ),
+    );
+    expect(verify2FA).not.toHaveBeenCalled();
   });
 });

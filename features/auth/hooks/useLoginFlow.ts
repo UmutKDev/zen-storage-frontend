@@ -3,9 +3,19 @@
 import { useCallback, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
+import {
+  startAuthentication,
+  type PublicKeyCredentialRequestOptionsJSON,
+} from "@simplewebauthn/browser";
 import { ApiError, isApiError } from "@/lib/api";
 import type { LoginCheckResponseModel } from "@/service/models";
-import { login, loginCheck, verify2FA } from "../api";
+import {
+  login,
+  loginCheck,
+  verify2FA,
+  passkeyLoginBegin,
+  passkeyLoginFinish,
+} from "../api";
 
 export type LoginStep = "email" | "password" | "twoFactor";
 
@@ -99,10 +109,41 @@ export function useLoginFlow() {
     [loginSessionId, finalize],
   );
 
+  const submitPasskey = useCallback(async () => {
+    setPending(true);
+    setError(null);
+    try {
+      const begin = await passkeyLoginBegin(email);
+      const credential = await startAuthentication({
+        optionsJSON: begin.Options as unknown as PublicKeyCredentialRequestOptionsJSON,
+      });
+      const result = await passkeyLoginFinish(email, credential);
+      await finalize(result.SessionId, result.ExpiresAt); // bypasses 2FA
+    } catch (e) {
+      // User cancellation / no credential → not a hard error; stay on password.
+      if (
+        e instanceof Error &&
+        (e.name === "NotAllowedError" || e.name === "AbortError")
+      ) {
+        return;
+      }
+      setError(toApiError(e));
+    } finally {
+      setPending(false);
+    }
+  }, [email, finalize]);
+
   const restart = useCallback(() => {
     setStep("email");
     setError(null);
   }, []);
+
+  // Passkey is offered only when the account has one AND the browser supports
+  // WebAuthn; otherwise we silently fall back to the password path.
+  const canPasskey =
+    Boolean(check?.HasPasskey) &&
+    typeof window !== "undefined" &&
+    typeof window.PublicKeyCredential !== "undefined";
 
   return {
     step,
@@ -110,9 +151,11 @@ export function useLoginFlow() {
     check,
     pending,
     error,
+    canPasskey,
     submitEmail,
     submitPassword,
     submitOtp,
+    submitPasskey,
     restart,
   };
 }

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AnimatePresence } from "framer-motion";
+import { KeyRound } from "lucide-react";
 import {
   Button,
   Input,
@@ -14,6 +15,7 @@ import {
   FormLabel,
   FormControl,
   FormMessage,
+  Separator,
 } from "@/components/ui";
 import { t } from "@/lib/i18n";
 import { useLoginFlow } from "../hooks/useLoginFlow";
@@ -137,6 +139,26 @@ export function LoginScreen() {
                 <Button type="submit" className="w-full" disabled={disabled}>
                   {t("auth.login.signIn")}
                 </Button>
+                {flow.canPasskey ? (
+                  <>
+                    <div className="relative py-1">
+                      <Separator />
+                      <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-surface-elevated px-2 text-xs text-muted-foreground">
+                        {t("auth.login.or")}
+                      </span>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full"
+                      onClick={flow.submitPasskey}
+                      disabled={disabled}
+                    >
+                      <KeyRound className="size-4" />
+                      {t("auth.login.usePasskey")}
+                    </Button>
+                  </>
+                ) : null}
                 <Button
                   type="button"
                   variant="ghost"
