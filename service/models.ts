@@ -22,5 +22,6 @@
  * file to explicit named re-exports. Tracked in DECISIONS.md D-F18.
  */
 
-/* eslint-disable-next-line no-restricted-syntax -- D-F18: curated leaf re-export */
+// D-F18: the SOLE allow-listed `export *` (no-restricted-syntax is disabled for
+// this file in eslint.config.mjs).
 export * from "./generates";
