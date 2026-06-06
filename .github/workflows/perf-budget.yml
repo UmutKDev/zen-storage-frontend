@@ -1,0 +1,21 @@
+name: perf-budget
+
+on:
+  pull_request:
+
+jobs:
+  budgets:
+    runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_API_URL: "http://localhost:8080"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - run: bun run build
+
+      # Bundle-size budget (.size-limit.json).
+      - run: bunx size-limit
+
+      # Lighthouse budgets (perf/a11y/best-practices/seo) against a prod server.
+      - run: bunx lhci autorun
