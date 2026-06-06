@@ -2,3 +2,4 @@
 // profile / security / subscription sub-features arrive in Phase 2.
 export { useConsentStore, CONSENT_VERSION } from "./stores/consent.store";
 export type { ConsentCategory } from "./stores/consent.store";
+export { CookieConsentBanner } from "./components/CookieConsentBanner";

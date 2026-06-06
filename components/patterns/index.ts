@@ -1,4 +1,3 @@
-// Cross-feature UI patterns (empty-state, state-boundary, conflict-dialog,
-// confirm-destructive, data-table) land in Phase 3. Placeholder barrel keeps
-// the import path + import-boundary stable from Phase 0.
-export {};
+// Cross-feature UI patterns. More land in Phase 3 (empty-state, state-boundary,
+// conflict-dialog, confirm-destructive, data-table).
+export { LegalDocument } from "./LegalDocument";

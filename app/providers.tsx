@@ -6,6 +6,7 @@ import { ThemeProvider } from "next-themes";
 import { MotionConfig } from "framer-motion";
 import { SessionProvider } from "@/lib/auth/client";
 import { SessionSync } from "@/features/auth";
+import { CookieConsentBanner } from "@/features/account";
 import { Toaster, TooltipProvider } from "@/components/ui";
 import {
   registerTeamSource,
@@ -49,6 +50,7 @@ export function Providers({ children }: { children: ReactNode }) {
           <MotionConfig reducedMotion="user">
             <TooltipProvider>{children}</TooltipProvider>
             <Toaster />
+            <CookieConsentBanner />
           </MotionConfig>
         </ThemeProvider>
       </QueryClientProvider>

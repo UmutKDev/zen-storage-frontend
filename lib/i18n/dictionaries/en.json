@@ -18,9 +18,31 @@
     "retry": "Try again"
   },
   "legal": {
-    "privacy": { "heading": "Privacy Policy" },
-    "terms": { "heading": "Terms of Service" },
-    "cookies": { "heading": "Cookie Policy" },
+    "lastUpdated": "Last updated: 6 June 2026",
+    "placeholderNote": "This is placeholder copy. The final legal text is reviewed before MVP.",
+    "contact": "Questions? Contact privacy@storage.example.",
+    "nav": {
+      "privacy": "Privacy",
+      "terms": "Terms",
+      "cookies": "Cookies",
+      "dataProcessing": "Data processing"
+    },
+    "privacy": {
+      "heading": "Privacy Policy",
+      "body": "We process your data to provide cloud storage (contract), to keep the service secure (legitimate interest), and — only with your consent — for analytics. We never sell your data. You can access, export, or delete your account from Account → Privacy."
+    },
+    "terms": {
+      "heading": "Terms of Service",
+      "body": "By using the service you agree to these terms. You are responsible for the content you upload and for keeping your credentials secure. The service is provided as-is during the MVP period."
+    },
+    "cookies": {
+      "heading": "Cookie Policy",
+      "body": "Essential cookies (session, security, locale) are always on. Functional and analytics cookies are optional and off by default — manage them anytime from the cookie banner or this page."
+    },
+    "dataProcessing": {
+      "heading": "Data Processing",
+      "body": "We use a limited set of sub-processors (storage backend, email, error monitoring) under data-processing agreements. International transfers rely on standard contractual clauses where applicable."
+    },
     "banner": {
       "title": "We value your privacy",
       "description": "Essential cookies keep the app running. Optional cookies help us improve it — the choice is yours.",
@@ -50,7 +72,9 @@
       "signUp": "Sign up",
       "twoFactorTitle": "Two-factor authentication",
       "twoFactorDescription": "Enter the 6-digit code from your authenticator app.",
-      "verify": "Verify"
+      "verify": "Verify",
+      "or": "or",
+      "usePasskey": "Use a passkey"
     },
     "register": {
       "title": "Create account",

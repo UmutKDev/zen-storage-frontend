@@ -36,6 +36,7 @@ export const useConsentStore = create<ConsentState>()(
           () =>
             ({
               [category]: value,
+              version: CONSENT_VERSION,
               decidedAt: new Date().toISOString(),
             }) as Partial<ConsentState>,
         ),
