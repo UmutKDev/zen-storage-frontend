@@ -2,5 +2,4 @@
 // client-only (`client.ts`) modules are imported directly by path so this
 // barrel never mixes runtimes.
 export { authConfig } from "./config";
-export type { AuthConfig } from "./config";
 export { isAuthenticated } from "./guards";
