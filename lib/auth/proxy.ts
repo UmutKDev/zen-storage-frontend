@@ -1,13 +1,38 @@
 import "server-only";
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
+import {
+  STATIC_HEADERS,
+  buildCsp,
+  generateNonce,
+  hstsHeader,
+} from "@/lib/security";
 
 /**
  * The real logic behind the root `proxy.ts` shim (Next 16.2 rename of
- * middleware; Node runtime only). Route protection for `(app)/*` lands in
- * Phase 1 — pass-through for now (the `request` param returns in P1).
+ * middleware; Node runtime only). Emits the security headers + a per-request
+ * CSP nonce. Route protection for `(app)/*` lands in Phase 1.
+ *
+ * P0 ships CSP as **Report-Only** (non-blocking): nonce-based enforcement would
+ * force every page to dynamic rendering (Next CSP guide), risking the static
+ * not-found page. Flip to enforcing `Content-Security-Policy` in P7 (D-P0.8).
  */
-export function proxy(): NextResponse {
-  return NextResponse.next();
+export function proxy(request: NextRequest): NextResponse {
+  const nonce = generateNonce();
+
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-nonce", nonce);
+
+  const response = NextResponse.next({ request: { headers: requestHeaders } });
+
+  for (const [key, value] of Object.entries(STATIC_HEADERS)) {
+    response.headers.set(key, value);
+  }
+  if (process.env.NODE_ENV === "production") {
+    response.headers.set("Strict-Transport-Security", hstsHeader());
+  }
+  response.headers.set("Content-Security-Policy-Report-Only", buildCsp(nonce));
+
+  return response;
 }
 
 // NOTE: the proxy `config.matcher` is defined in the root `proxy.ts` (Next

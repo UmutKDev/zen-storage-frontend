@@ -5,6 +5,15 @@ export { proxy } from "@/lib/auth/proxy";
 
 export const config = {
   matcher: [
-    "/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)",
+    {
+      // All routes except API, static assets, and metadata files. `missing`
+      // skips next/link prefetches — they don't need security headers/nonce.
+      source:
+        "/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|manifest.webmanifest|opengraph-image).*)",
+      missing: [
+        { type: "header", key: "next-router-prefetch" },
+        { type: "header", key: "purpose", value: "prefetch" },
+      ],
+    },
   ],
 };
