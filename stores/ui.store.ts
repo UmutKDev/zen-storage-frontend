@@ -9,6 +9,8 @@ interface UiState {
   openCommandPalette: () => void;
   closeCommandPalette: () => void;
   toggleCommandPalette: () => void;
+  /** Full reset — used by the sign-out teardown. */
+  reset: () => void;
 }
 
 export const useUiStore = create<UiState>((set) => ({
@@ -21,4 +23,5 @@ export const useUiStore = create<UiState>((set) => ({
   closeCommandPalette: () => set({ commandPaletteOpen: false }),
   toggleCommandPalette: () =>
     set((state) => ({ commandPaletteOpen: !state.commandPaletteOpen })),
+  reset: () => set({ modalStack: [], commandPaletteOpen: false }),
 }));

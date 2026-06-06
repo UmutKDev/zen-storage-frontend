@@ -37,10 +37,16 @@ export async function envelopeResponseRejected(
 ): Promise<never> {
   const status = error.response?.status;
   const messages = extractEnvelopeMessages(error.response?.data);
+  const retryAfterRaw = error.response?.headers?.["retry-after"];
+  const retryAfter =
+    typeof retryAfterRaw === "string" && /^\d+$/.test(retryAfterRaw)
+      ? Number(retryAfterRaw)
+      : undefined;
   const apiError = ApiError.fromHttp(
     status,
     messages.length > 0 ? messages : [t("common.errorGeneric")],
     error.response?.data,
+    retryAfter,
   );
 
   if (apiError.code === "UNAUTHORIZED") {

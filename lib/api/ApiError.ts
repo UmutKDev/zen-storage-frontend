@@ -20,6 +20,8 @@ export interface ApiErrorInit {
   code: ApiErrorCode;
   messages: string[];
   httpStatus?: number;
+  /** Seconds to wait before retrying — from the `Retry-After` header on 429. */
+  retryAfter?: number;
   raw?: unknown;
 }
 
@@ -27,14 +29,16 @@ export class ApiError extends Error {
   readonly code: ApiErrorCode;
   readonly messages: string[];
   readonly httpStatus?: number;
+  readonly retryAfter?: number;
   readonly raw?: unknown;
 
-  constructor({ code, messages, httpStatus, raw }: ApiErrorInit) {
+  constructor({ code, messages, httpStatus, retryAfter, raw }: ApiErrorInit) {
     super(messages[0] ?? code);
     this.name = "ApiError";
     this.code = code;
     this.messages = messages.length > 0 ? messages : [code];
     this.httpStatus = httpStatus;
+    this.retryAfter = retryAfter;
     this.raw = raw;
   }
 
@@ -55,11 +59,13 @@ export class ApiError extends Error {
     status: number | undefined,
     messages: string[],
     raw?: unknown,
+    retryAfter?: number,
   ): ApiError {
     return new ApiError({
       code: ApiError.codeFromStatus(status),
       messages,
       httpStatus: status,
+      retryAfter,
       raw,
     });
   }

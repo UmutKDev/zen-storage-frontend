@@ -11,6 +11,8 @@ interface WorkspaceState {
   teamId: string | null;
   setOwner: (ownerId: string | null) => void;
   switchTo: (target: { ownerId: string; teamId: string | null }) => void;
+  /** Full reset — used by the sign-out teardown. */
+  reset: () => void;
 }
 
 export const useWorkspaceStore = create<WorkspaceState>((set) => ({
@@ -18,4 +20,5 @@ export const useWorkspaceStore = create<WorkspaceState>((set) => ({
   teamId: null,
   setOwner: (ownerId) => set({ ownerId }),
   switchTo: ({ ownerId, teamId }) => set({ ownerId, teamId }),
+  reset: () => set({ ownerId: null, teamId: null }),
 }));

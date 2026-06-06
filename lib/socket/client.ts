@@ -13,9 +13,19 @@ export function createSocket(
   url: string,
   handshake: SocketHandshake,
 ): Socket<ServerToClientEvents, ClientToServerEvents> {
-  return io(url, {
+  const socket = io(url, {
     autoConnect: false,
     transports: ["websocket"],
     auth: { ...handshake },
   });
+  activeSocket = socket;
+  return socket;
+}
+
+let activeSocket: Socket | null = null;
+
+/** Tear down the active socket (sign-out teardown). No-op until P6 connects one. */
+export function disconnectSocket(): void {
+  activeSocket?.disconnect();
+  activeSocket = null;
 }

@@ -1,4 +1,4 @@
-export { createSocket } from "./client";
+export { createSocket, disconnectSocket } from "./client";
 export type {
   SocketHandshake,
   ServerToClientEvents,
