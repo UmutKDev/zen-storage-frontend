@@ -27,10 +27,15 @@ export function proxy(request: NextRequest): NextResponse {
   for (const [key, value] of Object.entries(STATIC_HEADERS)) {
     response.headers.set(key, value);
   }
+
+  // HSTS + CSP are production-only. In `next dev`, a report-only CSP just adds
+  // console noise (no report endpoint; HMR/eval and Next's un-nonced inline
+  // scripts trip it) for no gain. Verification runs against `next start` (prod),
+  // where the report-only CSP + per-request nonce are present. Enforced in P7.
   if (process.env.NODE_ENV === "production") {
     response.headers.set("Strict-Transport-Security", hstsHeader());
+    response.headers.set("Content-Security-Policy-Report-Only", buildCsp(nonce));
   }
-  response.headers.set("Content-Security-Policy-Report-Only", buildCsp(nonce));
 
   return response;
 }

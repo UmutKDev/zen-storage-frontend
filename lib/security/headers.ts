@@ -68,6 +68,7 @@ export function buildCsp(nonce: string): string {
     "form-action 'self'",
     "base-uri 'self'",
     "object-src 'none'",
-    "upgrade-insecure-requests",
+    // `upgrade-insecure-requests` is ignored in Report-Only (and logs a console
+    // error); re-add it when CSP is enforced in P7.
   ].join("; ");
 }
