@@ -19,11 +19,16 @@ export default defineConfig([
   {
     plugins: { boundaries, import: importPlugin },
     settings: {
+      // NOTE: boundaries resolves a file to the LATER-matching element. The
+      // global utility patterns (components/**, lib/**, hooks/**, …) also match
+      // a feature's INTERNAL folders (features/auth/components, …). So `feature`
+      // is listed LAST — it wins for everything under features/, making the
+      // whole flat feature ONE element (intra-feature imports are free; cross-
+      // feature still goes via the index barrel). Nested sub-features
+      // (features/storage/{browse,upload}) get a narrow `subfeature` element in P3.
       "boundaries/elements": [
         { type: "app", pattern: "app/**" },
         { type: "proxy", pattern: "(proxy|instrumentation).ts" },
-        { type: "feature", pattern: "features/*", mode: "folder", capture: ["name"] },
-        { type: "subfeature", pattern: "features/*/*", mode: "folder", capture: ["parent", "name"] },
         { type: "components", pattern: "components/**" },
         { type: "lib", pattern: "lib/**" },
         { type: "service", pattern: "service/**" },
@@ -32,6 +37,7 @@ export default defineConfig([
         { type: "config", pattern: "config/**" },
         { type: "types", pattern: "types/**" },
         { type: "tests", pattern: "tests/**" },
+        { type: "feature", pattern: "features/*", mode: "folder", capture: ["name"] },
       ],
       "boundaries/include": [
         "app/**",
@@ -56,8 +62,7 @@ export default defineConfig([
           rules: [
             { from: "app", allow: ["feature", "components", "lib", "service", "stores", "hooks", "config", "types"] },
             { from: "proxy", allow: ["lib", "config", "types"] },
-            { from: "feature", allow: ["feature", "subfeature", "components", "lib", "service", "stores", "hooks", "config", "types"] },
-            { from: "subfeature", allow: ["feature", "subfeature", "components", "lib", "service", "stores", "hooks", "config", "types"] },
+            { from: "feature", allow: ["feature", "components", "lib", "service", "stores", "hooks", "config", "types"] },
             { from: "components", allow: ["components", "lib", "hooks", "config", "types"] },
             { from: "lib", allow: ["lib", "service", "config", "types"] },
             // service composes the data layer from lib/api primitives + lib/i18n
@@ -70,17 +75,16 @@ export default defineConfig([
           ],
         },
       ],
-      // Only features/subfeatures are barrel-locked (entered via index.(ts|tsx)).
-      // Every other element type (lib, components, service, …) allows any entry
-      // file by path, so e.g. `@/lib/auth/server` and `@/components/ui/index`
-      // resolve. Deep feature imports stay blocked (also by no-restricted-imports).
+      // Only features are barrel-locked (entered via index.(ts|tsx)) — cross-
+      // feature imports must use the barrel; intra-feature imports are free
+      // (same element). Every other element type allows any entry file by path
+      // (e.g. `@/lib/auth/server`). Deep cross-feature imports are also blocked
+      // by no-restricted-imports below.
       "boundaries/entry-point": [
         "error",
         {
           default: "allow",
-          rules: [
-            { target: ["feature", "subfeature"], allow: "index.(ts|tsx)" },
-          ],
+          rules: [{ target: "feature", allow: "index.(ts|tsx)" }],
         },
       ],
       "no-restricted-imports": [
@@ -105,6 +109,17 @@ export default defineConfig([
       ],
     },
   },
+
+  // boundaries matches element patterns with micromatch `{ contains: true }`, so
+  // the global utility patterns (components/**, lib/**, hooks/**, …) also match a
+  // feature's INTERNAL folders (features/auth/components, …) and misclassify them.
+  // There's no pattern-only anchor under `contains`, so element-types is turned
+  // OFF for files UNDER features/** (intra-feature layering was permissive anyway).
+  // The critical guarantees remain: cross-feature hard-barrel (entry-point on
+  // `feature` + the `@/features/*/!(index)` import ban), no raw HTTP, no
+  // `@/service/generates`, and the leaf/one-way rules (whose FROM files are
+  // top-level, still checked). (D-P1.1)
+  { files: ["features/**"], rules: { "boundaries/element-types": "off" } },
 
   // service/ is the ONE sanctioned axios user (the Instance + interceptors).
   // The feature-side "no raw HTTP" ban still applies everywhere else.
