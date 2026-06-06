@@ -33,5 +33,47 @@
       "functional": "Functional",
       "analytics": "Analytics"
     }
+  },
+  "auth": {
+    "login": {
+      "title": "Sign in",
+      "subtitle": "Welcome back",
+      "emailLabel": "Email",
+      "emailPlaceholder": "you@example.com",
+      "continue": "Continue",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Your password",
+      "signIn": "Sign in",
+      "back": "Back",
+      "forgot": "Forgot password?",
+      "noAccount": "Don’t have an account?",
+      "signUp": "Sign up",
+      "twoFactorTitle": "Two-factor authentication",
+      "twoFactorDescription": "Enter the 6-digit code from your authenticator app.",
+      "verify": "Verify"
+    },
+    "register": {
+      "title": "Create account",
+      "subtitle": "Start storing in seconds",
+      "passwordConfirmLabel": "Confirm password",
+      "create": "Create account",
+      "haveAccount": "Already have an account?",
+      "signIn": "Sign in"
+    },
+    "reset": {
+      "title": "Reset password",
+      "description": "Enter your email and we’ll send a reset link.",
+      "send": "Send reset link",
+      "sentTitle": "Check your email",
+      "sentDescription": "If an account exists for that email, a reset link is on its way.",
+      "backToLogin": "Back to sign in"
+    },
+    "errors": {
+      "passwordRequired": "Password is required.",
+      "otpLength": "Enter the 6-digit code.",
+      "passwordMismatch": "Passwords do not match.",
+      "generic": "Something went wrong. Please try again.",
+      "rateLimitedPrefix": "Too many attempts. Retry in"
+    }
   }
 }

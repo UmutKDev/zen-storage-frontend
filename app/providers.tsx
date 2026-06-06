@@ -4,9 +4,10 @@ import { useEffect, useState, type ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "next-themes";
 import { MotionConfig } from "framer-motion";
+import { SessionProvider } from "@/lib/auth/client";
+import { SessionSync } from "@/features/auth";
 import { Toaster, TooltipProvider } from "@/components/ui";
 import {
-  registerSessionSource,
   registerTeamSource,
   registerSecureFolderTokenSource,
 } from "@/service/token-sources";
@@ -23,37 +24,34 @@ function makeQueryClient(): QueryClient {
 }
 
 /**
- * Client provider tree + the single place token-sources are registered, so the
- * `Instance`'s interceptors read live session/team/secure-folder state without
- * `service/` ever importing features (inverted-deps seam).
- *
- * NOTE: `SessionProvider` and the real `registerSignOut` are intentionally NOT
- * mounted yet — they poll `/api/auth/*`, which doesn't exist until Phase 1, and
- * would loop on 404. They land with the auth wiring in Phase 1. The session
- * token-source stays a no-op until then.
+ * Client provider tree. `SessionSync` registers the session token-source +
+ * sign-out handler (it needs the Session + QueryClient contexts); team +
+ * secure-folder sources are registered here (no React context needed).
  */
 export function Providers({ children }: { children: ReactNode }) {
   const [queryClient] = useState(makeQueryClient);
 
   useEffect(() => {
-    registerSessionSource(() => null); // real session token → Phase 1
     registerTeamSource(() => useWorkspaceStore.getState().teamId);
     registerSecureFolderTokenSource(() => null); // real getter → Phase 5
   }, []);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider
-        attribute="class"
-        defaultTheme="system"
-        enableSystem
-        disableTransitionOnChange
-      >
-        <MotionConfig reducedMotion="user">
-          <TooltipProvider>{children}</TooltipProvider>
-          <Toaster />
-        </MotionConfig>
-      </ThemeProvider>
-    </QueryClientProvider>
+    <SessionProvider>
+      <QueryClientProvider client={queryClient}>
+        <SessionSync />
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <MotionConfig reducedMotion="user">
+            <TooltipProvider>{children}</TooltipProvider>
+            <Toaster />
+          </MotionConfig>
+        </ThemeProvider>
+      </QueryClientProvider>
+    </SessionProvider>
   );
 }
