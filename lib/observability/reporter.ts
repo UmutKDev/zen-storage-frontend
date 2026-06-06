@@ -1,16 +1,18 @@
 import type { TelemetryEvent } from "./events";
+import { scrub } from "./scrubber";
 
 /**
- * Observability reporter. In dev it logs; a real provider (Sentry) + the PII
- * scrubber are wired later (0.4a, deferred). All payloads must pass through the
- * scrubber before reaching a real provider.
+ * Observability reporter. Every payload is PII-scrubbed before it's logged or
+ * (later) sent to a provider. A real reporter (Sentry) wires its `beforeSend`
+ * through the same `scrub`.
  */
 export function reportError(
   error: unknown,
   context?: Record<string, unknown>,
 ): void {
+  const safeContext = context ? scrub(context) : undefined;
   if (process.env.NODE_ENV !== "production") {
-    console.error("[observability] error", error, context);
+    console.error("[observability] error", error, safeContext);
   }
 }
 
@@ -18,7 +20,8 @@ export function reportEvent(
   event: TelemetryEvent,
   data?: Record<string, unknown>,
 ): void {
+  const safeData = data ? scrub(data) : undefined;
   if (process.env.NODE_ENV !== "production") {
-    console.debug("[observability] event", event, data);
+    console.debug("[observability] event", event, safeData);
   }
 }

@@ -13,7 +13,8 @@ export default defineConfig({
     setupFiles: ["./tests/setup.ts"],
     // config/env.ts validates this at import; provide it for the test runtime.
     env: { NEXT_PUBLIC_API_URL: "http://localhost:8080" },
-    include: ["tests/**/*.{test,spec}.{ts,tsx}", "**/*.{test,spec}.{ts,tsx}"],
-    exclude: ["tests/e2e/**", "node_modules/**", ".next/**"],
+    // Vitest owns *.test.* ; Playwright owns *.spec.* (e2e + security).
+    include: ["tests/**/*.test.{ts,tsx}"],
+    exclude: ["tests/e2e/**", "tests/security/**", "node_modules/**", ".next/**"],
   },
 });

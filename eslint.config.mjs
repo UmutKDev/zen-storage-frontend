@@ -99,6 +99,9 @@ export default defineConfig([
         { selector: "CallExpression[callee.name='fetch']", message: "Use @/service/factories. Exception: features/storage/upload/api/presigned-put.ts." },
         { selector: "ExportAllDeclaration", message: "Named re-exports only." },
         { selector: "Literal[value=/^#[0-9a-fA-F]{3,8}$/]", message: "No raw hex. Use semantic tokens." },
+        // Privacy §9: direct localStorage writes are a PII surface. Use a reviewed
+        // store (zustand persist) or add an eslint override if truly needed.
+        { selector: "MemberExpression[object.name='localStorage'][property.name='setItem']", message: "No direct localStorage.setItem (PII surface). Use a reviewed store." },
       ],
     },
   },

@@ -16,5 +16,22 @@
     "title": "Something went wrong",
     "description": "An unexpected error occurred. You can try again.",
     "retry": "Try again"
+  },
+  "legal": {
+    "privacy": { "heading": "Privacy Policy" },
+    "terms": { "heading": "Terms of Service" },
+    "cookies": { "heading": "Cookie Policy" },
+    "banner": {
+      "title": "We value your privacy",
+      "description": "Essential cookies keep the app running. Optional cookies help us improve it — the choice is yours.",
+      "acceptAll": "Accept all",
+      "rejectOptional": "Reject optional",
+      "managePreferences": "Manage preferences"
+    },
+    "consent": {
+      "essential": "Essential",
+      "functional": "Functional",
+      "analytics": "Analytics"
+    }
   }
 }
