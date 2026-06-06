@@ -28,7 +28,7 @@ privacy/PII, 0.14a supply‑chain CI, 0.8a intercepting‑routes spike.
 | Phase | Title | Status | Notes |
 |---|---|---|---|
 | 0 | Foundation + Design System | 🚧 | Core + design + **security headers (CSP nonce, report-only)** + **privacy (PII scrubber, consent)** DONE; all green. Deferred: 0.14a CI, 0.8a spike (D‑P0.7) |
-| 1 | Auth | ⏳ | session‑id multi‑step flow |
+| 1 | Auth | 🚧 | **Spine done**: Auth.js v5 multi-step login (+2FA), register, reset, route protection, full sign-out teardown; build/tsc/lint/test green. Deferred: passkey (→P2), legal/consent (follow-up) |
 | 2 | App Shell + Account | ⏳ | no team switch |
 | 3 | Storage Core | ⏳ | upload pipeline is the heavy lift |
 | 4 | Preview + Share | ⏳ | Share = presigned URL ✓; CDN resize via wsrv.nl ✓ (both resolved) |
@@ -60,6 +60,14 @@ privacy/PII, 0.14a supply‑chain CI, 0.8a intercepting‑routes spike.
    [folder structure](../02-architecture/folder-structure.md).
 
 ## Recent status entries
+- **2026-06-06 (Phase 1 spine)** — **Auth implemented (spine).** Auth.js v5 (split config: edge-safe base + full
+  node instance) + `app/api/auth/[...nextauth]` route handler; UI-driven multi-step login (email→password→2FA) +
+  register + reset under `features/auth` (rhf+zod, shadcn form/input-otp/alert/card, motion step transitions, 429
+  countdown, a11y); `SessionSync` wires the session token-source + sign-out handler; proxy route protection
+  (`auth()` wrapper + redirects, composed with security headers); full `signOutAndCleanup` teardown. The P0 dev loop
+  is gone (`/api/auth/session` → 200). Verified: build/tsc/lint green, 15 vitest (incl. multi-step login + 2FA handoff
+  + teardown-order), browser render of login/register (light+dark) + `/storage`→`/login?from=` redirect. Decisions
+  D-P1.0–D-P1.4. Deferred: passkey login (→P2), legal pages + consent banner (follow-up).
 - **2026-06-06 (pass 2)** — **Closed P0 security + privacy foundation (0.0a + 0.4a).** Security headers + per-request
   CSP **nonce** emitted from the proxy via `lib/security/*` (Report-Only at P0 — enforcing flips in P7, D-P0.8); HSTS/CSP
   prod-gated. PII **scrubber** (`lib/observability/scrubber.ts`) wired into the reporter; **consent store**

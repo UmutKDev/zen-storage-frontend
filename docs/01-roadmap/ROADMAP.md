@@ -8,6 +8,12 @@
 > **Update rule:** edit the relevant phase summary or its `phases/` file — **don't rewrite** — and add a Changelog line.
 
 ## Changelog
+- **2026-06-06 (Phase 1 — Auth spine)** — Session-based auth on Auth.js v5: split config (edge-safe base for the proxy
+  + full node instance with the credentials provider) + `app/api/auth/[...nextauth]` route handler; UI-driven
+  multi-step login (email → password → 2FA), register, reset under `features/auth`; `(app)` route protection in the
+  proxy + full `signOutAndCleanup` teardown. The P0 dev loop is resolved (`/api/auth/session` → 200). Green on
+  build/tsc/lint + 15 vitest. Decisions D-P1.0–D-P1.4. **Deferred:** passkey login (→ Phase 2, with registration),
+  legal pages + cookie-consent banner (immediate follow-up).
 - **2026-06-06 (P0 security + privacy closed)** — Closed **0.0a** (security headers + per-request CSP **nonce** from the
   proxy via `lib/security/*`; Report-Only at P0, enforcing flips in P7 — D‑P0.8) and **0.4a** (PII **scrubber** wired
   into the reporter; **consent store** in `features/account/` + `legal.*` i18n; ESLint bans direct
@@ -49,7 +55,7 @@
 | Phase | Title | Detailed plan | Status |
 |---|---|---|---|
 | 0 | Foundation + Design System | [phase-0](./phases/phase-0-foundation.md) | 🚧 core + security/privacy done (deferred: 0.14a CI, 0.8a spike) |
-| 1 | Auth | [phase-1](./phases/phase-1-auth.md) | ⏳ |
+| 1 | Auth | [phase-1](./phases/phase-1-auth.md) | 🚧 spine done (deferred: passkey→P2, legal/consent) |
 | 2 | App Shell + Account | [phase-2](./phases/phase-2-shell-account.md) | ⏳ |
 | 3 | Storage Core | [phase-3](./phases/phase-3-storage-core.md) | ⏳ |
 | 4 | Preview + Share | [phase-4](./phases/phase-4-preview-share.md) | ⏳ |
