@@ -18,6 +18,22 @@ if (typeof window !== "undefined") {
       dispatchEvent: vi.fn(),
     }),
   });
+
+  // jsdom lacks ResizeObserver, which input-otp (and other UI libs) use.
+  if (!("ResizeObserver" in globalThis)) {
+    class ResizeObserverStub {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    }
+    globalThis.ResizeObserver =
+      ResizeObserverStub as unknown as typeof ResizeObserver;
+  }
+
+  // jsdom doesn't implement these; input-otp calls elementFromPoint on input.
+  if (typeof document.elementFromPoint !== "function") {
+    document.elementFromPoint = () => null;
+  }
 }
 
 beforeAll(() => server.listen({ onUnhandledRequest: "error" }));
