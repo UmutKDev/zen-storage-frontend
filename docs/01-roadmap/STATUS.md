@@ -27,8 +27,8 @@ privacy/PII, 0.14a supply‑chain CI, 0.8a intercepting‑routes spike.
 ## Phase status
 | Phase | Title | Status | Notes |
 |---|---|---|---|
-| 0 | Foundation + Design System | 🚧 | Core + design + **security headers (CSP nonce, report-only)** + **privacy (PII scrubber, consent)** DONE; all green. Deferred: 0.14a CI, 0.8a spike (D‑P0.7) |
-| 1 | Auth | 🚧 | **Spine done**: Auth.js v5 multi-step login (+2FA), register, reset, route protection, full sign-out teardown; build/tsc/lint/test green. Deferred: passkey (→P2), legal/consent (follow-up) |
+| 0 | Foundation + Design System | ✅ | All sub-tasks closed: data layer, design system, 0.0a CSP/headers, 0.4a privacy, 0.8a intercepting-routes (confirmed), 0.14a supply-chain CI |
+| 1 | Auth | ✅ | Full: multi-step login (+2FA **+passkey**), register, reset, route protection, sign-out teardown, **legal pages + consent banner**. Verified live vs API + 16 tests |
 | 2 | App Shell + Account | ⏳ | no team switch |
 | 3 | Storage Core | ⏳ | upload pipeline is the heavy lift |
 | 4 | Preview + Share | ⏳ | Share = presigned URL ✓; CDN resize via wsrv.nl ✓ (both resolved) |
@@ -60,6 +60,13 @@ privacy/PII, 0.14a supply‑chain CI, 0.8a intercepting‑routes spike.
    [folder structure](../02-architecture/folder-structure.md).
 
 ## Recent status entries
+- **2026-06-06 (all deferrals closed)** — Cleared every deferred item. **0.8a** intercepting-routes confirmed live
+  (`@modal` + `(.)preview/[key]` + `[[...path]]` coexist; build lists both). **0.14a** supply-chain CI: renovate +
+  `supply-chain.yml` (prod audit clean, license allowlist clean — LGPL-3.0 for sharp/libvips + CC-BY-4.0 for
+  caniuse-lite ADR'd, private root excluded; SBOM) + `perf-budget.yml` (size-limit 438/480 KB + Lighthouse). **1.2**
+  passkey login (Begin/Finish + @simplewebauthn, bypasses 2FA, feature-detect). **1.6** legal pages
+  (privacy/terms/cookies/data-processing) + cookie consent banner. Backend error-code→friendly mapping (D-P1.6).
+  build/tsc/lint green, 16 vitest. Phase 0 + Phase 1 now ✅. (D-P0.7 closed; D-P0.9-spike, D-P0.10, D-P1.5/1.6.)
 - **2026-06-06 (Phase 1 spine)** — **Auth implemented (spine).** Auth.js v5 (split config: edge-safe base + full
   node instance) + `app/api/auth/[...nextauth]` route handler; UI-driven multi-step login (email→password→2FA) +
   register + reset under `features/auth` (rhf+zod, shadcn form/input-otp/alert/card, motion step transitions, 429

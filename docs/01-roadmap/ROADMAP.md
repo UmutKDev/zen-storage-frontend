@@ -8,6 +8,11 @@
 > **Update rule:** edit the relevant phase summary or its `phases/` file — **don't rewrite** — and add a Changelog line.
 
 ## Changelog
+- **2026-06-06 (all deferrals closed → P0 + P1 complete)** — Closed every deferred item: **0.8a** intercepting-routes
+  (confirmed Next 16.2 supports `@modal` + `(.)preview/[key]` + `[[...path]]` together), **0.14a** supply-chain CI
+  (Renovate + audit/license/SBOM + size-limit/Lighthouse workflows; prod audit + license allowlist verified locally),
+  **1.2** passkey login, **1.6** legal pages + cookie-consent banner, plus a backend error-code→friendly-message map.
+  Phase 0 and Phase 1 are now ✅. Decisions D-P0.7 (closed), D-P0.9-spike, D-P0.10, D-P1.5/1.6.
 - **2026-06-06 (Phase 1 — Auth spine)** — Session-based auth on Auth.js v5: split config (edge-safe base for the proxy
   + full node instance with the credentials provider) + `app/api/auth/[...nextauth]` route handler; UI-driven
   multi-step login (email → password → 2FA), register, reset under `features/auth`; `(app)` route protection in the
@@ -54,8 +59,8 @@
 ## Status snapshot
 | Phase | Title | Detailed plan | Status |
 |---|---|---|---|
-| 0 | Foundation + Design System | [phase-0](./phases/phase-0-foundation.md) | 🚧 core + security/privacy done (deferred: 0.14a CI, 0.8a spike) |
-| 1 | Auth | [phase-1](./phases/phase-1-auth.md) | 🚧 spine done (deferred: passkey→P2, legal/consent) |
+| 0 | Foundation + Design System | [phase-0](./phases/phase-0-foundation.md) | ✅ done (all sub-tasks incl. 0.8a + 0.14a) |
+| 1 | Auth | [phase-1](./phases/phase-1-auth.md) | ✅ done (incl. passkey + legal/consent) |
 | 2 | App Shell + Account | [phase-2](./phases/phase-2-shell-account.md) | ⏳ |
 | 3 | Storage Core | [phase-3](./phases/phase-3-storage-core.md) | ⏳ |
 | 4 | Preview + Share | [phase-4](./phases/phase-4-preview-share.md) | ⏳ |
