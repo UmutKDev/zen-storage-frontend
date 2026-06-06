@@ -1,6 +1,6 @@
 import { toast } from "sonner";
-import { t } from "@/lib/i18n";
 import { ApiError } from "./ApiError";
+import { friendlyMessage } from "./error-messages";
 
 /**
  * The one place an `ApiError` becomes a user-visible toast. Driven by the
@@ -9,6 +9,5 @@ import { ApiError } from "./ApiError";
  */
 export function toastApiError(error: ApiError): void {
   if (typeof window === "undefined") return;
-  const message = error.messages[0] ?? t("common.errorGeneric");
-  toast.error(message);
+  toast.error(friendlyMessage(error));
 }

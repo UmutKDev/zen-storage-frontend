@@ -1,6 +1,6 @@
 import { Alert, AlertDescription } from "@/components/ui";
 import { t } from "@/lib/i18n";
-import type { ApiError } from "@/lib/api";
+import { friendlyMessage, type ApiError } from "@/lib/api";
 
 /** Inline auth error / rate-limit countdown. Announced via aria-live. */
 export function AuthError({
@@ -14,7 +14,7 @@ export function AuthError({
   const message =
     retrySeconds > 0
       ? `${t("auth.errors.rateLimitedPrefix")} ${retrySeconds}s`
-      : (error.messages[0] ?? t("auth.errors.generic"));
+      : friendlyMessage(error);
 
   return (
     <Alert

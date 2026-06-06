@@ -72,6 +72,7 @@
       "passwordRequired": "Password is required.",
       "otpLength": "Enter the 6-digit code.",
       "passwordMismatch": "Passwords do not match.",
+      "invalidCredentials": "Invalid email or password.",
       "generic": "Something went wrong. Please try again.",
       "rateLimitedPrefix": "Too many attempts. Retry in"
     }

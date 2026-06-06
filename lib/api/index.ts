@@ -22,4 +22,5 @@ export {
 } from "./pagination";
 export type { PageParams } from "./pagination";
 export { toastApiError } from "./error-toast";
+export { friendlyMessage } from "./error-messages";
 export { invalidateScope, invalidateKey } from "./invalidators";
