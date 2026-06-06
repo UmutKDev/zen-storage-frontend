@@ -1,0 +1,20 @@
+{
+  "common": {
+    "appName": "Storage",
+    "errorGeneric": "Something went wrong. Please try again.",
+    "retry": "Try again",
+    "loading": "Loading…",
+    "cancel": "Cancel",
+    "confirm": "Confirm"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "description": "The page you’re looking for doesn’t exist or has moved.",
+    "back": "Back to home"
+  },
+  "error": {
+    "title": "Something went wrong",
+    "description": "An unexpected error occurred. You can try again.",
+    "retry": "Try again"
+  }
+}
