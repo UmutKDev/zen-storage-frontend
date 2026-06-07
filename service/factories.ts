@@ -7,6 +7,8 @@ import {
   CloudDirectoryApiFactory,
   CloudDocumentsApiFactory,
   CloudUploadApiFactory,
+  NotificationApiFactory,
+  SubscriptionApiFactory,
   TeamApiFactory,
   TeamInvitationsApiFactory,
   TeamMembersApiFactory,
@@ -66,6 +68,18 @@ export const teamMembersApiFactory = TeamMembersApiFactory(
 );
 
 export const cloudDocumentsApiFactory = CloudDocumentsApiFactory(
+  undefined,
+  undefined,
+  Instance,
+);
+
+export const subscriptionApiFactory = SubscriptionApiFactory(
+  undefined,
+  undefined,
+  Instance,
+);
+
+export const notificationApiFactory = NotificationApiFactory(
   undefined,
   undefined,
   Instance,

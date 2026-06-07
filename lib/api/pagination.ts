@@ -21,6 +21,8 @@ export function nextPage<T>(
   current: PageParams,
   result: ListResult<T>,
 ): PageParams | null {
+  // Stop on an empty page so a stale/over-reported `count` can't loop forever.
+  if (result.items.length === 0) return null;
   const consumed = current.skip + result.items.length;
   return consumed < result.count
     ? { skip: consumed, take: current.take }

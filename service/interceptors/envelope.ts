@@ -35,6 +35,12 @@ export function envelopeResponseFulfilled(
 export async function envelopeResponseRejected(
   error: AxiosError,
 ): Promise<never> {
+  // Request cancellation (TanStack Query aborting on navigation / unmount /
+  // refetch via the threaded AbortSignal) is intentional, not a real error —
+  // rethrow silently so it is never toasted. TanStack ignores aborted results.
+  if (error.code === "ERR_CANCELED" || error.name === "CanceledError") {
+    throw error;
+  }
   const status = error.response?.status;
   const messages = extractEnvelopeMessages(error.response?.data);
   const retryAfterRaw = error.response?.headers?.["retry-after"];

@@ -76,3 +76,42 @@ export {
   CardDescription,
   CardContent,
 } from "./card";
+export { Avatar, AvatarImage, AvatarFallback } from "./avatar";
+export {
+  Sheet,
+  SheetTrigger,
+  SheetClose,
+  SheetContent,
+  SheetHeader,
+  SheetFooter,
+  SheetTitle,
+  SheetDescription,
+} from "./sheet";
+export { Tabs, TabsList, TabsTrigger, TabsContent } from "./tabs";
+export { ScrollArea, ScrollBar } from "./scroll-area";
+export { Badge, badgeVariants } from "./badge";
+export { Switch } from "./switch";
+export { Skeleton } from "./skeleton";
+export {
+  Table,
+  TableHeader,
+  TableBody,
+  TableFooter,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableCaption,
+} from "./table";
+export {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogOverlay,
+  AlertDialogPortal,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "./alert-dialog";

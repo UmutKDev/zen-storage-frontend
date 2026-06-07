@@ -5,16 +5,30 @@
 >
 > Legend: ⏳ not started · 🚧 in progress · ✅ done · 🚫 blocked.
 
-**Updated:** 2026-06-06 · **Branch:** `v2` · **Round:** Phase 0 implementation (core skeleton + design system landed).
+**Updated:** 2026-06-07 · **Branch:** `v2` · **Round:** Phase 3 in progress — Stage A (browse) + B1 (single-item ops) landed.
 
 ## Where we are
-**Phase 0 core landed.** The runnable, team‑ready skeleton + design system is in place and green on
-`build` / `tsc` / `lint` / `test`: the shared `Instance` + split interceptors + token‑source seam, the full `lib/*`
-tree, global stores, config/types, route groups + providers, the design‑token system (semantic + shadcn‑bridge tokens,
-glass utilities, class‑based dark mode, motion), shadcn primitives wrapped for the premium look, ESLint boundaries in
-FULL ERROR mode, and the test scaffold (Vitest/RTL/MSW/Playwright) with passing smoke tests. Auth.js v5 confirmed on
-Next 16.2 / React 19. **Deferred to a follow‑up P0 pass** (see DECISIONS D‑P0.7): 0.0a security headers/CSP, 0.4a
-privacy/PII, 0.14a supply‑chain CI, 0.8a intercepting‑routes spike.
+**Phase 3 Stage A (browse) + Stage B1 (single-item operations) landed.** Storage is navigable AND mutable for single
+items: `features/storage/operations` adds create folder/file, rename, delete (optimistic + confirm), single move via a
+folder-picker dialog, and download — each routing name clashes through one shared `ConflictPrompt`/`useConflictMutation`
+(REPLACE/KEEP_BOTH/SKIP, no silent overwrite). Actions hang off a per-row/card menu + a header "New" menu. Move/Delete
+carry `Idempotency-Key`. Phase 3 is **staged in ~4 parts** (D-P3.1; B split B1→B2); upload will use the **`UploadPart`
+proxy** (D-P3.2). Green on `build`/`tsc`/`lint` + **61 Vitest** + **2 Playwright**; reviewer sweep applied; live backend
+contract smoke passed. **Next:** Stage B2 (multi-select + bulk + drag-and-drop) → C (upload) → D (search + palette + touch).
+
+## Earlier rounds
+
+**Phase 2 landed.** The authenticated **shell** (`features/shell`: glass-chrome sidebar/topbar, responsive Sheet drawer,
+theme toggle, profile menu, notification bell + unread count, inert workspace slot) wraps every `(app)` screen, plus the
+full **Account** area (`features/account`: profile view/edit with optimistic + rollback, read-only avatar behind the
+`avatarUpload` flag, a tabbed Security screen — change-password, 2FA enable/disable + one-time backup codes, passkey
+register/list/delete, sessions current-vs-others + revoke/others/all, read-only subscription, flagged API-keys stub) and
+a minimal `features/notifications` (bell + unread count). 9 new shadcn primitives wrapped. Green on
+`build`/`tsc`/`lint` + **32 Vitest** + **4 Playwright**; reviewer sweep (data-layer + design-system + a11y/state) applied;
+live backend contract smoke passed. Authenticated end-to-end walkthrough pending user creds.
+
+**Phase 0 + 1 (done earlier).** Runnable team-ready skeleton + design system; full session-based auth (multi-step login
++2FA +passkey, register, reset, route protection, legal pages + consent banner).
 
 ## Planning round checklist — ✅ complete
 - [x] Explored 3 layers (API `nestjs-storage`, old frontend `main`, v2 scaffold) — read‑only
@@ -29,8 +43,8 @@ privacy/PII, 0.14a supply‑chain CI, 0.8a intercepting‑routes spike.
 |---|---|---|---|
 | 0 | Foundation + Design System | ✅ | All sub-tasks closed: data layer, design system, 0.0a CSP/headers, 0.4a privacy, 0.8a intercepting-routes (confirmed), 0.14a supply-chain CI |
 | 1 | Auth | ✅ | Full: multi-step login (+2FA **+passkey**), register, reset, route protection, sign-out teardown, **legal pages + consent banner**. Verified live vs API + 16 tests |
-| 2 | App Shell + Account | ⏳ | no team switch |
-| 3 | Storage Core | ⏳ | upload pipeline is the heavy lift |
+| 2 | App Shell + Account | ✅ | Full: shell (sidebar/topbar/theme/profile/bell, inert workspace slot) + profile (optimistic, avatar read-only) + security (password, 2FA, passkeys, sessions) + read-only subscription + flagged API-keys stub. 32 vitest + 4 e2e; reviewers applied; live contract smoke |
+| 3 | Storage Core | 🚧 | **Staged in 4 parts.** A (browse) ✅ · B1 (single-item ops: create/rename/delete/move-dialog/download + conflict) ✅. B2 (multi-select+bulk+DnD) / C (upload, `UploadPart` proxy) / D (search+palette+touch) pending |
 | 4 | Preview + Share | ⏳ | Share = presigned URL ✓; CDN resize via wsrv.nl ✓ (both resolved) |
 | 5 | Secure Folders | ⏳ | token never‑persist guarantee |
 | 6 | Advanced | ⏳ | socket‑first + poll for jobs |
@@ -53,13 +67,63 @@ privacy/PII, 0.14a supply‑chain CI, 0.8a intercepting‑routes spike.
   shadcn init (`components.json`), motion/i18n/theme libs, providers, route groups.
 
 ## What's next
-1. Get approval on the plan + the 4 decisions + the open questions (esp. Q1 sharing, Q5 CDN). `Instance` location
-   resolved → `service/Instance.ts`.
-2. On "implement Phase 0": **read `node_modules/next/dist/docs/01-app/` first**, then execute the
-   [Phase 0 checklist](./phases/phase-0-foundation.md) against the locked
-   [folder structure](../02-architecture/folder-structure.md).
+1. **User check:** authenticated end-to-end walkthrough against the live backend (needs login creds) — browse + create /
+   rename / move / delete / download a real item, force a name conflict, and verify the actions-menu→dialog keyboard
+   focus return.
+2. **Phase 3 Stage B2 — multi-select + bulk + DnD:** `useItemSelection`, bulk action bar, bulk delete/move/download with
+   apply-to-all conflict, and drag-and-drop move. Then **Stage C** (upload pipeline, `UploadPart` proxy) and **Stage D**
+   (search/filter/sort + command palette + touch bottom-sheet). See the
+   [Phase 3 checklist](./phases/phase-3-storage-core.md).
 
 ## Recent status entries
+- **2026-06-07 (fix: cancelled-request toasts)** — Folder entry showed 2–3 **"Something went wrong"** toasts. Root cause
+  (found live): the threaded `AbortSignal` makes axios throw `CanceledError` on nav/refetch, and the Instance was toasting
+  it. Fix: `service/interceptors/envelope.ts` now **rethrows cancellations silently** (never toasts/signs-out). Global bug
+  (any aborted request); unit-tested (`tests/smoke/interceptor-cancel.test.ts`). Verified live: 0 toasts on entry/re-entry.
+  Decision D-P3.8. Green: tsc/lint + 63 vitest + build.
+- **2026-06-07 (Phase 3 live verification + fixes)** — Drove the running app against the live backend (Playwright + bundled
+  Chromium, real login). **Confirmed end-to-end:** per-folder browse, create (renders once), conflict prompt (no silent
+  overwrite), rename, delete; then folder-entry after the pagination change. **Fixed (caught only by running it, not the
+  mocked unit tests):** (1) browse list calls were missing **`delimiter: true`** → backend listed recursively; (2) the
+  paginated list path ignored `Take`, overlapped directory pages (duplicate folders), and **errored on folder entry**
+  ("Something went wrong"). Resolution: **dropped Skip/Take entirely** → the backend's single-call non-paginated path
+  (full folder in one request, no overlap, no error); browse is now single `useQuery`s. `browse.queries.ts` +
+  `useDirectories`/`useObjects`/`useFolderEntries`. Verified live: requests are `…?Path=<folder>&Delimiter=true`, no
+  Skip/Take, folder entry clean. Decision D-P3.7. Green: tsc/lint + 61 vitest + build.
+- **2026-06-07 (Phase 3 Stage B1 — single-item operations)** — Storage is mutable for single items. New
+  `features/storage/operations`: `operations.mutations` (createFolder/createFile/renameFile/renameDirectory/deleteEntries/
+  moveEntries/getDownloadUrl on the cloud factories; Move+Delete carry `Idempotency-Key`); `lib`
+  (conflict/paths/invalidate/validation); the shared `useConflictMutation` (first attempt FAIL → 409 → `ConflictPrompt`
+  → retry with REPLACE/KEEP_BOTH, SKIP cancels) + per-op hooks; components `ConflictPrompt`, `NameDialog`,
+  `DeleteConfirmDialog` (AlertDialog), `MoveDialog` (folder-picker reusing `useDirectories`), `EntryActionsMenu`,
+  `CreateMenu`. Delete is optimistic (remove + reconcile); create/rename invalidate the folder; move invalidates the
+  owner scope. Wired into `BrowseRow`/`BrowseCard` (actions menu) + `StorageBrowser` header. Conflict body parsed from
+  `error.raw.Status.Messages[0]`. Green: build/tsc/lint + **61 vitest**; reviewer sweep applied (DTOs→generated models;
+  card-menu glass removed; move-picker error state; `useDirectories(path, enabled)`); live contract smoke (all op
+  endpoints present). Decision D-P3.6. Stage B2/C/D pending.
+- **2026-06-07 (Phase 3 Stage A — browse foundation)** — Storage is navigable. `features/storage/browse`:
+  `browse.queries` (`listDirectories`/`listObjects`/`userStorageUsage`, `itemsOf`-normalized, AbortSignal-threaded) +
+  user-scoped `storageKeys` + infinite hooks (`useDirectories`/`useObjects`) merged by `useFolderEntries`
+  (folders-first sort); `viewPrefs` store (list/grid + sort, sessionStorage); UI — `StorageBrowser`, `ListView`/`GridView`
+  (both virtualized via `components/patterns/virtual-list.tsx`, threshold 100; grid chunks rows + `rowRole` keeps card
+  `listitem` semantics), `BreadcrumbBar` (URL-derived deep-link), `ViewToggle`, `SortMenu`, `UsageBar` (color + text
+  cue), `BrowseRow`/`BrowseCard`/`EntryBadges`, `BrowserStates`. `ownerId` wired in `SessionSync` (`session.user.id`);
+  `useOwnerId` + `enabled` gating. Route wired (`[[...path]]/page.tsx` → `StorageScreen`). Fixed `providers` retry to
+  skip 4xx (D-P3.5). Green: build/tsc/lint + **48 vitest** + **2 playwright**; reviewer sweep applied; live contract
+  smoke (Cloud list/search/usage present, 401 unauth). Decisions D-P3.1–D-P3.5. Stages B/C/D pending.
+- **2026-06-07 (Phase 2 — App Shell + Account)** — Authenticated **shell** as a feature (`features/shell`:
+  AppShell/Sidebar/MobileSidebar(Sheet)/Topbar/ThemeToggle/ProfileMenu/SidebarNav + inert WorkspaceSwitcher;
+  `shell.store` persists `sidebarCollapsed`) mounted in `(app)/layout`. **Account** area extended
+  (`features/account`: profile optimistic edit+rollback, read-only avatar behind `avatarUpload` flag, Security tabs —
+  change-password, 2FA wizard (lazy `qrcode.react`) + one-time backup codes, passkey register (reuses `startRegistration`)
+  /list/delete, sessions current-vs-others + revoke/others/all → `logoutAll` runs `signOutAndCleanup`, read-only
+  subscription, flagged API-keys stub). New `features/notifications` (bell + unread count, `void`-typed response cast).
+  9 shadcn primitives wrapped (avatar/sheet/tabs/scroll-area/badge/switch/skeleton/table/alert-dialog). User-scoped
+  query keys (`accountKeys` fixed `"account"` scope). Added `subscriptionApiFactory` + `notificationApiFactory`; flags
+  `avatarUpload`/`apiKeys`; `account.*` i18n. Green: build/tsc/lint + **32 vitest** + **4 playwright**. Reviewer sweep
+  applied: data-layer (hand-rolled DTOs → generated models), a11y (error states on Passkeys/Sessions/2FA via shared
+  `SectionError`; OtpField aria-label → i18n), design-system (clean + minor focus-visible polish). Live backend contract
+  smoke: all endpoints present (avatar upload absent → deferral confirmed; Profile → 401 unauth). Decisions D-P2.1–D-P2.3.
 - **2026-06-06 (all deferrals closed)** — Cleared every deferred item. **0.8a** intercepting-routes confirmed live
   (`@modal` + `(.)preview/[key]` + `[[...path]]` coexist; build lists both). **0.14a** supply-chain CI: renovate +
   `supply-chain.yml` (prod audit clean, license allowlist clean — LGPL-3.0 for sharp/libvips + CC-BY-4.0 for

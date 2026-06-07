@@ -8,6 +8,7 @@ import { SessionProvider } from "@/lib/auth/client";
 import { SessionSync } from "@/features/auth";
 import { CookieConsentBanner } from "@/features/account";
 import { Toaster, TooltipProvider } from "@/components/ui";
+import { isApiError } from "@/lib/api";
 import {
   registerTeamSource,
   registerSecureFolderTokenSource,
@@ -17,8 +18,22 @@ import { useWorkspaceStore } from "@/stores";
 function makeQueryClient(): QueryClient {
   return new QueryClient({
     defaultOptions: {
-      // Retry policy per data-layer §2.9 (queries: 2 on 5xx/network).
-      queries: { retry: 2, staleTime: 30_000, refetchOnWindowFocus: false },
+      // Retry policy per data-layer §2.9: queries retry only transient failures
+      // (5xx / network) up to 2×, never 4xx (auth/validation/conflict/etc.).
+      queries: {
+        retry: (failureCount, error) => {
+          if (
+            isApiError(error) &&
+            error.code !== "SERVER_ERROR" &&
+            error.code !== "NETWORK"
+          ) {
+            return false;
+          }
+          return failureCount < 2;
+        },
+        staleTime: 30_000,
+        refetchOnWindowFocus: false,
+      },
       mutations: { retry: 0 },
     },
   });

@@ -14,6 +14,7 @@ export { newIdempotencyKey } from "./idempotency";
 export { composeSignals, withTimeout } from "./abort";
 export { scopedKey } from "./query-keys";
 export type { QueryScope } from "./query-keys";
+export { itemsOf } from "./list";
 export {
   DEFAULT_PAGE_SIZE,
   firstPage,

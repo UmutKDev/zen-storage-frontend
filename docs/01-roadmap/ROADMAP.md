@@ -8,6 +8,34 @@
 > **Update rule:** edit the relevant phase summary or its `phases/` file — **don't rewrite** — and add a Changelog line.
 
 ## Changelog
+- **2026-06-07 (Phase 3 Stage B1 — single-item operations)** — Added the mutation layer for single items in
+  `features/storage/operations`: create folder/file (`Cloud/Directory`/`Cloud/Documents`), rename (`Cloud/Update` /
+  `Cloud/Directory/Rename`), delete (`Cloud/Delete` `Items[{Key,IsDirectory}]`, optimistic + confirm), single move via a
+  folder-picker `MoveDialog` (`Cloud/Move`), and download (`Cloud/PresignedUrl`). One shared `ConflictPrompt` +
+  `useConflictMutation` resolves name clashes (REPLACE/KEEP_BOTH/SKIP, no silent overwrite), parsing the 409 body from
+  `error.raw.Status.Messages[0]`. Move + Delete carry `Idempotency-Key`. Actions hang off a per-row/card `EntryActionsMenu`
+  + a header `CreateMenu`. Green: build/tsc/lint + 61 vitest; reviewer sweep applied; live contract smoke passed.
+  Decision D-P3.6. Stage B2 (multi-select + bulk + DnD) / C / D pending.
+- **2026-06-07 (Phase 3 Stage A — browse foundation)** — Started Phase 3, **staged in ~4 parts** (D-P3.1). Stage A makes
+  Personal storage navigable: `features/storage/browse` (list + smart-grid views with a persisted toggle + client sort,
+  URL-deep-linked breadcrumb, **virtualized** infinite loading via `components/patterns/virtual-list.tsx` off
+  `listDirectories`/`listObjects` `Skip/Take/Count`, the `userStorageUsage` usage bar, full loading/empty/error matrix).
+  `workspaceStore.ownerId` is now wired from the session in `SessionSync` (`useOwnerId` + `enabled` gating). Locked:
+  upload will use the **`UploadPart` proxy** (D-P3.2), and `ListParts` is **absent** from client+backend so Stage C
+  resumability degrades to persisted-ETag + idempotent re-PUT (D-P3.3). Also fixed the global query retry to skip 4xx
+  (D-P3.5). Green: build/tsc/lint + 48 vitest + 2 playwright; full reviewer sweep applied; live contract smoke passed.
+  Stages B (operations) / C (upload) / D (search + palette + touch) pending.
+- **2026-06-07 (Phase 2 — App Shell + Account)** — Shipped the authenticated **shell** as `features/shell`
+  (AppShell/Sidebar/MobileSidebar(Sheet)/Topbar/ThemeToggle/ProfileMenu/SidebarNav + inert WorkspaceSwitcher;
+  `shell.store` persists sidebar collapse) replacing the placeholder `(app)/layout`, plus the **Account** area in
+  `features/account` (profile optimistic edit+rollback; read-only avatar behind the `avatarUpload` flag — endpoint
+  inactive; Security tabs: change-password, 2FA enable/disable + one-time backup codes (lazy `qrcode.react`), passkeys
+  register/list/delete (reuses `@simplewebauthn` `startRegistration`), sessions current-vs-others + revoke/others/all
+  → `logoutAll` triggers `signOutAndCleanup`; read-only subscription; flagged API-keys stub) and a minimal
+  `features/notifications` (bell + unread count). Added 9 wrapped shadcn primitives, `subscriptionApiFactory` +
+  `notificationApiFactory`, user-scoped `accountKeys`, the `account.*` i18n namespace, and the `avatarUpload`/`apiKeys`
+  flags. Green: build/tsc/lint + 32 vitest + 4 playwright; full reviewer sweep applied; live backend contract smoke
+  passed (avatar upload absent → deferral confirmed). Decisions D-P2.1–D-P2.3. Phase 2 now ✅.
 - **2026-06-06 (all deferrals closed → P0 + P1 complete)** — Closed every deferred item: **0.8a** intercepting-routes
   (confirmed Next 16.2 supports `@modal` + `(.)preview/[key]` + `[[...path]]` together), **0.14a** supply-chain CI
   (Renovate + audit/license/SBOM + size-limit/Lighthouse workflows; prod audit + license allowlist verified locally),
@@ -61,8 +89,8 @@
 |---|---|---|---|
 | 0 | Foundation + Design System | [phase-0](./phases/phase-0-foundation.md) | ✅ done (all sub-tasks incl. 0.8a + 0.14a) |
 | 1 | Auth | [phase-1](./phases/phase-1-auth.md) | ✅ done (incl. passkey + legal/consent) |
-| 2 | App Shell + Account | [phase-2](./phases/phase-2-shell-account.md) | ⏳ |
-| 3 | Storage Core | [phase-3](./phases/phase-3-storage-core.md) | ⏳ |
+| 2 | App Shell + Account | [phase-2](./phases/phase-2-shell-account.md) | ✅ done (shell + profile + security + subscription) |
+| 3 | Storage Core | [phase-3](./phases/phase-3-storage-core.md) | 🚧 A (browse) + B1 (single-item ops) done; B2/C/D pending |
 | 4 | Preview + Share | [phase-4](./phases/phase-4-preview-share.md) | ⏳ |
 | 5 | Secure Folders | [phase-5](./phases/phase-5-secure-folders.md) | ⏳ |
 | 6 | Advanced | [phase-6](./phases/phase-6-advanced.md) | ⏳ |

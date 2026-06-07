@@ -100,5 +100,263 @@
       "generic": "Something went wrong. Please try again.",
       "rateLimitedPrefix": "Too many attempts. Retry in"
     }
+  },
+  "storage": {
+    "title": "Storage",
+    "breadcrumb": { "home": "Home", "label": "Folder path" },
+    "view": { "list": "List view", "grid": "Grid view" },
+    "sort": {
+      "label": "Sort",
+      "name": "Name",
+      "size": "Size",
+      "modified": "Modified",
+      "type": "Type",
+      "ascending": "Ascending",
+      "descending": "Descending"
+    },
+    "columns": { "name": "Name", "size": "Size", "modified": "Modified" },
+    "usage": {
+      "label": "Storage",
+      "of": "of",
+      "nearLimit": "Almost full",
+      "exceeded": "Storage full"
+    },
+    "list": { "label": "Files and folders" },
+    "empty": {
+      "title": "This folder is empty",
+      "description": "Upload files or create a folder to get started."
+    },
+    "error": { "title": "Couldn’t load this folder" },
+    "badge": { "encrypted": "Encrypted", "hidden": "Hidden", "locked": "Locked" },
+    "item": { "folder": "Folder", "openFolder": "Open folder" },
+    "ops": {
+      "new": "New",
+      "menu": {
+        "actions": "Actions",
+        "rename": "Rename",
+        "move": "Move",
+        "download": "Download",
+        "delete": "Delete"
+      },
+      "create": {
+        "folder": "New folder",
+        "file": "New file",
+        "folderTitle": "Create folder",
+        "fileTitle": "Create file",
+        "folderName": "Folder name",
+        "fileName": "File name",
+        "namePlaceholder": "Untitled",
+        "submit": "Create",
+        "createdFolder": "Folder created.",
+        "createdFile": "File created."
+      },
+      "rename": {
+        "title": "Rename",
+        "label": "New name",
+        "submit": "Rename",
+        "done": "Renamed."
+      },
+      "delete": {
+        "title": "Delete this item?",
+        "titleFolder": "Delete this folder?",
+        "description": "This can’t be undone. The item is permanently removed.",
+        "descriptionFolder": "This permanently deletes the folder and everything inside it. This can’t be undone.",
+        "confirm": "Delete",
+        "done": "Deleted."
+      },
+      "move": {
+        "title": "Move",
+        "pickDestination": "Choose a destination folder",
+        "here": "Move here",
+        "root": "Home",
+        "done": "Moved.",
+        "noSubfolders": "No subfolders here."
+      },
+      "download": { "preparing": "Preparing download…" },
+      "conflict": {
+        "title": "Name already in use",
+        "description": "An item named “{name}” already exists here. How should we resolve it?",
+        "descriptionGeneric": "An item with that name already exists here. How should we resolve it?",
+        "replace": "Replace",
+        "replaceHint": "Overwrite the existing item.",
+        "keepBoth": "Keep both",
+        "keepBothHint": "Add this one under a new name.",
+        "skip": "Skip",
+        "skipHint": "Keep the existing item, cancel this one."
+      },
+      "errors": {
+        "nameRequired": "A name is required.",
+        "invalidName": "Names can’t contain slashes."
+      }
+    }
+  },
+  "account": {
+    "shell": {
+      "nav": {
+        "storage": "Storage",
+        "account": "Account",
+        "apiKeys": "API keys"
+      },
+      "collapse": "Collapse sidebar",
+      "expand": "Expand sidebar",
+      "openMenu": "Open menu",
+      "closeMenu": "Close menu",
+      "workspace": {
+        "personal": "Personal",
+        "label": "Workspace"
+      },
+      "theme": {
+        "toggle": "Toggle theme",
+        "light": "Light",
+        "dark": "Dark",
+        "system": "System"
+      },
+      "profileMenu": {
+        "account": "Account",
+        "profile": "Profile",
+        "security": "Security",
+        "subscription": "Subscription",
+        "signOut": "Sign out"
+      },
+      "notifications": {
+        "label": "Notifications",
+        "none": "You’re all caught up.",
+        "unreadSuffix": "unread"
+      }
+    },
+    "nav": {
+      "title": "Account",
+      "profile": "Profile",
+      "security": "Security",
+      "subscription": "Subscription",
+      "apiKeys": "API keys"
+    },
+    "profile": {
+      "title": "Profile",
+      "subtitle": "Your personal information.",
+      "fullNameLabel": "Full name",
+      "fullNamePlaceholder": "Your name",
+      "phoneLabel": "Phone number",
+      "phonePlaceholder": "+1 555 000 0000",
+      "emailLabel": "Email",
+      "emailHint": "Your email is used to sign in and can’t be changed here.",
+      "save": "Save changes",
+      "saved": "Profile updated.",
+      "avatarAlt": "Profile photo",
+      "avatarUpload": "Change photo",
+      "avatarUploadHint": "Photo upload is coming soon."
+    },
+    "security": {
+      "title": "Security",
+      "subtitle": "Manage your password, two-factor authentication, passkeys, and sessions.",
+      "tabs": {
+        "password": "Password",
+        "twoFactor": "Two-factor",
+        "passkeys": "Passkeys",
+        "sessions": "Sessions"
+      },
+      "password": {
+        "title": "Change password",
+        "description": "Use a strong password you don’t reuse elsewhere.",
+        "currentLabel": "Current password",
+        "newLabel": "New password",
+        "confirmLabel": "Confirm new password",
+        "submit": "Update password",
+        "changed": "Password updated."
+      },
+      "twoFactor": {
+        "title": "Two-factor authentication",
+        "description": "Add a second step to your sign-in for stronger protection.",
+        "statusEnabled": "Two-factor authentication is on.",
+        "statusDisabled": "Two-factor authentication is off.",
+        "backupRemaining": "backup codes remaining",
+        "enable": "Enable two-factor",
+        "disable": "Disable two-factor",
+        "setupTitle": "Scan the QR code",
+        "setupDescription": "Scan this with your authenticator app, or enter the key manually.",
+        "secretLabel": "Setup key",
+        "copySecret": "Copy key",
+        "copied": "Copied.",
+        "continue": "Continue",
+        "verifyTitle": "Enter the code",
+        "verifyDescription": "Enter the 6-digit code from your authenticator app.",
+        "otpLabel": "One-time code",
+        "verify": "Verify & enable",
+        "enabled": "Two-factor authentication enabled.",
+        "disabled": "Two-factor authentication disabled.",
+        "disableTitle": "Disable two-factor?",
+        "disableDescription": "Enter a current code to confirm. Your account will be less protected.",
+        "backupTitle": "Save your backup codes",
+        "backupDescription": "Store these somewhere safe. Each code works once and they won’t be shown again.",
+        "download": "Download codes",
+        "savedConfirm": "I’ve saved my codes",
+        "regenerate": "Regenerate backup codes",
+        "regenerateTitle": "Regenerate backup codes?",
+        "regenerateDescription": "Enter a current code. Your previous backup codes will stop working.",
+        "regenerated": "New backup codes generated."
+      },
+      "passkeys": {
+        "title": "Passkeys",
+        "description": "Sign in without a password using your device or a security key.",
+        "add": "Add passkey",
+        "deviceNameLabel": "Passkey name",
+        "deviceNamePlaceholder": "e.g. MacBook Touch ID",
+        "empty": "No passkeys yet.",
+        "unsupported": "This browser doesn’t support passkeys.",
+        "registered": "Passkey added.",
+        "delete": "Remove",
+        "deleteTitle": "Remove this passkey?",
+        "deleteDescription": "You won’t be able to sign in with it anymore.",
+        "deleted": "Passkey removed.",
+        "lastUsed": "Last used",
+        "added": "Added"
+      },
+      "sessions": {
+        "title": "Active sessions",
+        "description": "Devices currently signed in to your account.",
+        "current": "This device",
+        "device": "Device",
+        "ip": "IP address",
+        "lastActive": "Last active",
+        "revoke": "Revoke",
+        "revokeTitle": "Revoke this session?",
+        "revokeDescription": "That device will be signed out.",
+        "revoked": "Session revoked.",
+        "logoutOthers": "Sign out other sessions",
+        "logoutOthersTitle": "Sign out everywhere else?",
+        "logoutOthersDescription": "All other devices will be signed out. This device stays signed in.",
+        "logoutAll": "Sign out everywhere",
+        "logoutAllTitle": "Sign out everywhere?",
+        "logoutAllDescription": "Every device, including this one, will be signed out.",
+        "empty": "No active sessions."
+      }
+    },
+    "subscription": {
+      "title": "Subscription",
+      "subtitle": "Your current plan and limits.",
+      "currentPlan": "Current plan",
+      "trial": "Trial",
+      "active": "Active",
+      "renews": "Renews",
+      "expires": "Expires",
+      "storage": "Storage",
+      "unlimited": "Unlimited",
+      "objects": "Files",
+      "billingCycle": "Billing",
+      "noPlan": "You don’t have an active plan.",
+      "comingSoon": "Plan changes are coming soon."
+    },
+    "apiKeys": {
+      "title": "API keys",
+      "comingSoon": "API key management is coming soon."
+    },
+    "errors": {
+      "fullNameRequired": "Name is required.",
+      "currentPasswordRequired": "Current password is required.",
+      "passwordMismatch": "Passwords do not match.",
+      "deviceNameRequired": "Give this passkey a name.",
+      "generic": "Something went wrong. Please try again.",
+      "rateLimitedPrefix": "Too many attempts. Retry in"
+    }
   }
 }

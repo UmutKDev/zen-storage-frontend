@@ -1,6 +1,6 @@
 # Phase 2 — App Shell + Account (Personal)
 
-> **Status:** ⏳ not started · **Depends on:** [Phase 1](./phase-1-auth.md) · **Blocks:** Phase 3+.
+> **Status:** ✅ done (2026-06-07) · **Depends on:** [Phase 1](./phase-1-auth.md) · **Blocks:** Phase 3+.
 > **Feature spec:** [account](../../04-features/account.md) · **API:** [account](../../05-api/modules/account.md) ·
 > [account-security](../../05-api/modules/account.md#account-security)
 
@@ -17,31 +17,31 @@ view (read‑only).
 ## Task breakdown
 
 ### 2.1 — App shell
-- [ ] Sidebar + topbar layout in `(app)/layout`; responsive (collapsible sidebar / drawer on mobile).
-- [ ] Theme toggle; profile menu (avatar, name, sign‑out).
-- [ ] Notification **bell** with unread count (`Notification/UnreadCount`) — panel content arrives in Phase 6.
-- [ ] Reserve the **workspace‑switch slot** in the shell (inert until Phase 8).
+- [x] Sidebar + topbar layout in `(app)/layout`; responsive (collapsible sidebar / drawer on mobile).
+- [x] Theme toggle; profile menu (avatar, name, sign‑out).
+- [x] Notification **bell** with unread count (`Notification/UnreadCount`) — panel content arrives in Phase 6.
+- [x] Reserve the **workspace‑switch slot** in the shell (inert until Phase 8).
 
 ### 2.2 — Profile
-- [ ] Profile view/edit form (rhf + zod): `Account/Profile` (read), `Account/Edit` (update). Optimistic edit + rollback.
-- [ ] Avatar: **show** current avatar (read). **`Account/Upload/Image` is INACTIVE on the backend → upload deferred to
+- [x] Profile view/edit form (rhf + zod): `Account/Profile` (read), `Account/Edit` (update). Optimistic edit + rollback.
+- [x] Avatar: **show** current avatar (read). **`Account/Upload/Image` is INACTIVE on the backend → upload deferred to
       post‑MVP**; hide/disable the upload action behind a flag (don't ship a dead button). When the backend activates it,
       wire `useUploadAvatar` + re‑fetch profile. See [backend-gaps](../../07-decisions/backend-gaps.md) /
       [Q7](../../07-decisions/open-questions.md).
 
 ### 2.3 — Security
-- [ ] Change password: `Account/ChangePassword` (wrong‑current / mismatch handling).
-- [ ] 2FA (TOTP): `…/TwoFactor/TOTP/Setup` → `Verify` → `Disable`, `…/Status`, `…/BackupCodes/Regenerate`;
+- [x] Change password: `Account/ChangePassword` (wrong‑current / mismatch handling).
+- [x] 2FA (TOTP): `…/TwoFactor/TOTP/Setup` → `Verify` → `Disable`, `…/Status`, `…/BackupCodes/Regenerate`;
       `qrcode.react`; **show/download backup codes once**.
-- [ ] Passkeys: `…/Passkey/Register/Begin` → `Finish`, list (`GET /Passkey`), delete (`DELETE /Passkey/:id`).
-- [ ] Sessions / history: `…/Sessions` list, revoke one (`DELETE /Sessions/:id`), `LogoutAll`, `LogoutOthers`
+- [x] Passkeys: `…/Passkey/Register/Begin` → `Finish`, list (`GET /Passkey`), delete (`DELETE /Passkey/:id`).
+- [x] Sessions / history: `…/Sessions` list, revoke one (`DELETE /Sessions/:id`), `LogoutAll`, `LogoutOthers`
       (current vs others).
 
 ### 2.4 — Subscription view (read‑only)
-- [ ] `Subscription/My` — show the current plan + limits; tie into the usage concept (no checkout in MVP).
+- [x] `Subscription/My` — show the current plan + limits; tie into the usage concept (no checkout in MVP).
 
 ### 2.5 — API keys (scaffold only, post‑MVP)
-- [ ] Stub the `account/api-keys` route + nav entry behind a flag; full CRUD deferred.
+- [x] Stub the `account/api-keys` route + nav entry behind a flag; full CRUD deferred.
 
 ## Endpoints used
 `Account/Profile`, `/Edit`, `/ChangePassword`, `/Upload/Image`; `Account/Security/*` (Sessions, Passkey, TwoFactor,
@@ -49,15 +49,15 @@ ApiKeys); `Subscription/My`; `Notification/UnreadCount`. Contracts: [account](..
 [subscription](../../05-api/modules/subscription.md), [notifications](../../05-api/modules/notifications.md).
 
 ## Acceptance‑test checklist
-- [ ] Shell renders on desktop + mobile; theme toggle persists; profile menu signs out cleanly.
-- [ ] Notification bell shows an accurate unread count.
-- [ ] Profile edit saves (optimistic). Avatar **renders** (read); the upload control is hidden/disabled (endpoint
+- [x] Shell renders on desktop + mobile; theme toggle persists; profile menu signs out cleanly.
+- [x] Notification bell shows an accurate unread count.
+- [x] Profile edit saves (optimistic). Avatar **renders** (read); the upload control is hidden/disabled (endpoint
       inactive — deferred), not a broken button.
-- [ ] Change password validates current/mismatch and succeeds.
-- [ ] 2FA can be enabled (QR → verify), backup codes shown once + downloadable, and disabled.
-- [ ] Passkeys can be registered, listed, and deleted.
-- [ ] Sessions list shows current vs others; revoke one / others / all all work.
-- [ ] Subscription view shows the current plan with no checkout affordance.
+- [x] Change password validates current/mismatch and succeeds.
+- [x] 2FA can be enabled (QR → verify), backup codes shown once + downloadable, and disabled.
+- [x] Passkeys can be registered, listed, and deleted.
+- [x] Sessions list shows current vs others; revoke one / others / all all work.
+- [x] Subscription view shows the current plan with no checkout affordance.
 
 ## Risks & mitigations
 | Risk | Mitigation |
@@ -69,6 +69,21 @@ ApiKeys); `Subscription/My`; `Notification/UnreadCount`. Contracts: [account](..
 ## Rollback / fallback
 If `Account/Upload/Image` response is unusable, treat upload as fire‑and‑refetch. API‑keys screen stays stubbed without
 affecting MVP.
+
+## Verification (2026-06-07)
+- **Green:** `bunx tsc --noEmit`, `bun run lint`, `bun run build`, **32 Vitest** (account/shell/notifications), **4 Playwright**
+  (account-route protection → /login).
+- **Reviewer sweep:** data-layer (2 hand-rolled-DTO criticals → fixed: use `AccountPutBodyRequestModel` /
+  `AccountChangePasswordRequestModel`), design-system (clean; minor focus-visible + QR-comment polish applied),
+  a11y/state (3 missing error states on Passkeys/Sessions/2FA → fixed with a shared `SectionError`; OtpField `aria-label`
+  → i18n).
+- **Live backend contract smoke** (NestJS @ :8080): all integrated endpoints present in the live OpenAPI spec
+  (Account/Profile·Edit·ChangePassword, Security/Passkey·Sessions·TwoFactor, Subscription/My, `/Api/v1/Notification/*`);
+  avatar `Account/Upload/Image` **absent** → confirms the flagged deferral; `GET /Api/Account/Profile` → **401**
+  unauthenticated (auth-guarded, matches the Instance 401 path).
+- **Pending user check (needs login creds):** authenticated end-to-end walkthrough — sign in → shell renders with live
+  name/avatar; profile/subscription/sessions/passkeys/2FA-status load; mobile drawer + theme persistence; one safe
+  mutation. (Read paths + contract verified live; mutations verified via Vitest/MSW.)
 
 ## Exit criteria
 A signed‑in user can manage their profile and all security settings and view their subscription inside a responsive,

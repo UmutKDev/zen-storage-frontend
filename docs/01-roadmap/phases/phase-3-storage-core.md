@@ -1,6 +1,8 @@
 # Phase 3 — Storage Core (Personal)
 
-> **Status:** ⏳ not started · **Depends on:** [Phase 2](./phase-2-shell-account.md) · **Blocks:** Phases 4–6.
+> **Status:** 🚧 in progress — **Stage A (browse) ✅** + **Stage B1 (single-item operations) ✅ 2026-06-07**;
+> Stage B2 (multi-select + bulk + DnD), C (upload), D (search + palette + touch) pending. **Staged in ~4 parts**
+> (decided D-P3.1; B split B1→B2). · **Depends on:** [Phase 2](./phase-2-shell-account.md) · **Blocks:** Phases 4–6.
 > **Feature specs:** [storage-browse](../../04-features/storage-browse.md) · [storage-upload](../../04-features/storage-upload.md)
 > · [storage-operations](../../04-features/storage-operations.md) · [storage-search-filter](../../04-features/storage-search-filter.md)
 > **Architecture:** [upload-pipeline](../../02-architecture/upload-pipeline.md) · [conflict-resolution](../../02-architecture/conflict-resolution.md)
@@ -21,14 +23,16 @@ duplicate scan / archive (Phase 6); team context UI (Phase 8).
 
 ## Task breakdown
 
-### 3.1 — Browse & navigate
-- [ ] `StorageBrowser` with **list** and **smart grid** views (view toggle persists per session).
-- [ ] Breadcrumb (`Cloud/List/Breadcrumb`); folder deep‑linking via `storage/[[...path]]`.
-- [ ] **Virtualization** (`@tanstack/react-virtual`) + infinite/paged query using envelope `Skip/Take/Count`.
-- [ ] State‑matrix coverage: loading skeleton, empty folder, error, no‑search‑results.
+### 3.1 — Browse & navigate ✅ (Stage A)
+- [x] `StorageBrowser` with **list** and **smart grid** views (view toggle persists per session — `viewPrefs` sessionStorage).
+- [x] Breadcrumb (derived client-side from the URL path — `Cloud/List/Breadcrumb` available if canonical names are later
+      needed, D-P3.4); folder deep‑linking via `storage/[[...path]]`.
+- [x] **Virtualization** (`@tanstack/react-virtual` via `components/patterns/virtual-list.tsx`, threshold 100) +
+      infinite/paged query using envelope `Skip/Take/Count` (`listDirectories` + `listObjects`).
+- [x] State‑matrix coverage: loading skeleton, empty folder, error+retry. (no‑search‑results lands with search in Stage D.)
 
-### 3.2 — Usage bar
-- [ ] Always‑visible usage bar (`Cloud/User/StorageUsage`): %, near‑limit color, warning/exceeded states.
+### 3.2 — Usage bar ✅ (Stage A)
+- [x] Always‑visible usage bar (`Cloud/User/StorageUsage`): %, near‑limit color **+ text cue**, warning/exceeded states.
 
 ### 3.3 — Upload pipeline (heaviest task) → see [upload-pipeline](../../02-architecture/upload-pipeline.md)
 - [ ] Persistent **upload queue/tray** (zustand): per‑file state + progress, concurrency limit, pause/cancel/retry.
@@ -38,19 +42,20 @@ duplicate scan / archive (Phase 6); team context UI (Phase 8).
 - [ ] **Folder upload** (recurse: create dirs + upload files).
 - [ ] **Quota / max‑size pre‑flight:** block with a clear message + upgrade hint (no silent failure).
 
-### 3.4 — Create / rename / move / delete
-- [ ] Create folder (`Cloud/Directory`; `IsEncrypted` option stubbed for Phase 5); create file (`Cloud/Documents`).
-- [ ] Rename: `Cloud/Update` (file) / `Cloud/Directory/Rename` (dir).
-- [ ] Move: `Cloud/Move` (`Idempotency-Key`) via dnd + dialog; optimistic + rollback.
-- [ ] Delete: `Cloud/Delete` / `DELETE /Cloud/Directory` (`Idempotency-Key`); confirm; **no trash** (leave room).
+### 3.4 — Create / rename / move / delete — single-item ✅ (B1)
+- [x] Create folder (`Cloud/Directory`; `IsEncrypted` stubbed for Phase 5); create file (`Cloud/Documents`).
+- [x] Rename: `Cloud/Update` (file) / `Cloud/Directory/Rename` (dir).
+- [x] Move: `Cloud/Move` (`Idempotency-Key`) via the **MoveDialog folder-picker** (single); dnd → B2. (invalidate-on-success.)
+- [x] Delete: single via `Cloud/Delete` `Items[{Key,IsDirectory}]` (handles files + unencrypted dirs; `Idempotency-Key`);
+      confirm (AlertDialog); **optimistic** removal + reconcile; **no trash**. Bulk → B2.
 
-### 3.5 — Multi‑select & bulk
+### 3.5 — Multi‑select & bulk → **Stage B2**
 - [ ] `useItemSelection` (range/toggle/select‑all); bulk action bar.
 - [ ] Bulk delete / move / download (loop endpoints); **apply‑to‑all** conflict handling.
 
 ### 3.6 — Conflict resolution → see [conflict-resolution](../../02-architecture/conflict-resolution.md)
-- [ ] One reusable dialog/hook for `FAIL/REPLACE/SKIP/KEEP_BOTH`; prompt by default; **apply‑to‑all** for bulk;
-      remember the choice for the batch.
+- [x] One reusable prompt/hook (`ConflictPrompt` + `useConflictMutation`) for `REPLACE/KEEP_BOTH/SKIP`; prompt by default,
+      no silent overwrite (B1, single). **apply‑to‑all** for bulk batches → B2.
 
 ### 3.7 — Search / filter / sort → see [storage-search-filter](../../04-features/storage-search-filter.md)
 - [ ] Filter + sort (by type/size/date/name; persists per session).
@@ -82,6 +87,37 @@ duplicate scan / archive (Phase 6); team context UI (Phase 8).
 - [ ] Create folder/file, rename, move (dnd + dialog), delete — single and bulk — all work with optimistic rollback.
 - [ ] Conflicts prompt; apply‑to‑all works on bulk; no silent overwrites.
 - [ ] Search default = current folder; global toggle works; filter/sort persist; no‑results state shows.
+
+## Stage A verification (2026-06-07)
+- **Green:** `tsc`, `lint`, `build`; **48 Vitest** (incl. `entries` sort/merge, `virtual-list` threshold,
+  `StorageBrowser` states + view toggle + ownerId-gating); **2 Playwright** (`/storage` + deep path → /login).
+- **Built:** `features/storage/browse/*` (queries/keys/hooks, `viewPrefs` store, list+grid views, breadcrumb, view
+  toggle, sort menu, usage bar, state components), `components/patterns/virtual-list.tsx`, `useOwnerId`, ownerId wiring
+  in `SessionSync`, route wired in `[[...path]]/page.tsx`.
+- **Reviewer sweep applied:** data-layer (AbortSignal threaded into the read GETs; retry-on-4xx policy fixed in
+  `providers`; `userId`→`ownerIdFromSession`), design-system (clean; `text-[11px]`→`text-xs`), a11y/state (grid cards now
+  carry `listitem` role via `virtual-list` `rowRole`; error-before-loading ordering; usage near-limit text cue).
+- **Live backend contract smoke** (NestJS @ :8080): `Cloud/List(/Directories|/Objects|/Breadcrumb)`, `Cloud/Search`,
+  `Cloud/User/StorageUsage` present; `Cloud/List/Objects` → 401 unauthenticated.
+- **Deferred (tracked):** arrow-key roving grid/list navigation + live-region state announcements (a11y polish, later
+  stage); no-search-results state (with search, Stage D); directories query-key hidden/folder-token segment (Phase 5);
+  authenticated live walkthrough (needs user creds).
+
+## Stage B1 verification (2026-06-07)
+- **Green:** `tsc`, `lint`, `build`; **61 Vitest** (+ops: path/conflict helpers, create-folder path, conflict→REPLACE
+  retry, rename via `update`, delete `Items[{Key,IsDirectory}]`, download presign, move→root via picker).
+- **Built:** `features/storage/operations/*` — `operations.mutations` (create/rename/delete/move/download), `lib`
+  (conflict/paths/invalidate/validation), hooks (`useConflictMutation` + per-op), components (`ConflictPrompt`,
+  `NameDialog`, `DeleteConfirmDialog`, `MoveDialog` folder-picker, `EntryActionsMenu`, `CreateMenu`). Wired into
+  `BrowseRow`/`BrowseCard` (actions menu) + `StorageBrowser` header (CreateMenu).
+- **Reviewer sweep applied:** data-layer (`DeleteItem`→`CloudDeleteModel`/`CloudMoveItemModel`; `ConflictStrategy`→
+  generated `ConflictResolutionModelStrategyEnum`), design-system (removed hand-rolled glass on the card menu; breadcrumb
+  `rounded-sm`), a11y/state (move-picker error+retry state; `useDirectories(path, enabled)` so the closed picker doesn't
+  fetch). Deferred/tracked: 403-secure-folder→unlock routing + `directories` key hidden-token slot (Phase 5);
+  dialog-from-menu focus-return + delete-toast severity (manual SR/keyboard pass in the live walkthrough).
+- **Live backend contract smoke** (NestJS @ :8080): `Cloud/Directory`, `Cloud/Documents`, `Cloud/Update`, `Cloud/Move`,
+  `Cloud/Delete`, `Cloud/PresignedUrl` all present. Authenticated create→rename→move→delete + forced conflict + download
+  pending user creds (checklist).
 
 ## Risks & mitigations
 | Risk | Mitigation |
@@ -133,9 +169,9 @@ Locked decisions surfaced by the HIGH/MEDIUM audit. These extend §3 acceptance 
 
 ### Large-list performance
 
-- [ ] **TanStack Virtual locked.** File lists with more than 100 entries are virtualized through
+- [x] **TanStack Virtual locked.** (Stage A) File lists with more than 100 entries are virtualized through
       `components/patterns/virtual-list.tsx`. Below 100, rendering is direct. The threshold is a constant in the
-      pattern, not a per-call prop.
+      pattern, not a per-call prop (`VIRTUALIZE_THRESHOLD = 100`).
 
 ### Mobile / touch
 
@@ -150,9 +186,10 @@ Locked decisions surfaced by the HIGH/MEDIUM audit. These extend §3 acceptance 
 
 ### OwnerId & query-key scope
 
-- [ ] **OwnerId derivation.** `workspaceStore.scope` is computed **once** at session-ready as `user.Id` OR
-      `team/{TeamId}`. Every `queryKey` and every `X-Team-Id` header reads from this single source. No ad-hoc
-      derivation in features. See [team-readiness](../../02-architecture/team-readiness.md).
+- [x] **OwnerId derivation.** (Stage A) `workspaceStore.ownerId` is set **once** at session-ready in `SessionSync`
+      from `session.user.id` (= `profile.Id`; teams swap it in Phase 8). Every storage `queryKey` reads it via
+      `useOwnerId()` and guards with `enabled: Boolean(ownerId)`; sign-out resets it. See
+      [team-readiness](../../02-architecture/team-readiness.md).
 
 ### Server-only seam enforcement
 

@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { registerSessionSource, registerSignOut } from "@/service/token-sources";
+import { useWorkspaceStore } from "@/stores";
 import { signOutAndCleanup } from "../lib/signOutAndCleanup";
 
 /**
@@ -22,6 +23,15 @@ export function SessionSync() {
   useEffect(() => {
     sessionIdRef.current = data?.sessionId ?? null;
   }, [data?.sessionId]);
+
+  // Derive the workspace `ownerId` from the session (auth `authorize` sets
+  // `id: profile.Id`). This is the single source for query-key scope + the
+  // future X-Team-Id; sign-out teardown resets it. (Phase 8 swaps it on team
+  // switch.)
+  const ownerIdFromSession = data?.user?.id ?? null;
+  useEffect(() => {
+    useWorkspaceStore.getState().setOwner(ownerIdFromSession);
+  }, [ownerIdFromSession]);
 
   useEffect(() => {
     registerSessionSource(() => sessionIdRef.current);
