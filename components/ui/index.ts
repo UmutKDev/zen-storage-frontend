@@ -91,6 +91,7 @@ export { Tabs, TabsList, TabsTrigger, TabsContent } from "./tabs";
 export { ScrollArea, ScrollBar } from "./scroll-area";
 export { Badge, badgeVariants } from "./badge";
 export { Switch } from "./switch";
+export { Checkbox } from "./checkbox";
 export { Skeleton } from "./skeleton";
 export {
   Table,

@@ -60,17 +60,39 @@ export function ConflictPrompt({
   onCancel: () => void;
   pending?: boolean;
 }) {
-  const name = details.Conflicts?.[0]?.Source?.Name;
+  // Batch conflicts (bulk move / multi-drag) get count copy + a name sample
+  // and "many" hints; the chosen strategy applies to every conflicting item
+  // in THIS batch (apply-to-all radius = one user action).
+  const batch = details.TotalItems > 1;
+  const names = (details.Conflicts ?? [])
+    .map((c) => c.Source?.Name)
+    .filter(Boolean);
+  const name = names[0];
 
   return (
     <>
       <DialogHeader>
         <DialogTitle>{t("storage.ops.conflict.title")}</DialogTitle>
         <DialogDescription>
-          {t("storage.ops.conflict.descriptionGeneric")}
+          {batch
+            ? `${details.ConflictCount} ${t("storage.ops.conflict.of")} ${details.TotalItems} ${t("storage.ops.conflict.existSuffix")}`
+            : t("storage.ops.conflict.descriptionGeneric")}
         </DialogDescription>
       </DialogHeader>
-      {name ? (
+      {batch && names.length > 0 ? (
+        <ul className="rounded-md bg-muted px-3 py-2 text-sm font-medium text-foreground">
+          {names.slice(0, 3).map((n) => (
+            <li key={n} className="truncate">
+              {n}
+            </li>
+          ))}
+          {names.length > 3 ? (
+            <li className="text-xs font-normal text-muted-foreground">
+              +{names.length - 3}
+            </li>
+          ) : null}
+        </ul>
+      ) : name ? (
         <p className="truncate rounded-md bg-muted px-3 py-2 text-sm font-medium text-foreground">
           {name}
         </p>
@@ -78,20 +100,32 @@ export function ConflictPrompt({
       <div className="flex flex-col gap-2">
         <Option
           label={t("storage.ops.conflict.replace")}
-          hint={t("storage.ops.conflict.replaceHint")}
+          hint={t(
+            batch
+              ? "storage.ops.conflict.replaceHintMany"
+              : "storage.ops.conflict.replaceHint",
+          )}
           onClick={() => onResolve("REPLACE")}
           disabled={pending}
           destructive
         />
         <Option
           label={t("storage.ops.conflict.keepBoth")}
-          hint={t("storage.ops.conflict.keepBothHint")}
+          hint={t(
+            batch
+              ? "storage.ops.conflict.keepBothHintMany"
+              : "storage.ops.conflict.keepBothHint",
+          )}
           onClick={() => onResolve("KEEP_BOTH")}
           disabled={pending}
         />
         <Option
           label={t("storage.ops.conflict.skip")}
-          hint={t("storage.ops.conflict.skipHint")}
+          hint={t(
+            batch
+              ? "storage.ops.conflict.skipHintMany"
+              : "storage.ops.conflict.skipHint",
+          )}
           onClick={() => onResolve("SKIP")}
           disabled={pending}
         />

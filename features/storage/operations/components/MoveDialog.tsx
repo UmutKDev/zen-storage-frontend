@@ -23,22 +23,32 @@ import { destinationKey } from "../lib/paths";
 import { ConflictPrompt } from "./ConflictPrompt";
 
 export function MoveDialog({
-  entry,
+  entries,
   currentPath,
   open,
   onOpenChange,
+  onMoved,
 }: {
-  entry: FolderEntry;
+  entries: ReadonlyArray<FolderEntry>;
   currentPath: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** Extra success hook (e.g. the bulk bar clearing the selection). */
+  onMoved?: () => void;
 }) {
   const [pickerPath, setPickerPath] = useState("");
-  const move = useMove(entry, () => onOpenChange(false));
+  const move = useMove(() => {
+    onMoved?.();
+    onOpenChange(false);
+  });
   const dirs = useDirectories(pickerPath, open);
   const subfolders = dirs.data ?? [];
-  const sourcePrefix =
-    entry.kind === "dir" ? entry.dir.Prefix.replace(/\/+$/, "") : null;
+  // Moved dirs can't be picked (blocking the node blocks its subtree too).
+  const sourcePrefixes = new Set(
+    entries
+      .filter((e) => e.kind === "dir")
+      .map((e) => e.key.replace(/\/+$/, "")),
+  );
   const crumbs = ["", ...accumulate(toSegments(pickerPath))];
 
   const handleOpenChange = (next: boolean) => {
@@ -65,7 +75,11 @@ export function MoveDialog({
         ) : (
           <>
             <DialogHeader>
-              <DialogTitle>{t("storage.ops.move.title")}</DialogTitle>
+              <DialogTitle>
+                {entries.length > 1
+                  ? `${t("storage.ops.bulk.movePrefix")} ${entries.length} ${t("storage.ops.bulk.itemsSuffix")}`
+                  : t("storage.ops.move.title")}
+              </DialogTitle>
               <DialogDescription>
                 {t("storage.ops.move.pickDestination")}
               </DialogDescription>
@@ -132,9 +146,9 @@ export function MoveDialog({
                     const childPath = pickerPath
                       ? `${pickerPath}/${dir.Name}`
                       : dir.Name;
-                    const isSource =
-                      sourcePrefix !== null &&
-                      dir.Prefix.replace(/\/+$/, "") === sourcePrefix;
+                    const isSource = sourcePrefixes.has(
+                      dir.Prefix.replace(/\/+$/, ""),
+                    );
                     return (
                       <li key={dir.Prefix}>
                         <button
@@ -161,7 +175,10 @@ export function MoveDialog({
               <Button
                 disabled={move.isPending || sameFolder}
                 onClick={() =>
-                  move.mutate({ destinationKey: destinationKey(pickerPath) })
+                  move.mutate({
+                    entries,
+                    destinationKey: destinationKey(pickerPath),
+                  })
                 }
               >
                 {t("storage.ops.move.here")}

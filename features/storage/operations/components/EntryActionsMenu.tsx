@@ -97,7 +97,7 @@ export function EntryActionsMenu({
       ) : null}
       {dialog === "move" ? (
         <MoveDialog
-          entry={entry}
+          entries={[entry]}
           currentPath={path}
           open
           onOpenChange={(o) => !o && close()}
@@ -105,10 +105,10 @@ export function EntryActionsMenu({
       ) : null}
       {dialog === "delete" ? (
         <DeleteConfirmDialog
-          entry={entry}
+          entries={[entry]}
           open
           onOpenChange={(o) => !o && close()}
-          onConfirm={() => del.remove(entry)}
+          onConfirm={() => del.remove([entry])}
           isPending={del.isPending}
         />
       ) : null}

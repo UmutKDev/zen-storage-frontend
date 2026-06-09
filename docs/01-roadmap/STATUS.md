@@ -5,16 +5,19 @@
 >
 > Legend: ⏳ not started · 🚧 in progress · ✅ done · 🚫 blocked.
 
-**Updated:** 2026-06-07 · **Branch:** `v2` · **Round:** Phase 3 in progress — Stage A (browse) + B1 (single-item ops) landed.
+**Updated:** 2026-06-10 · **Branch:** `v2` · **Round:** Phase 3 in progress — Stages A (browse) + B1 (single-item ops) + B2 (multi-select + bulk + DnD) landed.
 
 ## Where we are
-**Phase 3 Stage A (browse) + Stage B1 (single-item operations) landed.** Storage is navigable AND mutable for single
-items: `features/storage/operations` adds create folder/file, rename, delete (optimistic + confirm), single move via a
-folder-picker dialog, and download — each routing name clashes through one shared `ConflictPrompt`/`useConflictMutation`
-(REPLACE/KEEP_BOTH/SKIP, no silent overwrite). Actions hang off a per-row/card menu + a header "New" menu. Move/Delete
-carry `Idempotency-Key`. Phase 3 is **staged in ~4 parts** (D-P3.1; B split B1→B2); upload will use the **`UploadPart`
-proxy** (D-P3.2). Green on `build`/`tsc`/`lint` + **61 Vitest** + **2 Playwright**; reviewer sweep applied; live backend
-contract smoke passed. **Next:** Stage B2 (multi-select + bulk + drag-and-drop) → C (upload) → D (search + palette + touch).
+**Phase 3 Stage B2 (multi-select + bulk + drag-and-drop) landed.** Storage now has full file-manager selection:
+`useItemSelection` + in-memory `selection.store` (plain-click file select, Shift-range over the folders-first order,
+Ctrl/Cmd-toggle, checkboxes, mod+A, Esc; locked dirs excluded; survives list↔grid, clears on path change), a floating
+`BulkActionBar` (count + aria-live, bulk move/download/delete), and `DndMoveLayer` drag-move (MouseSensor desktop-only,
+drag the whole selection, drop on folders or breadcrumb ancestors, self/descendant guarded, “+N” DragOverlay chip).
+Bulk delete/move are **single batch calls** with `Items[]`; the one 409 + one strategy retry IS apply-to-all
+(batch radius = one user action); **partial-batch SKIP retries server-side** so the non-conflicting rest still moves
+(D-P3.9). Bulk download loops presigns over files only. Latent bug fixed: `useDelete`'s optimistic update still wrote
+the pre-D-P3.7 `InfiniteData` shape (would throw live on populated caches). Green on `build`/`tsc`/`lint` + **89
+Vitest** + 2 Playwright. **Next:** Stage C (upload pipeline, `UploadPart` proxy) → D (search + palette + touch).
 
 ## Earlier rounds
 
@@ -44,7 +47,7 @@ live backend contract smoke passed. Authenticated end-to-end walkthrough pending
 | 0 | Foundation + Design System | ✅ | All sub-tasks closed: data layer, design system, 0.0a CSP/headers, 0.4a privacy, 0.8a intercepting-routes (confirmed), 0.14a supply-chain CI |
 | 1 | Auth | ✅ | Full: multi-step login (+2FA **+passkey**), register, reset, route protection, sign-out teardown, **legal pages + consent banner**. Verified live vs API + 16 tests |
 | 2 | App Shell + Account | ✅ | Full: shell (sidebar/topbar/theme/profile/bell, inert workspace slot) + profile (optimistic, avatar read-only) + security (password, 2FA, passkeys, sessions) + read-only subscription + flagged API-keys stub. 32 vitest + 4 e2e; reviewers applied; live contract smoke |
-| 3 | Storage Core | 🚧 | **Staged in 4 parts.** A (browse) ✅ · B1 (single-item ops: create/rename/delete/move-dialog/download + conflict) ✅. B2 (multi-select+bulk+DnD) / C (upload, `UploadPart` proxy) / D (search+palette+touch) pending |
+| 3 | Storage Core | 🚧 | **Staged in 4 parts.** A (browse) ✅ · B1 (single-item ops) ✅ · B2 (multi-select + bulk single-call delete/move + files-only download + DnD move + apply-to-all conflict) ✅. C (upload, `UploadPart` proxy) / D (search+palette+touch) pending |
 | 4 | Preview + Share | ⏳ | Share = presigned URL ✓; CDN resize via wsrv.nl ✓ (both resolved) |
 | 5 | Secure Folders | ⏳ | token never‑persist guarantee |
 | 6 | Advanced | ⏳ | socket‑first + poll for jobs |
@@ -67,15 +70,25 @@ live backend contract smoke passed. Authenticated end-to-end walkthrough pending
   shadcn init (`components.json`), motion/i18n/theme libs, providers, route groups.
 
 ## What's next
-1. **User check:** authenticated end-to-end walkthrough against the live backend (needs login creds) — browse + create /
-   rename / move / delete / download a real item, force a name conflict, and verify the actions-menu→dialog keyboard
-   focus return.
-2. **Phase 3 Stage B2 — multi-select + bulk + DnD:** `useItemSelection`, bulk action bar, bulk delete/move/download with
-   apply-to-all conflict, and drag-and-drop move. Then **Stage C** (upload pipeline, `UploadPart` proxy) and **Stage D**
-   (search/filter/sort + command palette + touch bottom-sheet). See the
+1. **User check:** authenticated end-to-end walkthrough against the live backend (needs login creds) — selection matrix
+   (click/shift/ctrl/select-all/Esc in both views), bulk delete/move incl. a **partial 409** exercising all 3 strategies
+   (SKIP must move the rest), bulk download of 3+ files (Chrome's one-time multi-download prompt), DnD row→folder +
+   selection drag “+N” + breadcrumb drop + post-drag click not navigating, plus the B1 items (conflict, focus return).
+2. **Phase 3 Stage C — upload pipeline** (`UploadPart` proxy, queue/tray, quota pre-flight, folder upload), then
+   **Stage D** (search/filter/sort + command palette + touch bottom-sheet). See the
    [Phase 3 checklist](./phases/phase-3-storage-core.md).
 
 ## Recent status entries
+- **2026-06-10 (Phase 3 Stage B2 — multi-select + bulk + DnD)** — Full selection model (`useItemSelection` +
+  in-memory `selection.store`; `selectedKeys` = ⌘K contract; locked dirs excluded; survives view toggle, clears on
+  path change), `BulkActionBar` (move/download/delete + aria-live count), `DndMoveLayer` (MouseSensor 8px desktop-only,
+  whole-selection drag, folder/breadcrumb drop targets, self/descendant guard in pure `lib/dnd.ts`, post-drag click
+  suppression, reduced-motion-gated overlay). Bulk delete/move are **single `Items[]` calls** → one 409 + one strategy
+  retry = apply-to-all (batch radius); **partial-batch SKIP retries server-side** (verified vs `cloud.object.service.Move`);
+  `ConflictPrompt` shows “N of M” + name sample. Bulk download = sequential presigns, files only. Hooks/dialogs
+  generalized to arrays (no `bulk*` duplicates); `Checkbox` primitive added (shadcn). **Latent fix:** `useDelete`
+  optimistic update still used the pre-D-P3.7 `InfiniteData` cache shape (would throw live); now plain-array filters.
+  Green: `tsc`/`lint`/`build` + **89 vitest** (26 new). Decision D-P3.9. Stage C/D pending.
 - **2026-06-07 (fix: cancelled-request toasts)** — Folder entry showed 2–3 **"Something went wrong"** toasts. Root cause
   (found live): the threaded `AbortSignal` makes axios throw `CanceledError` on nav/refetch, and the Instance was toasting
   it. Fix: `service/interceptors/envelope.ts` now **rethrows cancellations silently** (never toasts/signs-out). Global bug

@@ -173,16 +173,39 @@
         "noSubfolders": "No subfolders here."
       },
       "download": { "preparing": "Preparing download…" },
+      "selection": {
+        "select": "Select",
+        "selectedSuffix": "selected",
+        "selectAll": "Select all",
+        "clear": "Clear selection",
+        "cleared": "Selection cleared."
+      },
+      "bulk": {
+        "deletePrefix": "Delete",
+        "deleteTitleSuffix": "items?",
+        "deleteDescription": "This permanently deletes the selected items — folders include everything inside them. This can’t be undone.",
+        "movePrefix": "Move",
+        "itemsSuffix": "items",
+        "downloadNone": "No files in the selection to download",
+        "deletedSuffix": "items deleted.",
+        "movedSuffix": "items moved."
+      },
+      "dnd": { "overlayMoveSuffix": "items" },
       "conflict": {
         "title": "Name already in use",
         "description": "An item named “{name}” already exists here. How should we resolve it?",
         "descriptionGeneric": "An item with that name already exists here. How should we resolve it?",
+        "of": "of",
+        "existSuffix": "items already exist here.",
         "replace": "Replace",
         "replaceHint": "Overwrite the existing item.",
+        "replaceHintMany": "Overwrite the existing items.",
         "keepBoth": "Keep both",
         "keepBothHint": "Add this one under a new name.",
+        "keepBothHintMany": "Add the conflicting ones under new names.",
         "skip": "Skip",
-        "skipHint": "Keep the existing item, cancel this one."
+        "skipHint": "Keep the existing item, cancel this one.",
+        "skipHintMany": "Keep the existing items; move the rest."
       },
       "errors": {
         "nameRequired": "A name is required.",

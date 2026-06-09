@@ -2,6 +2,7 @@
 
 import { VirtualList } from "@/components/patterns/virtual-list";
 import { t } from "@/lib/i18n";
+import type { ItemSelection } from "../../operations";
 import type { FolderEntry } from "../lib/entries";
 import { useGridColumns } from "../hooks/useGridColumns";
 import { BrowseCard } from "./BrowseCard";
@@ -16,9 +17,11 @@ function chunk<T>(items: T[], size: number): T[][] {
 export function GridView({
   entries,
   path,
+  selection,
 }: {
   entries: FolderEntry[];
   path: string;
+  selection: ItemSelection;
 }) {
   const { ref, columns } = useGridColumns();
   const rows = chunk(entries, columns);
@@ -41,7 +44,7 @@ export function GridView({
                 role="listitem"
                 className="h-36"
               >
-                <BrowseCard entry={entry} path={path} />
+                <BrowseCard entry={entry} path={path} selection={selection} />
               </div>
             ))}
           </div>

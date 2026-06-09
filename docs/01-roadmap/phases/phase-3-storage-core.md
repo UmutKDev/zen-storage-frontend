@@ -1,8 +1,8 @@
 # Phase 3 — Storage Core (Personal)
 
-> **Status:** 🚧 in progress — **Stage A (browse) ✅** + **Stage B1 (single-item operations) ✅ 2026-06-07**;
-> Stage B2 (multi-select + bulk + DnD), C (upload), D (search + palette + touch) pending. **Staged in ~4 parts**
-> (decided D-P3.1; B split B1→B2). · **Depends on:** [Phase 2](./phase-2-shell-account.md) · **Blocks:** Phases 4–6.
+> **Status:** 🚧 in progress — **Stage A (browse) ✅** + **Stage B1 (single-item operations) ✅ 2026-06-07** +
+> **Stage B2 (multi-select + bulk + DnD) ✅ 2026-06-10**; C (upload), D (search + palette + touch) pending.
+> **Staged in ~4 parts** (decided D-P3.1; B split B1→B2). · **Depends on:** [Phase 2](./phase-2-shell-account.md) · **Blocks:** Phases 4–6.
 > **Feature specs:** [storage-browse](../../04-features/storage-browse.md) · [storage-upload](../../04-features/storage-upload.md)
 > · [storage-operations](../../04-features/storage-operations.md) · [storage-search-filter](../../04-features/storage-search-filter.md)
 > **Architecture:** [upload-pipeline](../../02-architecture/upload-pipeline.md) · [conflict-resolution](../../02-architecture/conflict-resolution.md)
@@ -49,13 +49,19 @@ duplicate scan / archive (Phase 6); team context UI (Phase 8).
 - [x] Delete: single via `Cloud/Delete` `Items[{Key,IsDirectory}]` (handles files + unencrypted dirs; `Idempotency-Key`);
       confirm (AlertDialog); **optimistic** removal + reconcile; **no trash**. Bulk → B2.
 
-### 3.5 — Multi‑select & bulk → **Stage B2**
-- [ ] `useItemSelection` (range/toggle/select‑all); bulk action bar.
-- [ ] Bulk delete / move / download (loop endpoints); **apply‑to‑all** conflict handling.
+### 3.5 — Multi‑select & bulk ✅ (B2)
+- [x] `useItemSelection` (plain-click file select, Shift‑range over the folders-first order, Ctrl/Cmd‑toggle,
+      checkbox, mod+A select‑all, Esc clear; locked dirs excluded; survives list↔grid; clears on path change);
+      `BulkActionBar` (count + aria-live, select-all, clear) + in-memory `selection.store` (`selectedKeys` = ⌘K contract).
+- [x] Bulk delete / move / download — delete/move are **single calls** with `Items[]` (not loops; D-P3.9);
+      download loops presigns over **files only** (staggered hidden-anchor clicks); **apply‑to‑all** conflict handling.
+- [x] **Drag-and-drop move** (`DndMoveLayer`, MouseSensor desktop-only): drag selection or single entry onto
+      folder rows/cards or breadcrumb ancestors; self/descendant guarded (`lib/dnd.ts`); post-drag click suppressed.
 
 ### 3.6 — Conflict resolution → see [conflict-resolution](../../02-architecture/conflict-resolution.md)
 - [x] One reusable prompt/hook (`ConflictPrompt` + `useConflictMutation`) for `REPLACE/KEEP_BOTH/SKIP`; prompt by default,
-      no silent overwrite (B1, single). **apply‑to‑all** for bulk batches → B2.
+      no silent overwrite (B1, single). **apply‑to‑all** for bulk batches ✅ B2: one batch call → one 409 with
+      `ConflictCount/TotalItems` → one strategy retry covers the batch; partial-batch SKIP retries server-side (D-P3.9).
 
 ### 3.7 — Search / filter / sort → see [storage-search-filter](../../04-features/storage-search-filter.md)
 - [ ] Filter + sort (by type/size/date/name; persists per session).
@@ -119,6 +125,33 @@ duplicate scan / archive (Phase 6); team context UI (Phase 8).
   `Cloud/Delete`, `Cloud/PresignedUrl` all present. Authenticated create→rename→move→delete + forced conflict + download
   pending user creds (checklist).
 
+## Stage B2 verification (2026-06-10)
+- **Green:** `tsc`, `lint`, `build`; **89 Vitest** (+selection: checkbox/replace/toggle/shift-range/select-all-skips-locked/
+  Esc/view-toggle-survival/path-clear; +bulk: one-call delete (mixed dirs+files), optimistic bulk removal, one-call move,
+  batch-conflict "N of M" → REPLACE retries same items, partial SKIP retries server-side, full-conflict SKIP cancels
+  locally, files-only download + dirs-only disabled; +dnd-plan: `resolveDragSet`/`blockedPrefixes`/`canDropOn` matrices).
+- **Built:** `operations/stores/selection.store.ts` (in-memory; `selectedKeys` = ⌘K contract) + `useItemSelection`;
+  `BulkActionBar`; `DndMoveLayer` (MouseSensor 8px, DragOverlay chip +N badge, reduced-motion-gated drop animation,
+  conflict dialog home, post-drag click suppression) + pure `lib/dnd.ts`; `Checkbox` primitive (shadcn, wrapped);
+  generalized-to-arrays `useDelete`/`useMove`/`MoveDialog`/`DeleteConfirmDialog` (+`useDownload.downloadMany`);
+  batch-aware `ConflictPrompt` ("N of M" + name sample + `*Many` hints) + `useConflictMutation` partial-SKIP semantics;
+  rows/cards/breadcrumb wired as drag sources/drop targets; `storage.ops.{selection,bulk,dnd,conflict.*Many}` i18n.
+- **Fixed (latent, found while generalizing):** `useDelete`'s optimistic update still used the pre-D-P3.7
+  `InfiniteData` cache shape — it would throw on any populated plain-array cache live (mocked tests passed silently);
+  rewritten to plain-array filters. (D-P3.9)
+- **Reviewer sweep applied:** data-layer (403 pass-through no longer silent — `surfacePassthroughError` toast in the
+  op hooks until the Phase 5 unlock prompt; move invalidation narrowed to `storageKeys.all(ownerId)`; failed bulk
+  delete keeps the selection), design-system (DragOverlay drop animation composed from motion tokens; `shadow-e2/e3`
+  elevation tiers; `ghost-destructive` Button variant instead of inline restyle), a11y/state (bulk-bar focus handed to
+  the browse surface before unmount; Esc skips editable targets; checkbox hit target extended to ≥40px via `after:`
+  inset; Download uses `aria-disabled` + sr description instead of mouse-only `title`; "Selection cleared" announced
+  on the N→0 live-region transition).
+- **Deferred/tracked:** keyboard DnD (no KeyboardSensor — MoveDialog is the accessible path; with Stage A a11y
+  deferrals); touch long-press bottom sheet (Stage D); ⌘K bulk actions (Stage D, store contract ready);
+  `downloadMany` presign loop is not abortable on unmount (short loop, low risk); ConflictPrompt/MoveDialog option
+  rows are styled raw `<button>`s — extract a wrapped option-card primitive when a third consumer appears; live
+  authenticated walkthrough incl. partial-409 strategies + multi-download prompt (needs user creds).
+
 ## Risks & mitigations
 | Risk | Mitigation |
 |---|---|
@@ -164,8 +197,9 @@ Locked decisions surfaced by the HIGH/MEDIUM audit. These extend §3 acceptance 
 
 ### Conflict scope
 
-- [ ] **Conflict apply-to-batch scope.** "Apply to all" radius = **one user action** (one drag-drop or one bulk move).
-      Starting a new batch resets the dialog's remembered choice. No cross-action memory.
+- [x] **Conflict apply-to-batch scope.** (B2) "Apply to all" radius = **one user action** (one drag-drop or one bulk
+      move). Implemented structurally: each user action is ONE batch call; its 409 is resolved by ONE strategy choice;
+      the next action starts fresh (nothing is remembered). No cross-action memory by construction. (D-P3.9)
 
 ### Large-list performance
 

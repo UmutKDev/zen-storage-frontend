@@ -8,6 +8,15 @@
 > **Update rule:** edit the relevant phase summary or its `phases/` file — **don't rewrite** — and add a Changelog line.
 
 ## Changelog
+- **2026-06-10 (Phase 3 Stage B2 — multi-select + bulk + DnD)** — Storage is a real file manager: `useItemSelection`
+  + in-memory `selection.store` (click/Shift-range/Ctrl-toggle/checkbox/mod+A/Esc; locked dirs excluded; survives
+  list↔grid; `selectedKeys` is the ⌘K contract), floating `BulkActionBar`, and `DndMoveLayer` drag-move (desktop
+  MouseSensor; drags the whole selection; drop on folder rows/cards or breadcrumb ancestors; self/descendant guarded).
+  Bulk delete/move are **single `Cloud/Delete`/`Cloud/Move` calls** with `Items[]` — one 409 + one strategy retry =
+  **apply-to-all** (batch radius = one user action); partial-batch **SKIP retries server-side** so the rest still moves
+  (D-P3.9); `ConflictPrompt` grew batch copy (“N of M”). Bulk download loops presigns over files only. Existing
+  hooks/dialogs generalized to arrays; `Checkbox` primitive added; latent `useDelete` optimistic-cache-shape bug fixed.
+  Green: build/tsc/lint + 89 vitest. Stage C (upload) / D pending.
 - **2026-06-07 (Phase 3 Stage B1 — single-item operations)** — Added the mutation layer for single items in
   `features/storage/operations`: create folder/file (`Cloud/Directory`/`Cloud/Documents`), rename (`Cloud/Update` /
   `Cloud/Directory/Rename`), delete (`Cloud/Delete` `Items[{Key,IsDirectory}]`, optimistic + confirm), single move via a
