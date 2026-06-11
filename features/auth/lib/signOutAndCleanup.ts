@@ -1,6 +1,7 @@
 import type { QueryClient } from "@tanstack/react-query";
 import { signOut } from "next-auth/react";
 import { disconnectSocket } from "@/lib/socket";
+import { teardownUploads } from "@/features/storage";
 import { authenticationApiFactory } from "@/service/factories";
 import { useUiStore, useWorkspaceStore } from "@/stores";
 
@@ -21,6 +22,9 @@ export async function signOutAndCleanup(queryClient: QueryClient): Promise<void>
   }
 
   disconnectSocket();
+  // Abort in-flight uploads + clear the tray (persisted entries are
+  // owner-scoped and stay for the same owner's next session).
+  teardownUploads();
   // v5 QueryClient has no `cancelMutations`; cancel active query fetches, then
   // `clear()` purges both the query and mutation caches.
   await queryClient.cancelQueries();

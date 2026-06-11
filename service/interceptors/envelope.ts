@@ -57,7 +57,13 @@ export async function envelopeResponseRejected(
 
   if (apiError.code === "UNAUTHORIZED") {
     await getSignOut()();
-  } else if (apiError.code !== "FORBIDDEN" && apiError.code !== "CONFLICT") {
+  } else if (
+    apiError.code !== "FORBIDDEN" &&
+    apiError.code !== "CONFLICT" &&
+    // Queue-managed calls (upload engine) own their error presentation — the
+    // tray shows per-file state; a central toast per part retry would storm.
+    !error.config?.suppressErrorToast
+  ) {
     toastApiError(apiError);
   }
 

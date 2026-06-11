@@ -8,6 +8,16 @@
 > **Update rule:** edit the relevant phase summary or its `phases/` file — **don't rewrite** — and add a Changelog line.
 
 ## Changelog
+- **2026-06-11 (Phase 3 Stage C — upload pipeline)** — The heaviest Phase 3 task ships: full multipart upload on the
+  **`UploadPart` proxy** (D-P3.2 — 100% factory calls; presigned-PUT path intentionally unused). Singleton queue
+  engine with locked caps (3 files / 4 parts / 60 MB in-flight / 8 MiB parts, `lib/upload/config.ts`), per-part base64
+  MD5 (spark-md5), backoff retries, pause/cancel/retry, **IndexedDB refresh-resume** (degraded, D-P3.3: persisted
+  `partETags` = resume state; persisted Complete idempotency key reused), conflict gate with **apply-to-all batch
+  radius** (SKIP = client-local — backend rejects it for uploads), quota/max-size **pre-flight** + mid-batch halt,
+  zero-byte = one empty part, `UploadTray` + native `FileDropZone` (structurally distinct from dnd-kit move) +
+  folder upload (traversal + desktop-only picker, dir-409 = merge) + header Upload menu; sign-out teardown; Instance
+  `suppressErrorToast` flag. Green: tsc/lint/build + 128 vitest. D-P3.10; stale ListParts/presign acceptance rows
+  amended. Only Stage D (search + palette + touch) remains in Phase 3.
 - **2026-06-10 (Phase 3 Stage B2 — multi-select + bulk + DnD)** — Storage is a real file manager: `useItemSelection`
   + in-memory `selection.store` (click/Shift-range/Ctrl-toggle/checkbox/mod+A/Esc; locked dirs excluded; survives
   list↔grid; `selectedKeys` is the ⌘K contract), floating `BulkActionBar`, and `DndMoveLayer` drag-move (desktop

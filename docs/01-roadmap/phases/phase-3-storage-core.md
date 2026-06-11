@@ -1,8 +1,9 @@
 # Phase 3 — Storage Core (Personal)
 
 > **Status:** 🚧 in progress — **Stage A (browse) ✅** + **Stage B1 (single-item operations) ✅ 2026-06-07** +
-> **Stage B2 (multi-select + bulk + DnD) ✅ 2026-06-10**; C (upload), D (search + palette + touch) pending.
-> **Staged in ~4 parts** (decided D-P3.1; B split B1→B2). · **Depends on:** [Phase 2](./phase-2-shell-account.md) · **Blocks:** Phases 4–6.
+> **Stage B2 (multi-select + bulk + DnD) ✅ 2026-06-10** + **Stage C (upload pipeline) ✅ 2026-06-11**;
+> D (search + palette + touch) pending. **Staged in ~4 parts** (decided D-P3.1; B split B1→B2).
+> · **Depends on:** [Phase 2](./phase-2-shell-account.md) · **Blocks:** Phases 4–6.
 > **Feature specs:** [storage-browse](../../04-features/storage-browse.md) · [storage-upload](../../04-features/storage-upload.md)
 > · [storage-operations](../../04-features/storage-operations.md) · [storage-search-filter](../../04-features/storage-search-filter.md)
 > **Architecture:** [upload-pipeline](../../02-architecture/upload-pipeline.md) · [conflict-resolution](../../02-architecture/conflict-resolution.md)
@@ -34,13 +35,18 @@ duplicate scan / archive (Phase 6); team context UI (Phase 8).
 ### 3.2 — Usage bar ✅ (Stage A)
 - [x] Always‑visible usage bar (`Cloud/User/StorageUsage`): %, near‑limit color **+ text cue**, warning/exceeded states.
 
-### 3.3 — Upload pipeline (heaviest task) → see [upload-pipeline](../../02-architecture/upload-pipeline.md)
-- [ ] Persistent **upload queue/tray** (zustand): per‑file state + progress, concurrency limit, pause/cancel/retry.
-- [ ] Flow: `CreateMultipartUpload` (pre‑flight size/quota) → `GetMultipartPartUrls` (batch presign) → PUT parts to S3
-      (or `UploadPart` proxy) → `CompleteMultipartUpload` (`Idempotency-Key`) / `Abort` on cancel.
-- [ ] **Two distinct drops:** file‑drop onto the storage area = upload; item‑drop onto a folder = move (dnd‑kit).
-- [ ] **Folder upload** (recurse: create dirs + upload files).
-- [ ] **Quota / max‑size pre‑flight:** block with a clear message + upgrade hint (no silent failure).
+### 3.3 — Upload pipeline (heaviest task) ✅ (Stage C) → see [upload-pipeline](../../02-architecture/upload-pipeline.md)
+- [x] Persistent **upload queue/tray** (`features/storage/upload`: zustand `uploads.store` + engine singleton):
+      per‑file state + progress, concurrency caps from `lib/upload/config.ts`, pause (drain)/cancel (server abort)/retry.
+- [x] Flow (per **D-P3.2 proxy transport** — presign steps skipped, 100% factory): `CreateMultipartUpload` (pre‑flight
+      size/quota; resolved-Key authoritative) → N × `UploadPart` proxy (8 MiB parts, base64 `content-md5`, body ETag)
+      → `CompleteMultipartUpload` (persisted, reused `Idempotency-Key`) / `Abort` on cancel.
+- [x] **Two distinct drops:** native HTML5 file‑drop (`FileDropZone`, dashed overlay) = upload; dnd-kit MouseSensor
+      item‑drop = move — different event systems, structurally unambiguous.
+- [x] **Folder upload** (drop traversal via `webkitGetAsEntry` + `webkitdirectory` picker, desktop-only; dirs created
+      shallowest-first, existing dir 409 = merge).
+- [x] **Quota / max‑size pre‑flight:** client mirror of the backend gates blocks BEFORE upload with message +
+      upgrade hint; mid-batch quota 400 halts the batch's remaining files.
 
 ### 3.4 — Create / rename / move / delete — single-item ✅ (B1)
 - [x] Create folder (`Cloud/Directory`; `IsEncrypted` stubbed for Phase 5); create file (`Cloud/Documents`).
@@ -152,6 +158,40 @@ duplicate scan / archive (Phase 6); team context UI (Phase 8).
   rows are styled raw `<button>`s — extract a wrapped option-card primitive when a third consumer appears; live
   authenticated walkthrough incl. partial-409 strategies + multi-download prompt (needs user creds).
 
+## Stage C verification (2026-06-11)
+- **Green:** `tsc`, `lint`, `build`; **128 Vitest** (+39: plan/mime/traverse pure helpers; engine — happy path,
+  zero-byte single-empty-part, multi-part slicing, resolved-Key (KEEP_BOTH rename), transient retry w/ backoff,
+  retry-budget exhaustion + user retry, non-transient fail-fast, quota-400 batch halt, conflict gate REPLACE /
+  apply-to-all / SKIP-local, cancel→server Abort, pause-drain→resume, file-concurrency cap, IndexedDB restore
+  uploads-only-missing-parts with persisted idempotency key; persistence — round-trip/owner-filter/TTL-evict;
+  UI — drop-zone highlight+enqueue, non-file drags ignored, tray rows/actions, conflict dialog + apply-to-all).
+- **Built:** `features/storage/upload/*` — `core/engine.ts` (singleton: scheduler with 3-file/4-part/60MB gates,
+  worker-pool parts, backoff retries honoring `Retry-After`, pause=drain/cancel=abort/retry, batch conflict radius,
+  quota-batch halt, degraded refresh-resume, abort delivery budget) + `core/teardown.ts` (sign-out); `storage/`
+  (raw-IndexedDB wrapper + owner-scoped persisted queue, TTL evict); `stores/uploads.store.ts` (in-memory tray state);
+  `api/upload.mutations.ts` (factory wrappers, `suppressErrorToast`, AbortSignal + progress threading);
+  `lib/{plan,md5,mime,traverse}` (+ `lib/upload/config.ts` caps); hooks `useUploadQueue`/`useUploadEngineBoot`/
+  `useFileDrop`; UI `UploadTray` (progress rows, pause/resume/retry/cancel/dismiss, aria-live count, conflict gate
+  w/ apply-to-all), `FileDropZone` (native HTML5, depth-counter highlight), `UploadMenu` (file + desktop-only folder
+  pickers). Instance: `suppressErrorToast` config flag (envelope). `Progress` + spark-md5 (MIT) + fake-indexeddb (dev).
+  Tray mounted in `(app)/layout`; teardown wired into `signOutAndCleanup`.
+- **Reviewer sweep applied** (multi-dimension + adversarial verify): design-system (tray pane → the mandated
+  `glass-overlay` tier incl. reduced-transparency fallback; Progress indicator tokenized — `transition-transform
+  duration-200 ease-standard` via a new `--ease-standard` @theme token), a11y/state (per-file status transitions now
+  announced — polite region for done/paused + explicit "All uploads complete." on the active→0 transition, assertive
+  `role="alert"` for error/blocked since the central toast is suppressed; pause/resume/retry merged into ONE
+  persistent action button so focus survives status flips; dismiss hands focus to the tray header / browse surface;
+  tray buttons 32px + hit-slop = 40px effective targets), data-layer (engine slices on the PERSISTED `partSize` —
+  resume survives config changes; `uploadPart` gets a 10-min timeout override — the Instance's 30s default would kill
+  slow-link parts; `abortPending` persisted BEFORE abort delivery so a tab death mid-cancel doesn't resume a canceled
+  upload on next load). **Gap:** the dedicated engine-concurrency reviewer + 3 finding-verifications hit the session
+  limit; the three data-layer findings were verified manually against the code (all real, all fixed) and an inline
+  self-audit covered budget-leak/pause-race/abort-sibling paths — a fresh engine review is queued for the Stage D round.
+- **Deferred/tracked:** live multipart walkthrough vs the real backend (needs user creds — kill-tab resume, real 409,
+  quota gate, Chrome/Safari folder drop); touch "Add files" bottom-sheet entry (Stage D); `ListParts` backend gap
+  (D-P3.3) + `NoSuchUpload`→404 mapping gap; upload socket notification dedupe (Phase 6); re-run the engine-dimension
+  review (session-limited this round).
+
 ## Risks & mitigations
 | Risk | Mitigation |
 |---|---|
@@ -175,25 +215,28 @@ Locked decisions surfaced by the HIGH/MEDIUM audit. These extend §3 acceptance 
 
 ### Upload pipeline hardening
 
-- [ ] **Upload concurrency caps locked.** 4 chunks/file, 3 files concurrent, 60MB total in-flight. Values live in
-      `lib/upload/config.ts` and are the single source of truth — no per-call overrides. See
-      [upload-pipeline §4](../../02-architecture/upload-pipeline.md).
-- [ ] **IndexedDB refresh resumability.** Mid-upload refresh → on reload `ListParts` reconciles → resume from the last
-      good part. Manual test: kill the tab at 50% on a multipart file; reopen the app; the upload completes without
-      restarting from part 1.
-- [ ] **AbortMultipartUpload server cleanup.** User cancel mid-upload triggers `POST /Cloud/Upload/Abort/{uploadId}`;
-      retried up to 3× with backoff if the network fails. No orphaned multipart uploads on S3.
-- [ ] **ETag persist + lost-ETag recovery.** Each part PUT's `ETag` is persisted to IndexedDB as it completes. A missing
-      `ETag` at `Complete` time triggers `ListParts` recovery to repopulate before `CompleteMultipartUpload` runs.
-- [ ] **Presigned PUT error mapping.** Behavior matches
-      [upload-pipeline §6.5](../../02-architecture/upload-pipeline.md):
-      - `403` → re-presign and retry the part.
-      - `404` → drop the queue entry (upload is gone server-side).
-      - `5xx` → exponential backoff.
-      - timeout → exponential backoff.
-      UX messaging mirrors the table in §6.5 verbatim.
-- [ ] **Zero-byte + MIME inference.** Empty file (`size === 0`) uses a single PUT — no `CreateMultipartUpload`. MIME
-      derives in order: `File.type` → extension lookup → `application/octet-stream`.
+> Rows below were AMENDED at Stage C: D-P3.2 (UploadPart **proxy**, no presigned PUTs) and D-P3.3 (**no `ListParts`**
+> endpoint) override the original presigned/ListParts framing. Original intent kept, mechanism corrected (D-P3.10).
+
+- [x] **Upload concurrency caps locked.** 4 chunks/file, 3 files concurrent, 60MB total in-flight (+ 8 MiB part size).
+      Values live in `lib/upload/config.ts` and are the single source of truth — no per-call overrides.
+- [x] **IndexedDB refresh resumability (degraded — D-P3.3).** Mid-upload refresh → on reload the persisted
+      `partETags` record IS the resume state; parts missing from it are re-PUT (S3 is idempotent on
+      `(UploadId, PartNumber)`). No `ListParts` reconcile exists; a lost local record re-uploads from part 1.
+      Manual test: kill the tab at 50% on a multipart file; reopen; the upload completes without re-sending part 1.
+- [x] **AbortMultipartUpload server cleanup.** User cancel aborts in-flight requests then `DELETE
+      /Cloud/Upload/AbortMultipartUpload` (3-attempt budget; S3 `NoSuchUpload` surfaces as a generic 500 so any
+      outcome is treated terminal — the backend's orphan sweep owns escapes; `abortPending` retried on next load).
+- [x] **ETag persist.** Each part's body `ETag` is persisted to IndexedDB immediately on success (not batched).
+      Lost-ETag `ListParts` recovery is impossible (D-P3.3) — a part with no recorded ETag is simply re-uploaded.
+- [x] **Part error mapping (proxy transport).** Typed `ApiError`s replace raw presign statuses:
+      - `SERVER_ERROR` / `NETWORK` / `RATE_LIMITED` (honors `Retry-After`) → backoff **1s/2s/4s × 3**, then file error (retryable).
+      - non-transient (4xx) → immediate file error (retryable); tray owns messaging (`suppressErrorToast`).
+      - 403/presign-refresh rows are obsolete — there are no presigned URLs to refresh.
+- [x] **Zero-byte + MIME inference.** Empty file = `CreateMultipartUpload(TotalSize: 0)` + ONE empty part + Complete
+      (no single-PUT path exists server-side; stays 100% factory). MIME derives in order: `File.type` → extension
+      lookup (`lib/upload/mime.ts`) → `application/octet-stream`. (The doc's `MIME_MISMATCH` 409 does not exist in
+      the backend — no handler shipped; docs flagged stale.)
 
 ### Conflict scope
 
@@ -233,8 +276,11 @@ Locked decisions surfaced by the HIGH/MEDIUM audit. These extend §3 acceptance 
 
 | Cap | Value | Source |
 |---|---|---|
+| Part size | 8 MiB | `lib/upload/config.ts` |
 | Chunks per file (parallel) | 4 | `lib/upload/config.ts` |
 | Files concurrent (parallel) | 3 | `lib/upload/config.ts` |
 | Total in-flight bytes | 60 MB | `lib/upload/config.ts` |
+| Part retry schedule | 1s/2s/4s | `lib/upload/config.ts` |
+| Persisted-entry TTL | 7 days | `lib/upload/config.ts` |
 | Virtual-list threshold | 100 entries | `components/patterns/virtual-list.tsx` |
-| Abort retries | 3 (backoff) | `features/storage/upload/abort.ts` |
+| Abort attempts | 3 | `lib/upload/config.ts` (used by `upload/core/engine.ts`) |

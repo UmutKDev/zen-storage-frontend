@@ -211,6 +211,48 @@
         "nameRequired": "A name is required.",
         "invalidName": "Names can’t contain slashes."
       }
+    },
+    "upload": {
+      "menu": {
+        "button": "Upload",
+        "files": "Upload files",
+        "folder": "Upload folder"
+      },
+      "tray": {
+        "title": "Uploads",
+        "collapse": "Collapse uploads",
+        "expand": "Expand uploads",
+        "activeSuffix": "uploading",
+        "progressLabel": "Upload progress",
+        "allComplete": "All uploads complete."
+      },
+      "status": {
+        "queued": "Queued",
+        "presigning": "Preparing…",
+        "uploading": "Uploading…",
+        "completing": "Finishing…",
+        "done": "Done",
+        "error": "Failed",
+        "paused": "Paused",
+        "canceled": "Canceled",
+        "conflict": "Name conflict",
+        "blocked": "Blocked"
+      },
+      "actions": {
+        "pause": "Pause",
+        "resume": "Resume",
+        "retry": "Retry",
+        "cancel": "Cancel",
+        "dismiss": "Dismiss"
+      },
+      "drop": { "hint": "Drop files to upload" },
+      "conflict": { "applyToAll": "Apply to all in this batch" },
+      "errors": {
+        "maxSize": "exceeds the maximum upload size of",
+        "quota": "Not enough storage space for this upload.",
+        "upgradeHint": "Upgrade your plan for more space.",
+        "quotaBatch": "Blocked — storage limit reached."
+      }
     }
   },
   "account": {

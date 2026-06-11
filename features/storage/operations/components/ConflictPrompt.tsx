@@ -1,13 +1,16 @@
 "use client";
 
+import { useId } from "react";
 import { cn } from "@/lib/utils";
 import { t } from "@/lib/i18n";
 import {
   Button,
+  Checkbox,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  Label,
 } from "@/components/ui";
 import type { ConflictDetailsResponseModel } from "@/service/models";
 import type { ConflictStrategy } from "../lib/conflict";
@@ -54,12 +57,17 @@ export function ConflictPrompt({
   onResolve,
   onCancel,
   pending,
+  applyToAll,
 }: {
   details: ConflictDetailsResponseModel;
   onResolve: (strategy: ConflictStrategy) => void;
   onCancel: () => void;
   pending?: boolean;
+  /** Looped-batch hosts (the upload queue: N independent Creates) show the
+   *  "apply to all" checkbox here; single-call batches don't need it. */
+  applyToAll?: { checked: boolean; onChange: (checked: boolean) => void };
 }) {
+  const applyToAllId = useId();
   // Batch conflicts (bulk move / multi-drag) get count copy + a name sample
   // and "many" hints; the chosen strategy applies to every conflicting item
   // in THIS batch (apply-to-all radius = one user action).
@@ -130,6 +138,18 @@ export function ConflictPrompt({
           disabled={pending}
         />
       </div>
+      {applyToAll ? (
+        <div className="flex items-center gap-2">
+          <Checkbox
+            id={applyToAllId}
+            checked={applyToAll.checked}
+            onCheckedChange={(checked) => applyToAll.onChange(checked === true)}
+          />
+          <Label htmlFor={applyToAllId} className="text-sm font-normal">
+            {t("storage.upload.conflict.applyToAll")}
+          </Label>
+        </div>
+      ) : null}
       <DialogFooter>
         <Button variant="ghost" onClick={onCancel}>
           {t("common.cancel")}

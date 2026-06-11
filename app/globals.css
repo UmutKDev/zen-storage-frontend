@@ -159,6 +159,10 @@
   --shadow-e2: 0 4px 12px -2px rgb(0 0 0 / 0.1);
   --shadow-e3: 0 16px 32px -8px rgb(0 0 0 / 0.18);
   --shadow-e4: 0 20px 40px -12px rgb(0 0 0 / 0.22);
+
+  /* Motion easing token (mirrors lib/motion/tokens.ts `easing.standard`) so
+   * CSS transitions can share the design-system curve via `ease-standard`. */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
 }
 
 /*

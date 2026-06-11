@@ -5,19 +5,22 @@
 >
 > Legend: ⏳ not started · 🚧 in progress · ✅ done · 🚫 blocked.
 
-**Updated:** 2026-06-10 · **Branch:** `v2` · **Round:** Phase 3 in progress — Stages A (browse) + B1 (single-item ops) + B2 (multi-select + bulk + DnD) landed.
+**Updated:** 2026-06-11 · **Branch:** `v2` · **Round:** Phase 3 in progress — Stages A + B1 + B2 + C (upload pipeline) landed; only D (search + palette + touch) remains.
 
 ## Where we are
-**Phase 3 Stage B2 (multi-select + bulk + drag-and-drop) landed.** Storage now has full file-manager selection:
-`useItemSelection` + in-memory `selection.store` (plain-click file select, Shift-range over the folders-first order,
-Ctrl/Cmd-toggle, checkboxes, mod+A, Esc; locked dirs excluded; survives list↔grid, clears on path change), a floating
-`BulkActionBar` (count + aria-live, bulk move/download/delete), and `DndMoveLayer` drag-move (MouseSensor desktop-only,
-drag the whole selection, drop on folders or breadcrumb ancestors, self/descendant guarded, “+N” DragOverlay chip).
-Bulk delete/move are **single batch calls** with `Items[]`; the one 409 + one strategy retry IS apply-to-all
-(batch radius = one user action); **partial-batch SKIP retries server-side** so the non-conflicting rest still moves
-(D-P3.9). Bulk download loops presigns over files only. Latent bug fixed: `useDelete`'s optimistic update still wrote
-the pre-D-P3.7 `InfiniteData` shape (would throw live on populated caches). Green on `build`/`tsc`/`lint` + **89
-Vitest** + 2 Playwright. **Next:** Stage C (upload pipeline, `UploadPart` proxy) → D (search + palette + touch).
+**Phase 3 Stage C (upload pipeline — the heaviest task) landed.** `features/storage/upload` ships the full multipart
+pipeline on the **`UploadPart` proxy** (D-P3.2 — 100% factory calls, no presigned PUTs): a singleton queue **engine**
+(3 files / 4 parts-per-file / 60 MB in-flight + 8 MiB parts from `lib/upload/config.ts`; per-part base64 MD5 via
+spark-md5; backoff retries honoring `Retry-After`; pause=drain / cancel=server-Abort / retry; resolved-Key invariant),
+**IndexedDB refresh-resume** (degraded per D-P3.3: immediately-persisted `partETags` = resume state, owner-scoped,
+7-day TTL, persisted Complete idempotency key reused), **conflict gate** (Create 409 → shared ConflictPrompt; SKIP is
+client-local — backend rejects it; apply-to-all checkbox remembers the strategy for one batch), **quota/max-size
+pre-flight** (+ mid-batch quota halt), zero-byte = one empty part, **UploadTray** (progress rows, per-status actions,
+aria-live), native **FileDropZone** (structurally unambiguous vs dnd-kit move), **folder upload** (webkitGetAsEntry +
+desktop-only webkitdirectory picker; dir-create 409 = merge), header Upload menu, sign-out teardown. The Instance
+gained a `suppressErrorToast` config flag (tray owns error display; no per-part toast storms). Green on
+`build`/`tsc`/`lint` + **128 Vitest**. **Next:** Stage D (search/filter/sort + ⌘K palette + touch bottom-sheet) closes
+Phase 3.
 
 ## Earlier rounds
 
@@ -47,7 +50,7 @@ live backend contract smoke passed. Authenticated end-to-end walkthrough pending
 | 0 | Foundation + Design System | ✅ | All sub-tasks closed: data layer, design system, 0.0a CSP/headers, 0.4a privacy, 0.8a intercepting-routes (confirmed), 0.14a supply-chain CI |
 | 1 | Auth | ✅ | Full: multi-step login (+2FA **+passkey**), register, reset, route protection, sign-out teardown, **legal pages + consent banner**. Verified live vs API + 16 tests |
 | 2 | App Shell + Account | ✅ | Full: shell (sidebar/topbar/theme/profile/bell, inert workspace slot) + profile (optimistic, avatar read-only) + security (password, 2FA, passkeys, sessions) + read-only subscription + flagged API-keys stub. 32 vitest + 4 e2e; reviewers applied; live contract smoke |
-| 3 | Storage Core | 🚧 | **Staged in 4 parts.** A (browse) ✅ · B1 (single-item ops) ✅ · B2 (multi-select + bulk single-call delete/move + files-only download + DnD move + apply-to-all conflict) ✅. C (upload, `UploadPart` proxy) / D (search+palette+touch) pending |
+| 3 | Storage Core | 🚧 | **Staged in 4 parts.** A (browse) ✅ · B1 (single-item ops) ✅ · B2 (multi-select + bulk + DnD) ✅ · C (upload pipeline: `UploadPart` proxy, IndexedDB resume, conflict gate, quota pre-flight, tray + drop zone + folder upload) ✅. Only D (search+palette+touch) pending |
 | 4 | Preview + Share | ⏳ | Share = presigned URL ✓; CDN resize via wsrv.nl ✓ (both resolved) |
 | 5 | Secure Folders | ⏳ | token never‑persist guarantee |
 | 6 | Advanced | ⏳ | socket‑first + poll for jobs |
@@ -70,15 +73,31 @@ live backend contract smoke passed. Authenticated end-to-end walkthrough pending
   shadcn init (`components.json`), motion/i18n/theme libs, providers, route groups.
 
 ## What's next
-1. **User check:** authenticated end-to-end walkthrough against the live backend (needs login creds) — selection matrix
-   (click/shift/ctrl/select-all/Esc in both views), bulk delete/move incl. a **partial 409** exercising all 3 strategies
-   (SKIP must move the rest), bulk download of 3+ files (Chrome's one-time multi-download prompt), DnD row→folder +
-   selection drag “+N” + breadcrumb drop + post-drag click not navigating, plus the B1 items (conflict, focus return).
-2. **Phase 3 Stage C — upload pipeline** (`UploadPart` proxy, queue/tray, quota pre-flight, folder upload), then
-   **Stage D** (search/filter/sort + command palette + touch bottom-sheet). See the
+1. **User check:** authenticated end-to-end walkthrough against the live backend (needs login creds) — upload: small +
+   large multipart file w/ progress, pause/resume, cancel (verify server Abort), kill-tab-at-50% → reopen → resume
+   without re-sending part 1, forced 409 (REPLACE/KEEP_BOTH/SKIP + apply-to-all on a folder drop), quota/max-size
+   pre-flight block, folder drop + folder picker, zero-byte file; plus the B1/B2 items (selection matrix, bulk ops w/
+   partial 409, DnD move, bulk download).
+2. **Phase 3 Stage D — search/filter/sort + ⌘K command palette + touch bottom-sheet** closes Phase 3. See the
    [Phase 3 checklist](./phases/phase-3-storage-core.md).
 
 ## Recent status entries
+- **2026-06-11 (Phase 3 Stage C — upload pipeline)** — Full multipart upload on the **`UploadPart` proxy** (100%
+  factory; presign path + ESLint carve-out intentionally unused). `features/storage/upload`: engine singleton
+  (worker-pool parts, 3/4/60MB+8MiB caps from `lib/upload/config.ts`, spark-md5 `content-md5`, 1s/2s/4s backoff
+  honoring `Retry-After`, pause=drain/cancel=abort/retry, resolved-Key invariant, quota-batch halt via message regex —
+  backend has no typed quota code), IndexedDB persistence (immediate ETag writes, owner-scoped restore, 7-day TTL,
+  persisted+reused Complete idempotency key; **degraded resume** per D-P3.3 — no ListParts; `NoSuchUpload` = generic
+  500 so Abort is fire-once w/ 3-attempt budget), conflict gate (SKIP client-local — backend 400s it; apply-to-all =
+  per-batch remembered strategy; `ConflictPrompt` grew the checkbox slot), zero-byte = one empty part,
+  `UploadTray`/`FileDropZone`/`UploadMenu` (+ folder traversal, dir-409=merge), `(app)/layout` tray mount, sign-out
+  teardown. Instance: `suppressErrorToast` flag. `MIME_MISMATCH` confirmed absent in backend (docs stale); stale
+  ListParts/presign acceptance rows amended in the phase file. Green: tsc/lint/build + **128 vitest** (39 new incl.
+  engine concurrency/conflict/resume matrices, fake-indexeddb persistence, tray/drop UI). Reviewer sweep applied
+  (glass-overlay tray + tokenized Progress; per-file aria-live announcements, focus-stable tray actions, 40px targets;
+  persisted-`partSize` resume, 10-min part timeout, `abortPending` persisted pre-delivery); the engine-dimension
+  reviewer hit the session limit — its 3 flagged data-layer items were hand-verified + fixed, a fresh engine review is
+  queued with Stage D. Decision D-P3.10. Stage D remains.
 - **2026-06-10 (Phase 3 Stage B2 — multi-select + bulk + DnD)** — Full selection model (`useItemSelection` +
   in-memory `selection.store`; `selectedKeys` = ⌘K contract; locked dirs excluded; survives view toggle, clears on
   path change), `BulkActionBar` (move/download/delete + aria-live count), `DndMoveLayer` (MouseSensor 8px desktop-only,

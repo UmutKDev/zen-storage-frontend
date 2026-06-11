@@ -9,6 +9,8 @@ import {
   DndMoveLayer,
   useItemSelection,
 } from "../../operations";
+import { FileDropZone } from "../../upload/components/FileDropZone";
+import { UploadMenu } from "../../upload/components/UploadMenu";
 import { useFolderEntries } from "../hooks/useFolderEntries";
 import { useViewPrefs } from "../stores/viewPrefs.store";
 import { BreadcrumbBar } from "./BreadcrumbBar";
@@ -62,18 +64,21 @@ export function StorageBrowser({ path }: { path: string }) {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <BreadcrumbBar path={path} />
           <div className="flex items-center gap-2">
+            <UploadMenu path={path} />
             <CreateMenu path={path} />
             <SortMenu />
             <ViewToggle />
           </div>
         </div>
-        <div
-          id={BROWSE_CONTENT_ID}
-          tabIndex={-1}
-          className="min-h-0 flex-1 outline-none"
-        >
-          {content}
-        </div>
+        <FileDropZone path={path}>
+          <div
+            id={BROWSE_CONTENT_ID}
+            tabIndex={-1}
+            className="min-h-0 flex-1 outline-none"
+          >
+            {content}
+          </div>
+        </FileDropZone>
       </DndMoveLayer>
       <BulkActionBar path={path} selection={selection} />
       {/* Permanently mounted so the announcement isn't missed on first mount. */}
