@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Logo } from "@/components/ui";
 
 /**
  * Auth form container. SOLID `surface-elevated` (not glass) — per the
@@ -16,7 +17,10 @@ export function AuthCard({
   footer?: ReactNode;
 }) {
   return (
-    <div className="w-full rounded-lg border border-border bg-surface-elevated p-6 shadow-e2 sm:p-8">
+    <div className="w-full rounded-lg border border-border bg-surface-elevated p-6 shadow-[inset_0_1px_0_0_var(--glass-highlight),var(--shadow-e2)] sm:p-8">
+      <div className="mb-6 flex justify-center">
+        <Logo />
+      </div>
       <div className="mb-6 space-y-1.5">
         <h1 className="text-2xl font-semibold tracking-tight text-foreground">
           {title}
