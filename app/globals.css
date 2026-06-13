@@ -1007,3 +1007,216 @@
     background: var(--secondary);
   }
 }
+
+/* =====================================================================
+ * ZEN — SmartGrid (justified media grid) + FileTile
+ * Yandex-Disk-style browsing: each tile advertises its aspect ratio via
+ * --zs-ratio; flex-grow proportional to the ratio justifies each row to the
+ * container width at a uniform row height (--zs-row-h). Media tiles render
+ * thumbnails full-bleed; folders/docs are square tinted icon tiles. Pure CSS,
+ * no measurement code. (Reusable DS primitive — wired with real thumbnails in
+ * the media-grid phase.)
+ * ===================================================================== */
+@layer components {
+  .zs-smartgrid {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .zs-smartgrid__spacer {
+    flex-grow: 1000000;
+    flex-basis: 0;
+    min-width: 0;
+    height: 0;
+  }
+  .zs-tile {
+    position: relative;
+    flex-grow: calc(var(--zs-ratio, 1) * 100);
+    flex-basis: calc(var(--zs-ratio, 1) * var(--zs-row-h, 168px));
+    aspect-ratio: var(--zs-ratio, 1);
+    min-width: 0;
+    border-radius: var(--radius-lg);
+  }
+  .zs-tile--locked {
+    opacity: 0.7;
+  }
+  .zs-tile__inner {
+    position: absolute;
+    inset: 0;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--foreground) 8%, transparent);
+    border-radius: inherit;
+    background: var(--surface);
+    cursor: pointer;
+    box-shadow: inset 0 1px 0 0 var(--glass-highlight), var(--shadow-e1);
+    transition:
+      border-color 120ms var(--ease-standard),
+      box-shadow 120ms var(--ease-standard),
+      background-color 120ms var(--ease-standard);
+  }
+  .zs-tile__inner:hover {
+    border-color: color-mix(in srgb, var(--foreground) 14%, transparent);
+    box-shadow: inset 0 1px 0 0 var(--glass-highlight), var(--shadow-e2);
+  }
+  .zs-tile__inner:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--ring);
+  }
+  .zs-tile--selected .zs-tile__inner {
+    border-color: var(--ring);
+    background: color-mix(in srgb, var(--accent) 80%, var(--surface));
+    box-shadow: 0 0 0 1px var(--ring), var(--shadow-e1);
+  }
+  /* Media tiles: full-bleed thumbnail + bottom name scrim + play chip */
+  .zs-tile__img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: inherit;
+    transition:
+      transform 200ms var(--ease-standard),
+      border-radius 200ms var(--ease-standard);
+  }
+  .zs-tile--thumb:hover .zs-tile__img {
+    transform: scale(1.04);
+  }
+  .zs-tile--selected.zs-tile--thumb .zs-tile__img {
+    transform: scale(0.93);
+    border-radius: calc(var(--radius-lg) - 4px);
+  }
+  .zs-tile__scrim {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    height: 56px;
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    background: linear-gradient(180deg, transparent, color-mix(in srgb, #000 58%, transparent));
+    pointer-events: none;
+    transition: opacity 120ms var(--ease-standard);
+  }
+  .zs-tile__caption {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    padding: 0 10px 8px;
+    pointer-events: none;
+    transition: opacity 120ms var(--ease-standard);
+  }
+  .zs-tile--selected.zs-tile--thumb .zs-tile__scrim,
+  .zs-tile--selected.zs-tile--thumb .zs-tile__caption {
+    opacity: 0;
+  }
+  .zs-tile__name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  }
+  .zs-tile__duration {
+    flex-shrink: 0;
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+    color: rgba(255, 255, 255, 0.85);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  }
+  .zs-tile__play {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    translate: -50% -50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 9999px;
+    color: #fff;
+    background: color-mix(in srgb, #000 38%, transparent);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+    pointer-events: none;
+  }
+  .zs-tile__play > svg {
+    fill: currentColor;
+  }
+  /* Plain tiles (folders, docs): square tinted icon tile keyed by type */
+  .zs-tile__icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 2px;
+    border-radius: var(--radius-lg);
+    color: var(--tile, var(--brand));
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--tile, var(--brand)) 15%, transparent),
+      color-mix(in srgb, var(--tile, var(--brand)) 8%, transparent)
+    );
+    box-shadow:
+      inset 0 0 0 1px color-mix(in srgb, var(--tile, var(--brand)) 18%, transparent),
+      inset 0 1px 0 0 var(--glass-highlight);
+  }
+  .zs-tile__icon--folder > svg {
+    fill: color-mix(in srgb, var(--tile, var(--brand)) 14%, transparent);
+  }
+  .zs-tile__label {
+    max-width: calc(100% - 16px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.875rem;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: var(--foreground);
+  }
+  .zs-tile__meta {
+    max-width: calc(100% - 16px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.75rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--muted-foreground);
+  }
+  .zs-tile--hidden .zs-tile__icon {
+    background: color-mix(in srgb, var(--tile, var(--brand)) 6%, transparent);
+    box-shadow: none;
+    outline: 1.5px dashed color-mix(in srgb, var(--tile, var(--brand)) 50%, transparent);
+    outline-offset: -1.5px;
+  }
+  .zs-tile--hidden .zs-tile__inner {
+    border-style: dashed;
+  }
+  .zs-tile--hidden .zs-tile__label,
+  .zs-tile--hidden .zs-tile__meta {
+    opacity: 0.65;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .zs-tile--thumb:hover .zs-tile__img,
+  .zs-tile--selected.zs-tile--thumb .zs-tile__img {
+    transform: none;
+  }
+}

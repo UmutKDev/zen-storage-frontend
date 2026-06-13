@@ -3,8 +3,7 @@
 import Link from "next/link";
 import type { MouseEvent } from "react";
 import { useDraggable, useDroppable } from "@dnd-kit/core";
-import { File as FileIcon, Folder } from "lucide-react";
-import { cn, formatBytes } from "@/lib/utils";
+import { cn, fileMeta, formatBytes, toneClass } from "@/lib/utils";
 import { t } from "@/lib/i18n";
 import { Checkbox } from "@/components/ui";
 import type { FolderEntry } from "../lib/entries";
@@ -15,7 +14,7 @@ import {
   useDndMove,
   type ItemSelection,
 } from "../../operations";
-import { EntryBadges } from "./EntryBadges";
+import { EntryStatusChip, entryIsHidden, entryStatus } from "./EntryStatusChip";
 
 function CardInner({
   entry,
@@ -25,24 +24,33 @@ function CardInner({
   selected: boolean;
 }) {
   const isDir = entry.kind === "dir";
-  const Icon = isDir ? Folder : FileIcon;
+  const meta = fileMeta(entry.name, entry.kind);
+  const Icon = meta.icon;
+  const meta2 = isDir
+    ? (entryStatus(entry)?.word ?? t("storage.fileType.folder"))
+    : formatBytes(entry.file.Size);
   return (
     <div
       className={cn(
-        "flex h-full flex-col items-center justify-center gap-2 rounded-lg border border-border bg-surface p-4 text-center transition-colors hover:bg-accent",
+        "flex h-full flex-col items-center justify-center gap-2 rounded-lg border border-border bg-surface p-4 text-center shadow-[inset_0_1px_0_0_var(--glass-highlight),var(--shadow-e1)] transition-all hover:-translate-y-0.5 hover:border-foreground/15 hover:shadow-e2",
         selected && "border-ring bg-accent",
       )}
     >
-      <Icon
-        className={cn("size-10", isDir ? "text-brand" : "text-muted-foreground")}
-      />
-      <span className="line-clamp-2 w-full text-xs font-medium text-foreground">
+      <span
+        className={cn(
+          "zs-tile-icon size-14 [&>svg]:size-[26px]",
+          isDir && "zs-tile-icon--folder",
+          toneClass(meta.tone),
+          entryIsHidden(entry) && "zs-tile-icon--ghost",
+        )}
+      >
+        <Icon />
+        <EntryStatusChip entry={entry} />
+      </span>
+      <span className="line-clamp-2 w-full text-sm font-medium tracking-[-0.01em] text-foreground">
         {entry.name}
       </span>
-      <span className="text-xs text-muted-foreground">
-        {entry.kind === "file" ? formatBytes(entry.file.Size) : ""}
-      </span>
-      <EntryBadges entry={entry} />
+      <span className="text-xs tabular-nums text-muted-foreground">{meta2}</span>
     </div>
   );
 }
@@ -95,7 +103,7 @@ export function BrowseCard({
       className={cn(
         "group relative h-full rounded-lg",
         drop.isOver && "ring-2 ring-ring",
-        locked && "opacity-70",
+        (locked || entryIsHidden(entry)) && "opacity-70",
       )}
     >
       {entry.kind === "dir" && !locked ? (

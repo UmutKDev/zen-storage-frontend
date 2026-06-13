@@ -3,8 +3,7 @@
 import Link from "next/link";
 import type { MouseEvent } from "react";
 import { useDraggable, useDroppable } from "@dnd-kit/core";
-import { File as FileIcon, Folder } from "lucide-react";
-import { cn, formatBytes, formatDate } from "@/lib/utils";
+import { cn, fileMeta, formatBytes, formatDate, toneClass } from "@/lib/utils";
 import { t } from "@/lib/i18n";
 import { Checkbox } from "@/components/ui";
 import type { FolderEntry } from "../lib/entries";
@@ -15,27 +14,36 @@ import {
   useDndMove,
   type ItemSelection,
 } from "../../operations";
-import { EntryBadges } from "./EntryBadges";
+import { EntryStatusChip, entryIsHidden, entryStatus } from "./EntryStatusChip";
 
 function RowContent({ entry }: { entry: FolderEntry }) {
   const isDir = entry.kind === "dir";
-  const Icon = isDir ? Folder : FileIcon;
+  const meta = fileMeta(entry.name, entry.kind);
+  const Icon = meta.icon;
+  const kind = isDir ? (entryStatus(entry)?.word ?? meta.label) : meta.label;
   return (
     <>
-      <Icon
+      <span
         className={cn(
-          "size-5 shrink-0",
-          isDir ? "text-brand" : "text-muted-foreground",
+          "zs-tile-icon size-9 shrink-0",
+          isDir && "zs-tile-icon--folder",
+          toneClass(meta.tone),
+          entryIsHidden(entry) && "zs-tile-icon--ghost",
         )}
-      />
-      <span className="flex-1 truncate text-sm text-foreground">
-        {entry.name}
+      >
+        <Icon className="size-[18px]" />
+        <EntryStatusChip entry={entry} />
       </span>
-      <EntryBadges entry={entry} />
+      <span className="flex min-w-0 flex-1 flex-col gap-px">
+        <span className="truncate text-sm font-medium tracking-[-0.01em] text-foreground">
+          {entry.name}
+        </span>
+        <span className="truncate text-xs text-muted-foreground">{kind}</span>
+      </span>
       <span className="w-20 shrink-0 text-right text-xs tabular-nums text-muted-foreground">
         {entry.kind === "file" ? formatBytes(entry.file.Size) : ""}
       </span>
-      <span className="hidden w-40 shrink-0 text-right text-xs text-muted-foreground sm:block">
+      <span className="hidden w-40 shrink-0 text-right text-xs tabular-nums text-muted-foreground sm:block">
         {entry.kind === "file" ? formatDate(entry.file.LastModified) : ""}
       </span>
     </>
@@ -90,10 +98,10 @@ export function BrowseRow({
       onMouseDown={onMouseDown}
       data-selected={selected}
       className={cn(
-        "group flex items-center gap-1 rounded-md pl-2 pr-1 hover:bg-accent",
+        "zs-file-row group flex items-center gap-1 border-b border-border/50 pl-2 pr-1 hover:bg-accent",
         selected && "bg-accent",
         drop.isOver && "ring-2 ring-ring",
-        locked && "opacity-70",
+        (locked || entryIsHidden(entry)) && "opacity-70",
       )}
     >
       {selectable ? (
