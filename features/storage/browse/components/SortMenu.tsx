@@ -17,7 +17,7 @@ import {
   Button,
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
+  DropdownMenuRichItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui";
@@ -30,6 +30,17 @@ const FIELDS: ReadonlyArray<{ key: SortKey; icon: LucideIcon }> = [
   { key: "modified", icon: Clock },
   { key: "type", icon: Shapes },
 ];
+
+/** Composes the row label + an sr-only "(selected)" marker on the active row so
+ *  the choice is exposed to assistive tech (the check glyph is visual-only). */
+function sortLabel(label: string, active: boolean) {
+  return (
+    <>
+      {label}
+      {active ? <span className="sr-only"> ({t("common.selected")})</span> : null}
+    </>
+  );
+}
 
 export function SortMenu() {
   const sortKey = useViewPrefs((s) => s.sortKey);
@@ -55,37 +66,31 @@ export function SortMenu() {
           <ChevronDown className="-ml-0.5 size-3.5 opacity-70" />
         </Button>
       </DropdownMenuTrigger>
-      {/* Icon-led menu: each row shows its field/direction icon, swapped for a
-          check on the active choice (matches the Zen sort-menu design). */}
+      {/* Icon-TILE rows (machined .zs-menu-icon), matching the Zen sort menu:
+          the active field/direction swaps its tile icon for a check. */}
       <DropdownMenuContent align="end" className="w-[182px]">
         {FIELDS.map(({ key, icon: FieldIcon }) => {
           const active = sortKey === key;
-          const Icon = active ? Check : FieldIcon;
           return (
-            <DropdownMenuItem key={key} onSelect={() => setSort(key, sortDir)}>
-              <Icon />
-              {t(`storage.sort.${key}`)}
-              {active ? (
-                <span className="sr-only">({t("common.selected")})</span>
-              ) : null}
-            </DropdownMenuItem>
+            <DropdownMenuRichItem
+              key={key}
+              icon={active ? Check : FieldIcon}
+              label={sortLabel(t(`storage.sort.${key}`), active)}
+              onSelect={() => setSort(key, sortDir)}
+            />
           );
         })}
         <DropdownMenuSeparator />
-        <DropdownMenuItem onSelect={() => setSort(sortKey, "asc")}>
-          {sortDir === "asc" ? <Check /> : <ArrowUpNarrowWide />}
-          {t("storage.sort.ascending")}
-          {sortDir === "asc" ? (
-            <span className="sr-only">({t("common.selected")})</span>
-          ) : null}
-        </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => setSort(sortKey, "desc")}>
-          {sortDir === "desc" ? <Check /> : <ArrowDownWideNarrow />}
-          {t("storage.sort.descending")}
-          {sortDir === "desc" ? (
-            <span className="sr-only">({t("common.selected")})</span>
-          ) : null}
-        </DropdownMenuItem>
+        <DropdownMenuRichItem
+          icon={sortDir === "asc" ? Check : ArrowUpNarrowWide}
+          label={sortLabel(t("storage.sort.ascending"), sortDir === "asc")}
+          onSelect={() => setSort(sortKey, "asc")}
+        />
+        <DropdownMenuRichItem
+          icon={sortDir === "desc" ? Check : ArrowDownWideNarrow}
+          label={sortLabel(t("storage.sort.descending"), sortDir === "desc")}
+          onSelect={() => setSort(sortKey, "desc")}
+        />
       </DropdownMenuContent>
     </DropdownMenu>
   );
