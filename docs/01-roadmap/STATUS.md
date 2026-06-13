@@ -5,9 +5,24 @@
 >
 > Legend: ⏳ not started · 🚧 in progress · ✅ done · 🚫 blocked.
 
-**Updated:** 2026-06-11 · **Branch:** `v2` · **Round:** Phase 3 in progress — Stages A + B1 + B2 + C (upload pipeline) landed; only D (search + palette + touch) remains.
+**Updated:** 2026-06-14 · **Branch:** `v2` · **Round:** "Zen" design‑system treatment applied across all built surfaces (cross‑cutting refinement); Phase 3 Stage D (search + palette + touch) still remains.
 
 ## Where we are
+**The "Zen" premium design treatment landed across every built surface** (a cross‑cutting refinement on top of
+Phases 0–3C, not a new phase). The flat shadcn wrappers gained the refined look the design docs always specified —
+realized as cva variants + a disciplined `.zs-*` machined CSS layer in `app/globals.css` (semantic tokens only;
+reduced‑motion + reduced‑transparency honored). Highlights: gradient/`upload` buttons + the micro‑glass third tier
+(primitives); gradient `Logo`, tinted active nav, machined inert workspace chip, ⌘K search affordance, rich glass
+menus (shell); tinted type tiles + corner status chips + contained file‑list panel + pill breadcrumbs +
+`SmartGrid`/`FileTile` (browse); the hero Upload **dropzone dialog** over the existing engine + sectioned
+create/unlock dialogs (`SectionedDialog`). The Zen bundle is vendored at
+[`docs/03-design-system/zen-reference`](../03-design-system/zen-reference/ABOUT.md); contracts updated in
+[primitives §5](../03-design-system/components/primitives.md) + [patterns §4](../03-design-system/components/patterns.md).
+**Data layer untouched** (data‑layer‑reviewer: no findings); green on `tsc` + `lint` + `build`. Deferred to their
+phases: command palette (⌘K trigger only), secure‑folder reveal (`UnlockDialog` presentational), media thumbnails
+(`FileTile` unfed), archive/extract, teams. Next product task is still **Phase 3 Stage D**.
+
+## Earlier — Phase 3 Stage C
 **Phase 3 Stage C (upload pipeline — the heaviest task) landed.** `features/storage/upload` ships the full multipart
 pipeline on the **`UploadPart` proxy** (D-P3.2 — 100% factory calls, no presigned PUTs): a singleton queue **engine**
 (3 files / 4 parts-per-file / 60 MB in-flight + 8 MiB parts from `lib/upload/config.ts`; per-part base64 MD5 via

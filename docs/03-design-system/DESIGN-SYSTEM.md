@@ -12,6 +12,13 @@
 | **Motion** | [tokens](./motion/tokens.md) · [variants](./motion/variants.md) · [reduced-motion](./motion/reduced-motion.md) |
 | **Components** | [primitives](./components/primitives.md) · [patterns](./components/patterns.md) |
 | **Theming** | [theming](./theming.md) |
+| **Realized treatment** | [zen-reference](./zen-reference/ABOUT.md) — the vendored Zen design bundle + the realized `.zs-*` machined layer in `app/globals.css` |
+
+> **The "Zen" treatment is live.** The premium look this folder always specified is now realized in the
+> wrappers + a disciplined `.zs-*` component‑CSS layer (`app/globals.css`): gradient/upload buttons, the
+> micro‑glass third tier, tinted type tiles, corner status chips, the contained file‑list panel, pill
+> breadcrumbs, and sectioned emblem dialogs. See [primitives §5](./components/primitives.md#5-realized-zen-treatment-the-premium-look)
+> + [patterns §4](./components/patterns.md#4-realized-zen-patterns). Build new surfaces against these.
 
 ## Philosophy — "premium, not decorated"
 
