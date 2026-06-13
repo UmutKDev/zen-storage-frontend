@@ -28,9 +28,9 @@ export function FileDropZone({
     <div {...dropProps} className="relative flex min-h-0 flex-1 flex-col">
       {children}
       {isDragActive ? (
-        <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center rounded-lg border-2 border-dashed border-ring bg-surface/80">
-          <p className="flex items-center gap-2 text-sm font-medium text-foreground">
-            <UploadCloud className="size-5 text-brand" />
+        <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center rounded-lg border-2 border-dashed border-brand bg-brand/[0.06] backdrop-blur-[2px]">
+          <p className="flex items-center gap-2.5 rounded-full border border-border bg-surface-elevated px-4 py-2 text-sm font-medium text-foreground shadow-e2">
+            <UploadCloud className="size-5 text-primary" />
             {t("storage.upload.drop.hint")}
           </p>
         </div>

@@ -10,7 +10,7 @@ import {
   RotateCcw,
   X,
 } from "lucide-react";
-import { cn, formatBytes } from "@/lib/utils";
+import { cn, fileMeta, formatBytes, toneClass } from "@/lib/utils";
 import { t } from "@/lib/i18n";
 import { toast as toastVariant } from "@/lib/motion";
 import { Button, Dialog, DialogContent, Progress } from "@/components/ui";
@@ -96,10 +96,21 @@ function TrayRow({
   const cancelable = ACTIVE.has(item.status) || item.status === "paused";
   const action = primaryAction(item, queue);
   const ActionIcon = action?.icon;
+  const meta = fileMeta(item.fileName, "file");
+  const FileTypeIcon = meta.icon;
 
   return (
     <li className="flex flex-col gap-1 px-3 py-2">
       <div className="flex items-center gap-3">
+        <span
+          className={cn(
+            "zs-tile-icon size-7 shrink-0 [&>svg]:size-3.5",
+            toneClass(meta.tone),
+          )}
+          aria-hidden
+        >
+          <FileTypeIcon />
+        </span>
         <span className="min-w-0 flex-1 truncate text-sm text-foreground">
           {item.fileName}
         </span>

@@ -10,7 +10,7 @@ import {
   useItemSelection,
 } from "../../operations";
 import { FileDropZone } from "../../upload/components/FileDropZone";
-import { UploadMenu } from "../../upload/components/UploadMenu";
+import { UploadButton } from "../../upload/components/UploadButton";
 import { useFolderEntries } from "../hooks/useFolderEntries";
 import { useViewPrefs } from "../stores/viewPrefs.store";
 import { BreadcrumbBar } from "./BreadcrumbBar";
@@ -64,7 +64,7 @@ export function StorageBrowser({ path }: { path: string }) {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <BreadcrumbBar path={path} />
           <div className="flex items-center gap-2">
-            <UploadMenu path={path} />
+            <UploadButton path={path} />
             <CreateMenu path={path} />
             <SortMenu />
             <ViewToggle />

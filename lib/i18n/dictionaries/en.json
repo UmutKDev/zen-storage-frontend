@@ -242,6 +242,17 @@
         "files": "Upload files",
         "folder": "Upload folder"
       },
+      "dialog": {
+        "title": "Upload files",
+        "to": "to",
+        "cta": "Drop files here or",
+        "browse": "browse",
+        "hint": "Any file type · uploads run in the background",
+        "folder": "Upload a folder",
+        "cipher": "Encrypted in transit",
+        "hide": "Hide",
+        "empty": "Files you add appear here while they upload."
+      },
       "tray": {
         "title": "Uploads",
         "collapse": "Collapse uploads",
