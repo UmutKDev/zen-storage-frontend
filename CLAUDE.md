@@ -59,6 +59,14 @@ API fact, [`05-api`](./docs/05-api/API-INVENTORY.md) wins.
 6. **No hardcoded user‑facing copy.** All strings via i18n keys (EN at MVP). → [`i18n`](./docs/06-cross-cutting/i18n.md).
 7. **No raw hex / arbitrary colors** in components. Use semantic Tailwind tokens. **Every** animation respects
    `prefers-reduced-motion`. Pull shadcn primitives via the **shadcn MCP**, then wrap. → [`design-system`](./docs/03-design-system/DESIGN-SYSTEM.md).
+   **Build every new surface against the realized "Zen" treatment** — reuse the wrapped primitives in
+   `components/ui/*` (gradient/`upload` Button, `DropdownMenuRichItem` icon‑tile rows, `Badge` `info`, `Tabs`
+   `underline`, `Logo`, …) + the `.zs-*` layer in `app/globals.css`; never reintroduce flat shadcn. The Zen bundle
+   is a **vendored snapshot** at [`zen-reference`](./docs/03-design-system/zen-reference/ABOUT.md) (primitives §5 +
+   patterns §4 document the realized look). When the user updates the design in claude.ai/design they paste a fresh
+   `api.anthropic.com/v1/design/h/<hash>` export URL → **download (gzip) → extract → diff `project/` against
+   `zen-reference/` → implement → re‑sync the changed vendored files**. Export URLs are ephemeral (old hash → 404);
+   always use the newest one given.
 8. **Don't build team UI before Phase 8** — but keep everything team‑ready (header + key scope). → [`team-readiness`](./docs/02-architecture/team-readiness.md).
 9. **The envelope/error layer is the `Instance`**, not per call. It unwraps `Result`, maps typed `ApiError`, toasts,
    `401→re-auth`; `403`/`409` pass through to feature handlers.
