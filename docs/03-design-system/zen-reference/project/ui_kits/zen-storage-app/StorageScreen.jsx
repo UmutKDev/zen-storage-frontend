@@ -454,15 +454,15 @@ function StorageScreen({ path, onNavigate, onPreview }) {
           </div>
           <div style={{ position: "relative" }}>
             <Button
-              variant="ghost"
-              size="icon-sm"
+              variant="outline"
+              size="sm"
               aria-label="Sort"
               aria-haspopup="menu"
               aria-expanded={sortOpen}
               title={"Sort by " + (ZS_SORT_FIELDS.find((f) => f.key === sortKey) || {}).label + " · " + (sortDir === "asc" ? "ascending" : "descending")}
               onClick={() => setSortOpen((o) => !o)}
             >
-              <Icon name="arrow-up-down" />
+              <Icon name="arrow-up-down" /> Sort <Icon name="chevron-down" size={13} style={{ marginLeft: -2, opacity: 0.7 }} />
             </Button>
             <Menu
               open={sortOpen}

@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowUpDown, Check } from "lucide-react";
+import { ArrowUpDown, Check, ChevronDown } from "lucide-react";
 import { t } from "@/lib/i18n";
 import {
   Button,
@@ -29,12 +29,14 @@ export function SortMenu() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
-          variant="ghost"
-          size="icon-sm"
+          variant="outline"
+          size="sm"
           aria-label={t("storage.sort.label")}
           title={`${t("storage.sort.label")} — ${t(`storage.sort.${sortKey}`)} · ${dirLabel}`}
         >
           <ArrowUpDown className="size-4" />
+          {t("storage.sort.label")}
+          <ChevronDown className="-ml-0.5 size-3.5 opacity-70" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-44">
