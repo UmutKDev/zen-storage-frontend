@@ -468,7 +468,7 @@ function StorageScreen({ path, onNavigate, onPreview }) {
               open={sortOpen}
               onClose={() => setSortOpen(false)}
               align="end"
-              width={216}
+              width={182}
               items={[
                 ...ZS_SORT_FIELDS.map((f) => ({
                   icon: sortKey === f.key ? "check" : f.icon,

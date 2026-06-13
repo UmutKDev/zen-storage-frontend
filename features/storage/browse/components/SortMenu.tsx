@@ -1,19 +1,35 @@
 "use client";
 
-import { ArrowUpDown, Check, ChevronDown } from "lucide-react";
+import {
+  AArrowDown,
+  ArrowDownWideNarrow,
+  ArrowUpDown,
+  ArrowUpNarrowWide,
+  Check,
+  ChevronDown,
+  Clock,
+  Scale,
+  Shapes,
+  type LucideIcon,
+} from "lucide-react";
 import { t } from "@/lib/i18n";
 import {
   Button,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui";
 import { useViewPrefs, type SortKey } from "../stores/viewPrefs.store";
 
-const KEYS: ReadonlyArray<SortKey> = ["name", "size", "modified", "type"];
+/** Sort fields with their leading icon (swapped for a check when active). */
+const FIELDS: ReadonlyArray<{ key: SortKey; icon: LucideIcon }> = [
+  { key: "name", icon: AArrowDown },
+  { key: "size", icon: Scale },
+  { key: "modified", icon: Clock },
+  { key: "type", icon: Shapes },
+];
 
 export function SortMenu() {
   const sortKey = useViewPrefs((s) => s.sortKey);
@@ -39,22 +55,36 @@ export function SortMenu() {
           <ChevronDown className="-ml-0.5 size-3.5 opacity-70" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-44">
-        <DropdownMenuLabel>{t("storage.sort.label")}</DropdownMenuLabel>
-        {KEYS.map((key) => (
-          <DropdownMenuItem key={key} onSelect={() => setSort(key, sortDir)}>
-            <span className="flex-1">{t(`storage.sort.${key}`)}</span>
-            {sortKey === key ? <Check className="size-4" /> : null}
-          </DropdownMenuItem>
-        ))}
+      {/* Icon-led menu: each row shows its field/direction icon, swapped for a
+          check on the active choice (matches the Zen sort-menu design). */}
+      <DropdownMenuContent align="end" className="w-[182px]">
+        {FIELDS.map(({ key, icon: FieldIcon }) => {
+          const active = sortKey === key;
+          const Icon = active ? Check : FieldIcon;
+          return (
+            <DropdownMenuItem key={key} onSelect={() => setSort(key, sortDir)}>
+              <Icon />
+              {t(`storage.sort.${key}`)}
+              {active ? (
+                <span className="sr-only">({t("common.selected")})</span>
+              ) : null}
+            </DropdownMenuItem>
+          );
+        })}
         <DropdownMenuSeparator />
         <DropdownMenuItem onSelect={() => setSort(sortKey, "asc")}>
-          <span className="flex-1">{t("storage.sort.ascending")}</span>
-          {sortDir === "asc" ? <Check className="size-4" /> : null}
+          {sortDir === "asc" ? <Check /> : <ArrowUpNarrowWide />}
+          {t("storage.sort.ascending")}
+          {sortDir === "asc" ? (
+            <span className="sr-only">({t("common.selected")})</span>
+          ) : null}
         </DropdownMenuItem>
         <DropdownMenuItem onSelect={() => setSort(sortKey, "desc")}>
-          <span className="flex-1">{t("storage.sort.descending")}</span>
-          {sortDir === "desc" ? <Check className="size-4" /> : null}
+          {sortDir === "desc" ? <Check /> : <ArrowDownWideNarrow />}
+          {t("storage.sort.descending")}
+          {sortDir === "desc" ? (
+            <span className="sr-only">({t("common.selected")})</span>
+          ) : null}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

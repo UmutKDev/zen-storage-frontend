@@ -5,7 +5,8 @@
     "retry": "Try again",
     "loading": "Loading…",
     "cancel": "Cancel",
-    "confirm": "Confirm"
+    "confirm": "Confirm",
+    "selected": "selected"
   },
   "notFound": {
     "title": "Page not found",

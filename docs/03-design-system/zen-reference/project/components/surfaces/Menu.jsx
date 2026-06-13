@@ -47,7 +47,7 @@ export function Menu({ open, onClose, items = [], align = "start", width }) {
       ref={ref}
       role="menu"
       className={`zs-menu glass-overlay${align === "end" ? " zs-menu--end" : ""}`}
-      style={width ? { width } : undefined}
+      style={width ? { width, minWidth: width } : undefined}
     >
       {items.map((item, i) =>
         item === "separator" ? (
