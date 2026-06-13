@@ -1,0 +1,26 @@
+<!-- @dsCard group="Type" viewport="700x160" name="Numerals" subtitle="Tabular numerals for sizes, usage, counts, dates" -->
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../styles.css" />
+<style>
+  body { padding: 16px 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .lbl { font-size: var(--text-xs); color: var(--muted-foreground); margin: 0 0 6px; }
+  table { border-collapse: collapse; width: 100%; font-size: var(--text-sm); }
+  td { padding: 3px 0; border-bottom: 1px solid var(--border); }
+  td:last-child { text-align: right; color: var(--muted-foreground); font-size: var(--text-xs); }
+  .tab td:last-child { font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body>
+  <div>
+    <p class="lbl">✗ proportional — columns wobble</p>
+    <table><tr><td>report.pdf</td><td>1,111,111 B</td></tr><tr><td>backup.zip</td><td>9,999,999 B</td></tr><tr><td>notes.md</td><td>1,919,191 B</td></tr></table>
+  </div>
+  <div>
+    <p class="lbl">✓ tabular-nums — columns align</p>
+    <table class="tab"><tr><td>report.pdf</td><td>1,111,111 B</td></tr><tr><td>backup.zip</td><td>9,999,999 B</td></tr><tr><td>notes.md</td><td>1,919,191 B</td></tr></table>
+  </div>
+</body>
+</html>

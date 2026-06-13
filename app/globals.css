@@ -67,6 +67,13 @@
   --glass-blur-chrome: 12px;
   --glass-blur-overlay: 16px;
   --glass-saturate: 140%;
+
+  /* Tier 3 — micro-glass: translucent control fills (outline/secondary buttons)
+   * + the 1px highlight rim used across the machined treatments below. Faint
+   * blur only; NEVER on repeated data rows or badges. */
+  --glass-micro-bg: rgba(255, 255, 255, 0.55);
+  --glass-blur-micro: 8px;
+  --glass-highlight: rgba(255, 255, 255, 0.35);
 }
 
 .dark {
@@ -109,6 +116,8 @@
   --glass-chrome-bg: rgba(20, 20, 22, 0.55);
   --glass-overlay-bg: rgba(24, 24, 27, 0.66);
   --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-micro-bg: rgba(255, 255, 255, 0.06);
+  --glass-highlight: rgba(255, 255, 255, 0.14);
 }
 
 /*
@@ -241,5 +250,760 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* =====================================================================
+ * ZEN — machined component layer
+ * ---------------------------------------------------------------------
+ * The "premium, not decorated" treatments from the design system that are
+ * too verbose (multi-stop gradients with color-mix(#fff/#000), multi-layer
+ * inset rims/wells, sheen sweeps, oklch tone vars) to express as inline
+ * Tailwind. Realized as `.zs-*` classes consumed by the shadcn wrappers in
+ * components/ui/* and the storage feature components. Semantic tokens only.
+ * Source of truth: docs/03-design-system/zen-reference/project/components/**.
+ * In `@layer components` so single-property Tailwind utilities can still
+ * override (radius, size, color). Keyframes + reduced-motion neutralizers
+ * are unlayered below so they reliably win.
+ * ===================================================================== */
+@layer components {
+  /* ---------- Buttons: gradient + inset rim fills ---------- */
+  .zs-btn-grad-primary {
+    border: 1px solid color-mix(in srgb, var(--primary) 82%, #000000);
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--primary) 86%, #ffffff) 0%,
+      var(--primary) 60%,
+      color-mix(in srgb, var(--primary) 94%, #000000) 100%
+    );
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.25),
+      0 1px 2px 0 rgb(0 0 0 / 0.1),
+      0 3px 10px -3px color-mix(in srgb, var(--primary) 45%, transparent);
+  }
+  .zs-btn-grad-primary:hover {
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--primary) 76%, #ffffff) 0%,
+      color-mix(in srgb, var(--primary) 94%, #ffffff) 60%,
+      var(--primary) 100%
+    );
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.32),
+      0 1px 2px 0 rgb(0 0 0 / 0.1),
+      0 5px 14px -4px color-mix(in srgb, var(--primary) 55%, transparent);
+  }
+  .zs-btn-grad-destructive {
+    border: 1px solid color-mix(in srgb, var(--destructive) 82%, #000000);
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--destructive) 86%, #ffffff) 0%,
+      var(--destructive) 60%,
+      color-mix(in srgb, var(--destructive) 94%, #000000) 100%
+    );
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.22),
+      0 1px 2px 0 rgb(0 0 0 / 0.1),
+      0 3px 10px -3px color-mix(in srgb, var(--destructive) 40%, transparent);
+  }
+  .zs-btn-grad-destructive:hover {
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--destructive) 76%, #ffffff) 0%,
+      color-mix(in srgb, var(--destructive) 94%, #ffffff) 60%,
+      var(--destructive) 100%
+    );
+  }
+  /* Outline → micro-glass fill (the disciplined third tier). */
+  .zs-btn-micro {
+    border: 1px solid color-mix(in srgb, var(--input) 85%, transparent);
+    background: var(--glass-micro-bg);
+    -webkit-backdrop-filter: blur(var(--glass-blur-micro)) saturate(var(--glass-saturate));
+    backdrop-filter: blur(var(--glass-blur-micro)) saturate(var(--glass-saturate));
+    box-shadow: inset 0 1px 0 0 var(--glass-highlight), var(--shadow-e1);
+  }
+  .zs-btn-micro:hover {
+    background: color-mix(in srgb, var(--accent) 70%, transparent);
+    color: var(--accent-foreground);
+  }
+  .zs-btn-secondary-glass {
+    border: 1px solid color-mix(in srgb, var(--foreground) 6%, transparent);
+    background: color-mix(in srgb, var(--secondary) 88%, transparent);
+    box-shadow: inset 0 1px 0 0 var(--glass-highlight);
+  }
+  .zs-btn-secondary-glass:hover {
+    background: color-mix(in srgb, var(--secondary) 72%, transparent);
+  }
+
+  /* ---------- Upload hero button (exactly ONE per view) ----------
+   * Heavier than primary: deeper gradient, engraved icon well, ⌘U chip,
+   * hover sheen sweep + 1px lift. */
+  .zs-btn-upload {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    color: var(--primary-foreground);
+    border: 1px solid color-mix(in srgb, var(--primary) 70%, #000000);
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--primary) 70%, #ffffff) 0%,
+      color-mix(in srgb, var(--primary) 90%, #ffffff) 30%,
+      var(--primary) 58%,
+      color-mix(in srgb, var(--primary) 84%, #000000) 100%
+    );
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.38),
+      inset 0 -1px 0 0 rgba(0, 0, 0, 0.22),
+      0 1px 2px 0 rgb(0 0 0 / 0.12),
+      0 4px 10px -3px color-mix(in srgb, var(--primary) 55%, transparent),
+      0 10px 26px -8px color-mix(in srgb, var(--primary) 40%, transparent);
+  }
+  /* Doubled class beats any Tailwind size px utility so the well sits flush. */
+  .zs-btn-upload.zs-btn-upload {
+    padding-left: 6px;
+    padding-right: 12px;
+  }
+  .zs-btn-upload::after {
+    content: "";
+    position: absolute;
+    inset-block: -2px;
+    left: -45%;
+    width: 36%;
+    background: linear-gradient(
+      105deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.38) 50%,
+      transparent 100%
+    );
+    transform: skewX(-18deg);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .zs-btn-upload:hover {
+    transform: translateY(-1px);
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--primary) 62%, #ffffff) 0%,
+      color-mix(in srgb, var(--primary) 84%, #ffffff) 30%,
+      color-mix(in srgb, var(--primary) 96%, #ffffff) 58%,
+      var(--primary) 100%
+    );
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.45),
+      inset 0 -1px 0 0 rgba(0, 0, 0, 0.2),
+      0 2px 3px 0 rgb(0 0 0 / 0.12),
+      0 6px 14px -3px color-mix(in srgb, var(--primary) 60%, transparent),
+      0 14px 32px -8px color-mix(in srgb, var(--primary) 45%, transparent);
+  }
+  .zs-btn-upload:hover::after {
+    animation: zs-upload-sheen 0.7s var(--ease-standard);
+  }
+  .zs-btn-upload:active:not(:disabled) {
+    transform: translateY(0.5px) scale(0.99);
+    box-shadow:
+      inset 0 2px 4px 0 rgba(0, 0, 0, 0.22),
+      inset 0 1px 0 0 rgba(0, 0, 0, 0.1),
+      0 1px 2px 0 rgb(0 0 0 / 0.1);
+  }
+  .zs-btn-upload__well {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    border-radius: calc(var(--radius-md) - 2px);
+    background: linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.2) 0%,
+      rgba(0, 0, 0, 0.08) 70%,
+      rgba(255, 255, 255, 0.06) 100%
+    );
+    box-shadow:
+      inset 0 1px 2px 0 rgba(0, 0, 0, 0.28),
+      inset 0 -1px 0 0 rgba(255, 255, 255, 0.14),
+      0 1px 0 0 rgba(255, 255, 255, 0.16);
+  }
+  .zs-btn-upload__well > svg {
+    transition: transform 120ms var(--ease-standard);
+  }
+  .zs-btn-upload:hover .zs-btn-upload__well > svg {
+    transform: translateY(-1.5px);
+  }
+  .zs-btn-upload__kbd {
+    margin-left: 2px;
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    line-height: 1.4;
+    font-weight: 500;
+    color: color-mix(in srgb, var(--primary-foreground) 88%, transparent);
+    background: rgba(0, 0, 0, 0.16);
+    box-shadow:
+      inset 0 1px 1.5px 0 rgba(0, 0, 0, 0.2),
+      inset 0 -1px 0 0 rgba(255, 255, 255, 0.12);
+  }
+
+  /* ---------- Badge: gradient fills ---------- */
+  .zs-badge-grad-default {
+    border-color: color-mix(in srgb, var(--primary) 84%, #000000);
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--primary) 84%, #ffffff) 0%,
+      var(--primary) 100%
+    );
+    box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.25), 0 1px 2px 0 rgb(0 0 0 / 0.08);
+  }
+  .zs-badge-grad-destructive {
+    border-color: color-mix(in srgb, var(--destructive) 84%, #000000);
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--destructive) 84%, #ffffff) 0%,
+      var(--destructive) 100%
+    );
+    box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.2), 0 1px 2px 0 rgb(0 0 0 / 0.08);
+  }
+
+  /* ---------- Switch / Checkbox: gradient when checked ---------- */
+  .zs-switch-on[data-state="checked"] {
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--primary) 84%, #ffffff) 0%,
+      var(--primary) 100%
+    );
+    box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.25);
+  }
+  .zs-checkbox-on[data-state="checked"],
+  .zs-checkbox-on[data-state="indeterminate"] {
+    border-color: color-mix(in srgb, var(--primary) 84%, #000000);
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--primary) 84%, #ffffff) 0%,
+      var(--primary) 100%
+    );
+    box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.25), 0 1px 2px 0 rgb(0 0 0 / 0.08);
+  }
+
+  /* ---------- Avatar: glass rim ---------- */
+  .zs-avatar-rim::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow:
+      inset 0 0 0 1px color-mix(in srgb, var(--foreground) 12%, transparent),
+      inset 0 1px 0 0 var(--glass-highlight);
+    pointer-events: none;
+  }
+
+  /* ---------- Logo lettermark tile ---------- */
+  .zs-logo-tile {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border-radius: var(--radius-md);
+    color: var(--primary-foreground);
+    font-weight: 600;
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--primary) 84%, #ffffff) 0%,
+      var(--primary) 60%,
+      color-mix(in srgb, var(--primary) 94%, #000000) 100%
+    );
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.28),
+      0 1px 2px 0 rgb(0 0 0 / 0.1),
+      0 3px 8px -3px color-mix(in srgb, var(--primary) 40%, transparent);
+  }
+
+  /* ---------- Rich dropdown-menu item: icon tile + kbd chip ---------- */
+  .zs-menu-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    border-radius: var(--radius-sm);
+    color: var(--muted-foreground);
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--foreground) 7%, transparent),
+      color-mix(in srgb, var(--foreground) 4%, transparent)
+    );
+    box-shadow:
+      inset 0 0 0 1px color-mix(in srgb, var(--foreground) 10%, transparent),
+      inset 0 1px 0 0 var(--glass-highlight);
+    transition: color 120ms var(--ease-standard);
+  }
+  .zs-menu-kbd {
+    flex-shrink: 0;
+    padding: 0 5px;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    line-height: 1.6;
+    color: var(--muted-foreground);
+    background: color-mix(in srgb, var(--foreground) 5%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--foreground) 10%, transparent);
+  }
+
+  /* ---------- Tinted type tiles (file/folder icon socket) ----------
+   * `--tile` is set by a `.zs-tone-*` class; consumer sets size + radius. */
+  .zs-tile-icon {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border-radius: var(--radius-md);
+    color: var(--tile, var(--brand));
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--tile, var(--brand)) 15%, transparent),
+      color-mix(in srgb, var(--tile, var(--brand)) 8%, transparent)
+    );
+    box-shadow:
+      inset 0 0 0 1px color-mix(in srgb, var(--tile, var(--brand)) 18%, transparent),
+      inset 0 1px 0 0 var(--glass-highlight);
+  }
+  .zs-tile-icon--folder > svg {
+    fill: color-mix(in srgb, var(--tile, var(--brand)) 14%, transparent);
+  }
+  /* Hidden = ghosted dashed tile */
+  .zs-tile-icon--ghost {
+    background: color-mix(in srgb, var(--tile, var(--brand)) 6%, transparent);
+    box-shadow: none;
+    outline: 1.5px dashed color-mix(in srgb, var(--tile, var(--brand)) 50%, transparent);
+    outline-offset: -1.5px;
+  }
+  .zs-tone-brand { --tile: var(--brand); }
+  .zs-tone-red { --tile: oklch(0.6 0.19 25); }
+  .zs-tone-blue { --tile: oklch(0.58 0.14 250); }
+  .zs-tone-green { --tile: oklch(0.58 0.14 155); }
+  .zs-tone-amber { --tile: oklch(0.68 0.14 75); }
+  .zs-tone-teal { --tile: oklch(0.6 0.12 195); }
+  .zs-tone-violet { --tile: oklch(0.58 0.16 295); }
+  .zs-tone-slate { --tile: var(--muted-foreground); }
+
+  /* ---------- Protected-state corner chip (on the tile) ---------- */
+  .zs-status-chip {
+    position: absolute;
+    right: -6px;
+    bottom: -6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 9999px;
+    color: var(--muted-foreground);
+    background: var(--surface-elevated);
+    box-shadow:
+      0 0 0 2px var(--surface),
+      inset 0 0 0 1px color-mix(in srgb, var(--foreground) 14%, transparent),
+      inset 0 1px 0 0 var(--glass-highlight),
+      0 1px 2px rgb(0 0 0 / 0.1);
+  }
+  .zs-status-chip > svg {
+    width: 11px;
+    height: 11px;
+    display: block;
+  }
+  .zs-status-chip--lock {
+    color: var(--success);
+    background: color-mix(in srgb, var(--success) 10%, var(--surface-elevated));
+    box-shadow:
+      0 0 0 2px var(--surface),
+      inset 0 0 0 1px color-mix(in srgb, var(--success) 32%, transparent),
+      inset 0 1px 0 0 var(--glass-highlight),
+      0 1px 2px rgb(0 0 0 / 0.1);
+  }
+
+  /* ---------- Contained file-list panel + sticky column header ---------- */
+  .zs-file-panel {
+    box-sizing: border-box;
+    border: 1px solid color-mix(in srgb, var(--foreground) 8%, transparent);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    box-shadow: inset 0 1px 0 0 var(--glass-highlight), var(--shadow-e1);
+    overflow: hidden;
+  }
+  .zs-file-panel__head {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 8px 8px 12px;
+    border-bottom: 1px solid color-mix(in srgb, var(--foreground) 6%, transparent);
+    background: color-mix(in srgb, var(--muted) 35%, var(--surface));
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--muted-foreground) 80%, transparent);
+    user-select: none;
+  }
+
+  /* ---------- Progress / task rails ---------- */
+  .zs-rail {
+    display: block;
+    height: 3px;
+    border-radius: 9999px;
+    background: color-mix(in srgb, var(--foreground) 7%, transparent);
+    overflow: hidden;
+  }
+  .zs-rail__fill {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--brand), var(--primary));
+    transition: width 0.18s linear;
+  }
+  .zs-rail__fill--done {
+    background: var(--success);
+  }
+  .zs-rail__fill--wait {
+    width: 32%;
+    opacity: 0.4;
+    animation: zs-rail-wait 1.4s var(--ease-standard) infinite;
+  }
+
+  /* ---------- Breadcrumb pills ---------- */
+  .zs-crumb-sep {
+    display: flex;
+    flex-shrink: 0;
+    color: color-mix(in srgb, var(--muted-foreground) 50%, transparent);
+  }
+  .zs-crumb-glyph {
+    display: flex;
+    flex-shrink: 0;
+    color: var(--muted-foreground);
+    transition: color 120ms var(--ease-standard);
+  }
+  .zs-crumb-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 26px;
+    padding: 0 10px;
+    border-radius: 9999px;
+    background: transparent;
+    color: var(--muted-foreground);
+    white-space: nowrap;
+    cursor: pointer;
+    transition:
+      color 120ms var(--ease-standard),
+      background-color 120ms var(--ease-standard);
+  }
+  .zs-crumb-link:hover {
+    color: var(--foreground);
+    background: color-mix(in srgb, var(--accent) 70%, transparent);
+  }
+  .zs-crumb-link:hover .zs-crumb-glyph {
+    color: var(--foreground);
+  }
+  .zs-crumb-link:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--ring);
+  }
+  .zs-crumb-current {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 26px;
+    padding: 0 11px;
+    border-radius: 9999px;
+    background: var(--surface-elevated);
+    font-weight: 500;
+    color: var(--foreground);
+    white-space: nowrap;
+    box-shadow:
+      inset 0 0 0 1px color-mix(in srgb, var(--foreground) 10%, transparent),
+      inset 0 1px 0 0 var(--glass-highlight),
+      0 1px 2px rgb(0 0 0 / 0.06);
+  }
+  .zs-crumb-current .zs-crumb-glyph {
+    color: var(--primary);
+  }
+
+  /* ---------- Sectioned dialog chrome (emblem head + recessed foot) ---------- */
+  .zs-section-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 16px 16px 20px;
+    border-bottom: 1px solid color-mix(in srgb, var(--foreground) 6%, transparent);
+  }
+  .zs-section-emblem {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    border-radius: var(--radius-md);
+    color: var(--foreground);
+    background: linear-gradient(
+      180deg,
+      var(--surface-elevated) 0%,
+      color-mix(in srgb, var(--surface-elevated) 94%, var(--foreground)) 100%
+    );
+    box-shadow:
+      inset 0 1px 0 0 var(--glass-highlight),
+      inset 0 -1px 0 0 color-mix(in srgb, var(--foreground) 10%, transparent),
+      0 1px 2px 0 rgb(0 0 0 / 0.08),
+      0 4px 12px -3px rgb(0 0 0 / 0.18),
+      0 0 0 5px color-mix(in srgb, var(--foreground) 3%, transparent);
+  }
+  .zs-section-emblem--armed {
+    color: var(--primary-foreground);
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--primary) 70%, #ffffff) 0%,
+      color-mix(in srgb, var(--primary) 90%, #ffffff) 30%,
+      var(--primary) 58%,
+      color-mix(in srgb, var(--primary) 84%, #000000) 100%
+    );
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.38),
+      inset 0 -1px 0 0 rgba(0, 0, 0, 0.22),
+      0 1px 2px 0 rgb(0 0 0 / 0.12),
+      0 4px 12px -3px color-mix(in srgb, var(--primary) 50%, transparent),
+      0 0 0 5px color-mix(in srgb, var(--primary) 7%, transparent);
+  }
+  .zs-section-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 16px 12px 20px;
+    border-top: 1px solid color-mix(in srgb, var(--foreground) 6%, transparent);
+    background: color-mix(in srgb, var(--muted) 30%, transparent);
+  }
+  .zs-section-cipher {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+    white-space: nowrap;
+  }
+
+  /* ---------- Upload dropzone (dashed field + engraved disc) ---------- */
+  .zs-dropzone {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 32px 16px;
+    border: 1.5px dashed color-mix(in srgb, var(--foreground) 18%, transparent);
+    border-radius: var(--radius-lg);
+    text-align: center;
+    cursor: pointer;
+    background:
+      radial-gradient(
+        420px 150px at 50% 0%,
+        color-mix(in srgb, var(--brand) 5%, transparent),
+        transparent 70%
+      ),
+      color-mix(in srgb, var(--muted) 26%, transparent);
+    transition:
+      border-color 120ms var(--ease-standard),
+      background-color 120ms var(--ease-standard),
+      box-shadow 120ms var(--ease-standard);
+  }
+  .zs-dropzone:hover {
+    border-color: color-mix(in srgb, var(--brand) 55%, var(--border));
+  }
+  .zs-dropzone:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--ring);
+  }
+  .zs-dropzone--over {
+    border-color: var(--brand);
+    background:
+      radial-gradient(
+        420px 150px at 50% 0%,
+        color-mix(in srgb, var(--brand) 12%, transparent),
+        transparent 75%
+      ),
+      color-mix(in srgb, var(--brand) 5%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brand) 30%, transparent);
+  }
+  .zs-dropzone__disc {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 9999px;
+    color: var(--foreground);
+    background: linear-gradient(
+      180deg,
+      var(--surface-elevated) 0%,
+      color-mix(in srgb, var(--surface-elevated) 94%, var(--foreground)) 100%
+    );
+    box-shadow:
+      inset 0 1px 0 0 var(--glass-highlight),
+      inset 0 -1px 0 0 color-mix(in srgb, var(--foreground) 10%, transparent),
+      0 1px 2px 0 rgb(0 0 0 / 0.08),
+      0 5px 14px -4px rgb(0 0 0 / 0.18),
+      0 0 0 7px color-mix(in srgb, var(--foreground) 3%, transparent);
+    transition:
+      transform 120ms var(--ease-standard),
+      color 120ms var(--ease-standard),
+      box-shadow 120ms var(--ease-standard);
+  }
+  .zs-dropzone__disc > svg {
+    transition: transform 120ms var(--ease-standard);
+  }
+  .zs-dropzone:hover .zs-dropzone__disc > svg {
+    transform: translateY(-2px);
+  }
+  .zs-dropzone--over .zs-dropzone__disc {
+    transform: translateY(-3px);
+    color: var(--primary);
+    box-shadow:
+      inset 0 1px 0 0 var(--glass-highlight),
+      inset 0 -1px 0 0 color-mix(in srgb, var(--foreground) 10%, transparent),
+      0 1px 2px 0 rgb(0 0 0 / 0.08),
+      0 8px 18px -4px rgb(0 0 0 / 0.2),
+      0 0 0 7px color-mix(in srgb, var(--brand) 14%, transparent);
+  }
+
+  /* ---------- Create-dialog option row + format chips ---------- */
+  .zs-create-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border: 1px solid color-mix(in srgb, var(--foreground) 10%, transparent);
+    border-radius: var(--radius-md);
+    background: color-mix(in srgb, var(--muted) 30%, transparent);
+    cursor: pointer;
+    user-select: none;
+    transition:
+      border-color 120ms var(--ease-standard),
+      background-color 120ms var(--ease-standard);
+  }
+  .zs-create-option:hover {
+    border-color: color-mix(in srgb, var(--foreground) 18%, transparent);
+  }
+  .zs-create-option--on {
+    border-color: color-mix(in srgb, var(--success) 40%, var(--border));
+    background: color-mix(in srgb, var(--success) 5%, transparent);
+  }
+  .zs-create-option--on .zs-create-option-glyph {
+    color: var(--success);
+  }
+  .zs-create-option-glyph {
+    display: flex;
+    flex-shrink: 0;
+    color: color-mix(in srgb, var(--muted-foreground) 70%, transparent);
+    transition: color 120ms var(--ease-standard);
+  }
+  .zs-format-chip {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1px;
+    padding: 8px 10px;
+    border: 1px solid color-mix(in srgb, var(--foreground) 10%, transparent);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    text-align: left;
+    cursor: pointer;
+    box-shadow: inset 0 1px 0 0 var(--glass-highlight);
+    transition:
+      border-color 120ms var(--ease-standard),
+      background-color 120ms var(--ease-standard),
+      box-shadow 120ms var(--ease-standard);
+  }
+  .zs-format-chip:hover {
+    border-color: color-mix(in srgb, var(--foreground) 20%, transparent);
+  }
+  .zs-format-chip:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--ring);
+  }
+  .zs-format-chip--on {
+    border-color: var(--ring);
+    background: color-mix(in srgb, var(--accent) 80%, var(--surface));
+    box-shadow: 0 0 0 1px var(--ring), inset 0 1px 0 0 var(--glass-highlight);
+  }
+}
+
+/* Keyframes + reduced-motion neutralizers — unlayered so they reliably win. */
+@keyframes zs-upload-sheen {
+  from {
+    left: -45%;
+    opacity: 1;
+  }
+  to {
+    left: 135%;
+    opacity: 1;
+  }
+}
+@keyframes zs-rail-wait {
+  from {
+    transform: translateX(-110%);
+  }
+  to {
+    transform: translateX(340%);
+  }
+}
+@keyframes zs-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-8px);
+  }
+  40% {
+    transform: translateX(7px);
+  }
+  60% {
+    transform: translateX(-4px);
+  }
+  80% {
+    transform: translateX(2px);
+  }
+}
+.zs-shake {
+  animation: zs-shake 0.4s var(--ease-standard);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .zs-btn-upload:hover {
+    transform: none;
+  }
+  .zs-btn-upload:hover::after,
+  .zs-rail__fill--wait,
+  .zs-shake {
+    animation: none;
+  }
+}
+
+/* Micro-glass solid fallback under reduced transparency / more contrast. */
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  .zs-btn-micro {
+    background: var(--background);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .zs-btn-secondary-glass {
+    background: var(--secondary);
   }
 }

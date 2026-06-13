@@ -128,6 +128,30 @@
     },
     "error": { "title": "Couldn’t load this folder" },
     "badge": { "encrypted": "Encrypted", "hidden": "Hidden", "locked": "Locked" },
+    "status": {
+      "encrypted": "Encrypted",
+      "unlocked": "Unlocked",
+      "hidden": "Hidden",
+      "encryptedLabel": "Encrypted folder",
+      "unlockedLabel": "Unlocked folder",
+      "hiddenLabel": "Hidden folder"
+    },
+    "fileType": {
+      "folder": "Folder",
+      "pdf": "PDF document",
+      "word": "Word document",
+      "text": "Plain text",
+      "markdown": "Markdown",
+      "spreadsheet": "Spreadsheet",
+      "archive": "Archive",
+      "image": "Image",
+      "vector": "Vector image",
+      "video": "Video",
+      "audio": "Audio",
+      "generic": "File",
+      "fileSuffix": "file"
+    },
+    "search": { "placeholder": "Search files…", "shortcut": "⌘K", "comingSoon": "Search is coming soon" },
     "item": { "folder": "Folder", "openFolder": "Open folder" },
     "ops": {
       "new": "New",

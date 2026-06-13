@@ -1,0 +1,36 @@
+<!-- @dsCard group="Brand" viewport="700x230" name="Glass tiers" subtitle="glass-chrome 12px/62% · glass-overlay 16px/72% · solid fallback required" -->
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../styles.css" />
+<style>
+  body {
+    padding: 24px;
+    display: flex;
+    gap: 20px;
+    background:
+      radial-gradient(circle at 25% 30%, color-mix(in srgb, var(--brand) 16%, transparent), transparent 55%),
+      radial-gradient(circle at 80% 80%, color-mix(in srgb, var(--info) 8%, transparent), transparent 50%),
+      var(--muted);
+  }
+  .pane { flex: 1; border-radius: var(--radius-lg); padding: 16px; height: 130px; box-sizing: border-box; }
+  .nm { font-size: var(--text-sm); font-weight: var(--weight-medium); margin: 0; }
+  .meta { font-family: var(--font-mono); font-size: 10px; color: var(--muted-foreground); margin: 6px 0 0; line-height: 1.6; }
+</style>
+</head>
+<body>
+  <div class="pane glass-chrome">
+    <p class="nm">glass-chrome</p>
+    <p class="meta">topbar · sidebar<br>blur 12px · sat 140%<br>62% light / 55% dark<br>rim + e2</p>
+  </div>
+  <div class="pane glass-overlay">
+    <p class="nm">glass-overlay</p>
+    <p class="meta">modals · popovers · palette · tray · toasts<br>blur 16px · sat 140%<br>72% light / 66% dark<br>rim + e3</p>
+  </div>
+  <div class="pane" style="background: var(--surface-elevated); border: 1px solid var(--border); box-shadow: var(--shadow-e2);">
+    <p class="nm">solid fallback</p>
+    <p class="meta">prefers-reduced-transparency<br>prefers-contrast: more<br>same layout, solid fill</p>
+  </div>
+</body>
+</html>

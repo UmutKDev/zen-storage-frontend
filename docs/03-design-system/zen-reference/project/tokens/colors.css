@@ -1,0 +1,84 @@
+/* Zen Storage — color tokens.
+ * Source of truth: nextjs-storage@v2 app/globals.css + docs/03-design-system/foundations/color.md.
+ * Monochrome base; color is reserved for actions & states. ONE warm accent (Claude-style orange).
+ * Components use semantic tokens, never raw hex. Dark theme is class-based: add .dark to <html>. */
+
+:root {
+  color-scheme: light;
+
+  /* Base + surfaces */
+  --background: #ffffff;
+  --foreground: #171717;
+  --surface: #fafafa;
+  --surface-elevated: #ffffff;
+
+  /* shadcn primitive bridge */
+  --card: #ffffff;
+  --card-foreground: #171717;
+  --popover: #ffffff;
+  --popover-foreground: #171717;
+  --secondary: #f4f4f5;
+  --secondary-foreground: #171717;
+
+  /* Brand = the single primary action (orange). Deepened for AA with white text. */
+  --primary: #c2410c;
+  --primary-foreground: #ffffff;
+  /* Lighter brand tint: focus ring + accents on neutral surfaces. */
+  --brand: #d97757;
+
+  /* Neutral hover surface (shadcn `accent` semantics — NOT the brand). */
+  --accent: #f4f4f5;
+  --accent-foreground: #171717;
+
+  --muted: #f4f4f5;
+  --muted-foreground: #71717a;
+
+  --border: #e4e4e7;
+  --input: #e4e4e7;
+  --ring: #d97757;
+
+  /* State colors (meaning, never decoration) */
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --success: #16a34a;
+  --warning: #d97706;
+  --danger: #dc2626;
+  --info: #2563eb;
+}
+
+.dark {
+  color-scheme: dark;
+
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --surface: #141414;
+  --surface-elevated: #1c1c1c;
+
+  --card: #141414;
+  --card-foreground: #ededed;
+  --popover: #1c1c1c;
+  --popover-foreground: #ededed;
+  --secondary: #1a1a1a;
+  --secondary-foreground: #ededed;
+
+  --primary: #e0937a;
+  --primary-foreground: #1a1410;
+  --brand: #e0937a;
+
+  --accent: #1f1f1f;
+  --accent-foreground: #ededed;
+
+  --muted: #1a1a1a;
+  --muted-foreground: #a1a1aa;
+
+  --border: #262626;
+  --input: #2a2a2a;
+  --ring: #e0937a;
+
+  --destructive: #ef4444;
+  --destructive-foreground: #fafafa;
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --info: #3b82f6;
+}

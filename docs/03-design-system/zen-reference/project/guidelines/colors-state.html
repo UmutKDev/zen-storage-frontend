@@ -1,0 +1,22 @@
+<!-- @dsCard group="Colors" viewport="700x180" name="State colors" subtitle="Color = meaning, never decoration" -->
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../styles.css" />
+<style>
+  body { display: flex; gap: 12px; padding: 16px; }
+  .st { flex: 1; }
+  .sw { border-radius: var(--radius-md); height: 56px; border: 1px solid var(--border); }
+  .nm { font-size: var(--text-sm); font-weight: var(--weight-medium); margin: 8px 0 0; }
+  .hx { font-family: var(--font-mono); font-size: 10px; color: var(--muted-foreground); margin: 2px 0 0; }
+  .use { font-size: var(--text-xs); color: var(--muted-foreground); margin: 2px 0 0; }
+</style>
+</head>
+<body>
+  <div class="st"><div class="sw" style="background: #16a34a;"></div><p class="nm">success</p><p class="hx">#16a34a</p><p class="use">clean scan, success toasts</p></div>
+  <div class="st"><div class="sw" style="background: #d97706;"></div><p class="nm">warning</p><p class="hx">#d97706</p><p class="use">quota 80/90%, scan pending</p></div>
+  <div class="st"><div class="sw" style="background: #dc2626;"></div><p class="nm">danger</p><p class="hx">#dc2626</p><p class="use">delete, quota exceeded, infected</p></div>
+  <div class="st"><div class="sw" style="background: #2563eb;"></div><p class="nm">info</p><p class="hx">#2563eb</p><p class="use">neutral notices</p></div>
+</body>
+</html>

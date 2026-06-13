@@ -1,0 +1,9 @@
+/* Zen Storage — elevation. Premium = hairline borders + soft shadows, never heavy drops.
+ * In dark theme shadows are weak; borders + the glass highlight rim do the separating. */
+
+:root {
+  --shadow-e1: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-e2: 0 4px 12px -2px rgb(0 0 0 / 0.1);
+  --shadow-e3: 0 16px 32px -8px rgb(0 0 0 / 0.18);
+  --shadow-e4: 0 20px 40px -12px rgb(0 0 0 / 0.22);
+}

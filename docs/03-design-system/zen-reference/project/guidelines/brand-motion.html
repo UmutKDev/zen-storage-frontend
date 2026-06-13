@@ -1,0 +1,25 @@
+<!-- @dsCard group="Brand" viewport="700x200" name="Motion" subtitle="120/200/320ms · decelerate in, accelerate out · reduced-motion always" -->
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../styles.css" />
+<style>
+  body { padding: 20px 24px; }
+  .row { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
+  .tok { width: 150px; font-family: var(--font-mono); font-size: var(--text-xs); color: var(--muted-foreground); }
+  .track { position: relative; flex: 1; height: 8px; border-radius: var(--radius-full); background: var(--muted); }
+  .dot { position: absolute; top: -4px; left: 0; width: 16px; height: 16px; border-radius: 50%; background: var(--brand); animation-iteration-count: infinite; animation-direction: alternate; }
+  @keyframes zsdemo { from { left: 0; } to { left: calc(100% - 16px); } }
+  .use { width: 170px; font-size: var(--text-xs); color: var(--muted-foreground); text-align: right; }
+  .note { font-size: var(--text-xs); color: var(--muted-foreground); margin: 14px 0 0; }
+  @media (prefers-reduced-motion: reduce) { .dot { animation: none !important; left: calc(50% - 8px); } }
+</style>
+</head>
+<body>
+  <div class="row"><span class="tok">fast · 120ms</span><div class="track"><div class="dot" style="animation: zsdemo 0.12s var(--ease-standard) infinite alternate 0.8s;"></div></div><span class="use">hover, press, small fades</span></div>
+  <div class="row"><span class="tok">base · 200ms</span><div class="track"><div class="dot" style="animation: zsdemo 0.2s var(--ease-standard) infinite alternate 0.8s;"></div></div><span class="use">modals, dropdowns, rows</span></div>
+  <div class="row"><span class="tok">slow · 320ms</span><div class="track"><div class="dot" style="animation: zsdemo 0.32s var(--ease-standard) infinite alternate 0.8s;"></div></div><span class="use">page transitions, sheets</span></div>
+  <p class="note">easing: standard cubic-bezier(0.2,0,0,1) · entrances decelerate +8px rise · exits accelerate · spring only for drag/snap · never animate blur</p>
+</body>
+</html>

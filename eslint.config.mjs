@@ -14,6 +14,9 @@ export default defineConfig([
     "next-env.d.ts",
     "service/generates/**",
     "**/*.css",
+    // Vendored design-system reference (HTML/JSX prototypes from claude.ai/design).
+    // Read-only material — never compiled, bundled, or linted. See its ABOUT.md.
+    "docs/**",
   ]),
 
   {

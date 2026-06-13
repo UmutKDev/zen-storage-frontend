@@ -66,6 +66,23 @@ Design intent baked into the numbers:
 > These are **starting values, tunable in Phase 0**. The *token names and the two‑tier model* are the contract;
 > the exact alphas/px get dialed in against the real palette.
 
+### 3a. Micro‑glass (the disciplined third tier — control fills ONLY)
+
+The premium realization adds one further, **deliberately constrained** tier for translucent **control fills** — the
+`outline`/`secondary` button fills get a faint frosted backing + the 1px highlight rim, so they read as machined glass
+rather than flat boxes. It is NOT a general surface tier: never on data rows, cards, tables, or badges.
+
+| Token | value (light) | value (dark) |
+|---|---|---|
+| `--glass-micro-bg` | `rgba(255,255,255,0.55)` | `rgba(255,255,255,0.06)` |
+| `--glass-blur-micro` | `8px` (faintest) | `8px` |
+| `--glass-highlight` | `rgba(255,255,255,0.35)` | `rgba(255,255,255,0.14)` |
+
+`--glass-highlight` is also the shared 1px inner top‑edge rim used across the machined `.zs-*` treatments (tiles,
+panels, emblems, breadcrumb chip). Like the two main tiers, micro‑glass **falls back to a solid fill** under
+`prefers-reduced-transparency` / `prefers-contrast: more` (see [§6](#6-accessibility--honor-reduce-transparency)). The
+contract is still "glass on chrome/overlays/controls, calm underneath" — three tiers, no more.
+
 ## 4. Light vs dark behavior
 
 - **Light:** glass = white‑ish translucency + highlight rim; shadow does the separating.

@@ -1,0 +1,27 @@
+/* Zen Storage — typography tokens.
+ * Geist Sans for all UI; Geist Mono for code, hashes, keys, technical metadata.
+ * Tabular numerals for sizes, usage %, counts, and dates in tables. */
+
+:root {
+  --font-sans: "Geist", system-ui, -apple-system, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, "SF Mono", monospace;
+
+  /* Size / line-height scale (Tailwind v4 defaults, usage fixed by the docs) */
+  --text-xs: 0.75rem;      --leading-xs: 1rem;      /* badges, captions, table meta */
+  --text-sm: 0.875rem;     --leading-sm: 1.25rem;   /* secondary text, dense tables */
+  --text-base: 1rem;       --leading-base: 1.5rem;  /* body default */
+  --text-lg: 1.125rem;     --leading-lg: 1.75rem;   /* emphasized body, list titles */
+  --text-xl: 1.25rem;      --leading-xl: 1.75rem;   /* section headers */
+  --text-2xl: 1.5rem;      --leading-2xl: 2rem;     /* page titles */
+  --text-3xl: 1.875rem;    --leading-3xl: 2.25rem;  /* landing section heads */
+  --text-4xl: 2.25rem;     --leading-4xl: 2.5rem;   /* landing hero only */
+
+  /* Weights: 400 body · 500 labels/buttons · 600 headers · 700 hero only */
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  /* Slightly tighter tracking on 2xl+ headings for the premium feel */
+  --tracking-heading: -0.01em;
+}

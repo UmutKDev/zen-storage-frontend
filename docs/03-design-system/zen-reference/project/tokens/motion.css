@@ -1,0 +1,30 @@
+/* Zen Storage — motion tokens. Durations & easings are tokens, never hand-tuned.
+ * Entrances use decelerate; exits use accelerate; symmetric transitions use standard.
+ * Premium motion is quick and crisp, not lingering. */
+
+:root {
+  --duration-fast: 120ms; /* @kind other */ /* hover/press micro-interactions, small fades */
+  --duration-base: 200ms; /* @kind other */ /* most transitions (modal, dropdown, list item) */
+  --duration-slow: 320ms; /* @kind other */ /* page transitions, large surfaces, emphasis */
+
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1); /* @kind other */
+  --ease-decelerate: cubic-bezier(0, 0, 0, 1); /* @kind other */
+  --ease-accelerate: cubic-bezier(0.4, 0, 1, 1); /* @kind other */
+
+  /* Distance tokens: nudge 4px (press/hover) · rise 8px (entrances) · slide 16px (sheets) */
+  --distance-nudge: 4px;
+  --distance-rise: 8px;
+  --distance-slide: 16px;
+}
+
+/* EVERY animation respects prefers-reduced-motion — no exceptions. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

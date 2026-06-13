@@ -1,0 +1,22 @@
+<!-- @dsCard group="Colors" viewport="700x170" name="Neutrals — dark" subtitle="Class-based .dark scope; borders do the separating" -->
+<!DOCTYPE html>
+<html class="dark">
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../styles.css" />
+<style>
+  body { display: flex; gap: 8px; padding: 16px; background: #0a0a0a; }
+  .sw { flex: 1; border-radius: var(--radius-md); padding: 10px; height: 110px; display: flex; flex-direction: column; justify-content: flex-end; border: 1px solid #262626; color: #ededed; }
+  .nm { font-size: var(--text-xs); font-weight: var(--weight-medium); margin: 0; }
+  .hx { font-family: var(--font-mono); font-size: 10px; opacity: 0.7; margin: 2px 0 0; }
+</style>
+</head>
+<body>
+  <div class="sw" style="background: #0a0a0a;"><p class="nm">background</p><p class="hx">#0a0a0a</p></div>
+  <div class="sw" style="background: #141414;"><p class="nm">surface</p><p class="hx">#141414</p></div>
+  <div class="sw" style="background: #1a1a1a;"><p class="nm">muted</p><p class="hx">#1a1a1a</p></div>
+  <div class="sw" style="background: #1c1c1c;"><p class="nm">surface-elevated</p><p class="hx">#1c1c1c</p></div>
+  <div class="sw" style="background: #262626;"><p class="nm">border</p><p class="hx">#262626</p></div>
+  <div class="sw" style="background: #ededed; color: #171717;"><p class="nm">foreground</p><p class="hx">#ededed</p></div>
+</body>
+</html>

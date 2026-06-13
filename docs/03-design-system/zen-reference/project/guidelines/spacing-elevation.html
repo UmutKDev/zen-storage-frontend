@@ -1,0 +1,20 @@
+<!-- @dsCard group="Spacing" viewport="700x210" name="Elevation" subtitle="Hairline borders + soft shadows, never heavy drops" -->
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../styles.css" />
+<style>
+  body { padding: 24px; display: flex; gap: 20px; background: var(--surface); }
+  .e { flex: 1; height: 110px; background: var(--surface-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
+  .nm { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--foreground); margin: 0; }
+  .use { font-size: var(--text-xs); color: var(--muted-foreground); margin: 0; }
+</style>
+</head>
+<body>
+  <div class="e" style="box-shadow: var(--shadow-e1);"><p class="nm">e1</p><p class="use">inputs, cards</p></div>
+  <div class="e" style="box-shadow: var(--shadow-e2);"><p class="nm">e2</p><p class="use">chrome, bulk bar</p></div>
+  <div class="e" style="box-shadow: var(--shadow-e3);"><p class="nm">e3</p><p class="use">overlays, modals</p></div>
+  <div class="e" style="box-shadow: var(--shadow-e4);"><p class="nm">e4</p><p class="use">command palette</p></div>
+</body>
+</html>
