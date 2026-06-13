@@ -33,7 +33,7 @@ function CardInner({
     <div
       className={cn(
         "flex h-full flex-col items-center justify-center gap-2 rounded-lg border border-border bg-surface p-4 text-center shadow-[inset_0_1px_0_0_var(--glass-highlight),var(--shadow-e1)] transition-all hover:-translate-y-0.5 hover:border-foreground/15 hover:shadow-e2",
-        selected && "border-ring bg-accent",
+        selected && "border-ring bg-accent/90",
       )}
     >
       <span

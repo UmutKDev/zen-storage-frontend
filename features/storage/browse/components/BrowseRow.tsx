@@ -98,8 +98,9 @@ export function BrowseRow({
       onMouseDown={onMouseDown}
       data-selected={selected}
       className={cn(
-        "zs-file-row group flex items-center gap-1 border-b border-border/50 pl-2 pr-1 hover:bg-accent",
-        selected && "bg-accent",
+        "zs-file-row group flex items-center gap-1 border-b border-border/50 pl-2 pr-1 transition-colors hover:bg-accent/60",
+        selected &&
+          "bg-accent/90 shadow-[inset_0_1px_0_0_var(--glass-highlight)]",
         drop.isOver && "ring-2 ring-ring",
         (locked || entryIsHidden(entry)) && "opacity-70",
       )}

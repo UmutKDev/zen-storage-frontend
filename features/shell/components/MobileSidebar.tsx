@@ -1,7 +1,7 @@
 "use client";
 
-import { t } from "@/lib/i18n";
 import {
+  Logo,
   Sheet,
   SheetContent,
   SheetHeader,
@@ -21,11 +21,8 @@ export function MobileSidebar() {
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetContent side="left" className="w-72 gap-4 p-4">
         <SheetHeader className="p-0">
-          <SheetTitle className="flex items-center gap-2">
-            <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-primary font-semibold text-primary-foreground">
-              S
-            </span>
-            {t("common.appName")}
+          <SheetTitle>
+            <Logo />
           </SheetTitle>
         </SheetHeader>
         <WorkspaceSwitcher />

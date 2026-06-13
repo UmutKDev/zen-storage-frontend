@@ -1,15 +1,21 @@
 "use client";
 
-import { PanelLeft } from "lucide-react";
+import type { ReactNode } from "react";
+import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { t } from "@/lib/i18n";
-import { Button, Logo, Separator } from "@/components/ui";
+import { Button, Logo } from "@/components/ui";
 import { useShellStore } from "../stores/shell.store";
 import { SidebarNav } from "./SidebarNav";
 import { WorkspaceSwitcher } from "./WorkspaceSwitcher";
 
-/** Persistent desktop sidebar (glass-chrome). Collapses to an icon rail. */
-export function Sidebar() {
+/**
+ * Persistent desktop sidebar (glass-chrome). Collapses to an icon rail; the
+ * collapse toggle rides in the header row beside the logo. The `footer` slot
+ * pins app-wide chrome (the storage-usage card) to the bottom — injected from
+ * the app layer so the shell stays ignorant of the storage feature.
+ */
+export function Sidebar({ footer }: { footer?: ReactNode }) {
   const collapsed = useShellStore((s) => s.sidebarCollapsed);
   const toggle = useShellStore((s) => s.toggleSidebar);
 
@@ -21,28 +27,33 @@ export function Sidebar() {
         collapsed ? "w-16" : "w-64",
       )}
     >
-      <div className={cn("flex items-center px-1 py-1", collapsed && "justify-center")}>
+      <div
+        className={cn(
+          "flex items-center gap-2 px-1 pt-1",
+          collapsed ? "flex-col justify-center" : "justify-between",
+        )}
+      >
         <Logo wordmark={!collapsed} />
-      </div>
-
-      <WorkspaceSwitcher collapsed={collapsed} />
-      <Separator />
-      <SidebarNav collapsed={collapsed} />
-
-      <div className="mt-auto">
         <Button
           variant="ghost"
-          size={collapsed ? "icon" : "sm"}
+          size="icon-sm"
           onClick={toggle}
           aria-label={
             collapsed ? t("account.shell.expand") : t("account.shell.collapse")
           }
-          className={cn("w-full", collapsed && "w-auto")}
         >
-          <PanelLeft className="size-4" />
-          {!collapsed && <span>{t("account.shell.collapse")}</span>}
+          {collapsed ? (
+            <PanelLeftOpen className="size-4" />
+          ) : (
+            <PanelLeftClose className="size-4" />
+          )}
         </Button>
       </div>
+
+      <WorkspaceSwitcher collapsed={collapsed} />
+      <SidebarNav collapsed={collapsed} />
+
+      {footer ? <div className="mt-auto">{footer}</div> : null}
     </aside>
   );
 }

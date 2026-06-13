@@ -97,6 +97,17 @@ live backend contract smoke passed. Authenticated end-to-end walkthrough pending
    [Phase 3 checklist](./phases/phase-3-storage-core.md).
 
 ## Recent status entries
+- **2026-06-14 (Zen alignment — sidebar + usage)** — Closed the remaining gaps vs the Zen app‑chrome reference.
+  **Storage‑usage now lives in the sidebar only** (per the design — chat6 "kullanım bilgisi artık yalnızca
+  sidebar'da"): new bottom‑pinned `SidebarUsageCard` (solid card, gradient fill, collapses to a `{pct}%` chip),
+  injected via a new `AppShell` `sidebarFooter` slot composed at the app layer (`SidebarUsageCard` reads `collapsed`
+  from the shell store via the barrel — one clean `storage → shell` UI dependency, no boundary break); the old
+  `UsageBar` in `StorageBrowser` was removed/deleted. **Sidebar chrome** matched: collapse toggle moved into the
+  header row beside the `Logo` (`PanelLeftClose`/`Open`), an `aria-hidden` "Workspace" section label above the nav,
+  and `MobileSidebar` now uses `<Logo>`. **Browse tints** made translucent to match the prototype (`accent/60` hover,
+  `accent/90` selected + highlight rim on rows/cards). New `.zs-usage-*` CSS (semantic tokens). Reviewer sweep clean
+  (design‑system + data‑layer: no findings; a11y: 1 NIT — usage card hides on query error, same as the old `UsageBar`,
+  acceptable for secondary chrome). Green: `tsc` + `lint` + `build` (18 routes).
 - **2026-06-11 (Phase 3 Stage C — upload pipeline)** — Full multipart upload on the **`UploadPart` proxy** (100%
   factory; presign path + ESLint carve-out intentionally unused). `features/storage/upload`: engine singleton
   (worker-pool parts, 3/4/60MB+8MiB caps from `lib/upload/config.ts`, spark-md5 `content-md5`, 1s/2s/4s backoff

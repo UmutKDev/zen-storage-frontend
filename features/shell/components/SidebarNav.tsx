@@ -19,6 +19,14 @@ export function SidebarNav({
 
   return (
     <nav className="flex flex-col gap-1" aria-label={t("account.nav.title")}>
+      {!collapsed && (
+        <div
+          aria-hidden
+          className="px-3 pb-1.5 text-[11px] font-semibold tracking-[0.08em] text-muted-foreground/75 uppercase"
+        >
+          {t("account.shell.workspace.label")}
+        </div>
+      )}
       {navItems
         .filter((item) => !item.flag || isEnabled(item.flag))
         .map((item) => {

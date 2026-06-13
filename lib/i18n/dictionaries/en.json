@@ -118,6 +118,7 @@
     "usage": {
       "label": "Storage",
       "of": "of",
+      "usedSuffix": "used",
       "nearLimit": "Almost full",
       "exceeded": "Storage full"
     },

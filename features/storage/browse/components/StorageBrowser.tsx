@@ -22,7 +22,6 @@ import {
 import { GridView } from "./GridView";
 import { ListView } from "./ListView";
 import { SortMenu } from "./SortMenu";
-import { UsageBar } from "./UsageBar";
 import { ViewToggle } from "./ViewToggle";
 
 export function StorageBrowser({ path }: { path: string }) {
@@ -85,7 +84,6 @@ export function StorageBrowser({ path }: { path: string }) {
       <span aria-live="polite" className="sr-only">
         {liveMessage}
       </span>
-      <UsageBar />
     </div>
   );
 }
