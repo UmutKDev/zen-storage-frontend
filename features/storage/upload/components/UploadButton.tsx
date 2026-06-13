@@ -29,6 +29,7 @@ export function UploadButton({ path }: { path: string }) {
     <>
       <Button
         variant="upload"
+        size="sm"
         onClick={() => setOpen(true)}
         title={`${t("storage.upload.menu.button")} (⌘U)`}
       >

@@ -20,12 +20,21 @@ export function SortMenu() {
   const sortDir = useViewPrefs((s) => s.sortDir);
   const setSort = useViewPrefs((s) => s.setSort);
 
+  const dirLabel =
+    sortDir === "asc"
+      ? t("storage.sort.ascending")
+      : t("storage.sort.descending");
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm">
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          aria-label={t("storage.sort.label")}
+          title={`${t("storage.sort.label")} — ${t(`storage.sort.${sortKey}`)} · ${dirLabel}`}
+        >
           <ArrowUpDown className="size-4" />
-          {t("storage.sort.label")}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-44">

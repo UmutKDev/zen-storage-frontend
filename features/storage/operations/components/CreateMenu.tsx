@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { FileText, FolderPlus, Plus } from "lucide-react";
+import { ChevronDown, FileText, FolderPlus, Plus } from "lucide-react";
 import { t } from "@/lib/i18n";
 import {
   Button,
@@ -25,6 +25,7 @@ export function CreateMenu({ path }: { path: string }) {
           <Button variant="outline" size="sm">
             <Plus className="size-4" />
             {t("storage.ops.new")}
+            <ChevronDown className="-ml-0.5 size-3.5 opacity-70" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-64">
