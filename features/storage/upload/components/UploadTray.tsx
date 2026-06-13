@@ -18,7 +18,11 @@ import { ConflictPrompt } from "../../operations/components/ConflictPrompt";
 import { focusBrowseContent } from "../../operations/lib/feedback";
 import { uploadEngine } from "../core/engine";
 import { useUploadEngineBoot, useUploadQueue } from "../hooks/useUploadQueue";
-import type { UploadItem, UploadStatus } from "../stores/uploads.store";
+import {
+  useUploadsStore,
+  type UploadItem,
+  type UploadStatus,
+} from "../stores/uploads.store";
 
 const STATUS_KEY: Record<UploadStatus, string> = {
   queued: "storage.upload.status.queued",
@@ -203,6 +207,10 @@ function UploadConflictDialog({ items }: { items: ReadonlyArray<UploadItem> }) {
 export function UploadTray() {
   useUploadEngineBoot();
   const queue = useUploadQueue();
+  // While the upload dialog is open it already shows the queue — suppress the
+  // tray pane so progress isn't shown twice (the engine, live regions, and
+  // conflict gate below stay mounted).
+  const dialogOpen = useUploadsStore((s) => s.dialogOpen);
   const [collapsed, setCollapsed] = useState(false);
   const collapseRef = useRef<HTMLButtonElement>(null);
   const activeCount = queue.items.filter((i) => ACTIVE.has(i.status)).length;
@@ -249,7 +257,7 @@ export function UploadTray() {
   return (
     <>
       <AnimatePresence>
-        {queue.items.length > 0 ? (
+        {queue.items.length > 0 && !dialogOpen ? (
           <motion.section
             variants={toastVariant}
             initial="hidden"

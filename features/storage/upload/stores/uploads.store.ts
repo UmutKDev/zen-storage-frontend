@@ -43,6 +43,10 @@ export interface UploadItem {
 
 interface UploadsState {
   items: ReadonlyArray<UploadItem>;
+  /** True while the upload DIALOG is open. The background tray hides its visible
+   *  pane in that case (the dialog already shows the queue — never both). */
+  dialogOpen: boolean;
+  setDialogOpen: (open: boolean) => void;
   upsert: (item: UploadItem) => void;
   patch: (id: string, patch: Partial<UploadItem>) => void;
   remove: (id: string) => void;
@@ -51,6 +55,8 @@ interface UploadsState {
 
 export const useUploadsStore = create<UploadsState>()((set) => ({
   items: [],
+  dialogOpen: false,
+  setDialogOpen: (open) => set({ dialogOpen: open }),
   upsert: (item) =>
     set((state) => {
       const index = state.items.findIndex((i) => i.id === item.id);
