@@ -1,6 +1,7 @@
 "use client";
 
 import { EyeOff, Lock } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { t } from "@/lib/i18n";
 import type { FolderEntry } from "../lib/entries";
 
@@ -41,7 +42,14 @@ export function EntryStatusChip({ entry }: { entry: FolderEntry }) {
   if (!status) return null;
   const Icon = status.chip === "lock" ? Lock : EyeOff;
   return (
-    <span className="zs-status-chip" role="img" aria-label={status.label}>
+    <span
+      className={cn(
+        "zs-status-chip",
+        status.chip === "lock" && "zs-status-chip--lock",
+      )}
+      role="img"
+      aria-label={status.label}
+    >
       <Icon />
     </span>
   );
