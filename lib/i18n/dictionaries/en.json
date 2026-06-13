@@ -172,7 +172,33 @@
         "namePlaceholder": "Untitled",
         "submit": "Create",
         "createdFolder": "Folder created.",
-        "createdFile": "File created."
+        "createdFile": "File created.",
+        "in": "in",
+        "directory": "Directory",
+        "directoryDesc": "A new folder",
+        "document": "Document",
+        "documentDesc": "A new text document",
+        "documentTitle": "New document",
+        "documentName": "Document name",
+        "format": "Format",
+        "encrypt": "Encrypt this folder",
+        "encryptSoon": "Coming soon",
+        "cipher": "AES-256"
+      },
+      "secure": {
+        "unlock": {
+          "title": "Unlock folder",
+          "titleHidden": "Show hidden items",
+          "subtitle": "Enter the folder password",
+          "subtitleHidden": "Enter your password to reveal hidden items",
+          "password": "Password",
+          "show": "Show password",
+          "hide": "Hide password",
+          "cipher": "AES-256 encrypted",
+          "submit": "Unlock",
+          "reveal": "Reveal",
+          "error": "Incorrect password"
+        }
       },
       "rename": {
         "title": "Rename",
