@@ -36,12 +36,17 @@ export function SidebarNav({
               className={cn(
                 "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                 active
-                  ? "bg-accent text-accent-foreground"
+                  ? "bg-accent text-accent-foreground shadow-[inset_0_1px_0_0_var(--glass-highlight)]"
                   : "text-muted-foreground hover:bg-accent/60 hover:text-foreground",
                 collapsed && "justify-center px-0",
               )}
             >
-              <Icon className="size-4 shrink-0" />
+              <Icon
+                className={cn(
+                  "size-4 shrink-0",
+                  active && "text-primary",
+                )}
+              />
               {collapsed ? (
                 <span className="sr-only">{label}</span>
               ) : (

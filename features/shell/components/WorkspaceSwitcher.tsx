@@ -13,16 +13,16 @@ export function WorkspaceSwitcher({ collapsed = false }: { collapsed?: boolean }
   return (
     <div
       className={cn(
-        "flex items-center gap-2 rounded-md border border-border bg-surface px-3 py-2 text-sm",
+        "flex items-center gap-2.5 rounded-md border border-border bg-surface px-2.5 py-2 text-sm shadow-[inset_0_1px_0_0_var(--glass-highlight),var(--shadow-e1)]",
         collapsed && "justify-center px-0",
       )}
       aria-label={t("account.shell.workspace.label")}
     >
-      <span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
-        <Folder className="size-3.5" />
+      <span className="zs-tile-icon zs-tone-brand size-7 shrink-0">
+        <Folder className="size-4" />
       </span>
       {!collapsed && (
-        <span className="truncate font-medium text-foreground">
+        <span className="truncate font-semibold tracking-[-0.01em] text-foreground">
           {t("account.shell.workspace.personal")}
         </span>
       )}

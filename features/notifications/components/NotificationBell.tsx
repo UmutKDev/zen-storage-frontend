@@ -37,8 +37,8 @@ export function NotificationBell() {
           <Bell className="size-4" />
           {count > 0 && (
             <Badge
-              variant="destructive"
-              className="absolute -top-0.5 -right-0.5 size-4 min-w-4 justify-center rounded-full px-1 text-[10px] leading-none"
+              variant="default"
+              className="absolute -top-0.5 -right-0.5 size-4 min-w-4 justify-center rounded-full px-1 text-[10px] leading-none shadow-[0_0_0_2px_var(--surface)]"
               aria-hidden
             >
               {count > 99 ? "99+" : count}

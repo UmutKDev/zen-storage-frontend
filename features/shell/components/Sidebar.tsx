@@ -3,7 +3,7 @@
 import { PanelLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { t } from "@/lib/i18n";
-import { Button, Separator } from "@/components/ui";
+import { Button, Logo, Separator } from "@/components/ui";
 import { useShellStore } from "../stores/shell.store";
 import { SidebarNav } from "./SidebarNav";
 import { WorkspaceSwitcher } from "./WorkspaceSwitcher";
@@ -21,20 +21,8 @@ export function Sidebar() {
         collapsed ? "w-16" : "w-64",
       )}
     >
-      <div
-        className={cn(
-          "flex items-center gap-2 px-1 py-1",
-          collapsed && "justify-center",
-        )}
-      >
-        <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-primary font-semibold text-primary-foreground">
-          S
-        </span>
-        {!collapsed && (
-          <span className="font-semibold tracking-tight text-foreground">
-            {t("common.appName")}
-          </span>
-        )}
+      <div className={cn("flex items-center px-1 py-1", collapsed && "justify-center")}>
+        <Logo wordmark={!collapsed} />
       </div>
 
       <WorkspaceSwitcher collapsed={collapsed} />

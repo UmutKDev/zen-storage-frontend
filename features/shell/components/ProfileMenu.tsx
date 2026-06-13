@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { CreditCard, LogOut, Shield, User } from "lucide-react";
 import { t } from "@/lib/i18n";
@@ -12,8 +12,7 @@ import {
   Button,
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
+  DropdownMenuRichItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui";
@@ -21,6 +20,7 @@ import { signOutAndCleanup } from "@/features/auth";
 import { useProfile } from "@/features/account";
 
 export function ProfileMenu() {
+  const router = useRouter();
   const queryClient = useQueryClient();
   const { data: profile } = useProfile();
   const displayName = profile?.FullName?.trim() || profile?.Email || "";
@@ -40,43 +40,48 @@ export function ProfileMenu() {
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuLabel className="flex flex-col gap-0.5">
-          {profile?.FullName ? (
-            <span className="truncate font-medium text-foreground">
-              {profile.FullName}
-            </span>
-          ) : null}
-          {profile?.Email ? (
-            <span className="truncate text-xs font-normal text-muted-foreground">
-              {profile.Email}
-            </span>
-          ) : null}
-        </DropdownMenuLabel>
+      <DropdownMenuContent align="end" className="w-60 p-1.5">
+        <div className="flex items-center gap-3 px-2 py-2">
+          <Avatar className="size-9">
+            <AvatarImage src={profile?.Image || undefined} alt="" />
+            <AvatarFallback>{getInitials(displayName)}</AvatarFallback>
+          </Avatar>
+          <div className="flex min-w-0 flex-col">
+            {profile?.FullName ? (
+              <span className="truncate text-sm font-semibold tracking-[-0.01em] text-foreground">
+                {profile.FullName}
+              </span>
+            ) : null}
+            {profile?.Email ? (
+              <span className="truncate text-xs text-muted-foreground">
+                {profile.Email}
+              </span>
+            ) : null}
+          </div>
+        </div>
         <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
-          <Link href="/account/profile">
-            <User className="size-4" />
-            {t("account.shell.profileMenu.profile")}
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link href="/account/security">
-            <Shield className="size-4" />
-            {t("account.shell.profileMenu.security")}
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link href="/account/subscription">
-            <CreditCard className="size-4" />
-            {t("account.shell.profileMenu.subscription")}
-          </Link>
-        </DropdownMenuItem>
+        <DropdownMenuRichItem
+          icon={User}
+          label={t("account.shell.profileMenu.profile")}
+          onSelect={() => router.push("/account/profile")}
+        />
+        <DropdownMenuRichItem
+          icon={Shield}
+          label={t("account.shell.profileMenu.security")}
+          onSelect={() => router.push("/account/security")}
+        />
+        <DropdownMenuRichItem
+          icon={CreditCard}
+          label={t("account.shell.profileMenu.subscription")}
+          onSelect={() => router.push("/account/subscription")}
+        />
         <DropdownMenuSeparator />
-        <DropdownMenuItem onSelect={() => void signOutAndCleanup(queryClient)}>
-          <LogOut className="size-4" />
-          {t("account.shell.profileMenu.signOut")}
-        </DropdownMenuItem>
+        <DropdownMenuRichItem
+          icon={LogOut}
+          variant="destructive"
+          label={t("account.shell.profileMenu.signOut")}
+          onSelect={() => void signOutAndCleanup(queryClient)}
+        />
       </DropdownMenuContent>
     </DropdownMenu>
   );

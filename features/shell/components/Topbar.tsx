@@ -1,6 +1,7 @@
 "use client";
 
-import { Menu } from "lucide-react";
+import { Menu, Search } from "lucide-react";
+import { toast } from "sonner";
 import { t } from "@/lib/i18n";
 import { Button } from "@/components/ui";
 import { NotificationBell } from "@/features/notifications";
@@ -8,8 +9,8 @@ import { useShellStore } from "../stores/shell.store";
 import { ProfileMenu } from "./ProfileMenu";
 import { ThemeToggle } from "./ThemeToggle";
 
-/** Top navigation bar (glass-chrome). Hosts the mobile menu, notifications,
- *  theme toggle, and profile menu. The breadcrumb/search slot fills in P3. */
+/** Top navigation bar (glass-chrome). Hosts the mobile menu, the ⌘K search
+ *  trigger, notifications, theme toggle, and profile menu. */
 export function Topbar() {
   const setMobileNavOpen = useShellStore((s) => s.setMobileNavOpen);
 
@@ -25,7 +26,21 @@ export function Topbar() {
         <Menu className="size-5" />
       </Button>
 
-      {/* Breadcrumb / command-search slot — filled in Phase 3. */}
+      {/* Search trigger — visual affordance; the command palette lands in its
+          own phase (the click + ⌘K binding wire up there). */}
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        onClick={() => toast(t("storage.search.comingSoon"))}
+        aria-label={t("storage.search.placeholder")}
+        className="hidden w-64 justify-start gap-2 font-normal text-muted-foreground md:flex"
+      >
+        <Search className="size-4" />
+        <span className="flex-1 text-left">{t("storage.search.placeholder")}</span>
+        <kbd className="zs-menu-kbd">{t("storage.search.shortcut")}</kbd>
+      </Button>
+
       <div className="flex-1" />
 
       <NotificationBell />
