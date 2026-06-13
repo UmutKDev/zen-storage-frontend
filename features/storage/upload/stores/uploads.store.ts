@@ -29,6 +29,11 @@ export interface UploadItem {
   fileName: string;
   /** Destination folder ("" = root). */
   path: string;
+  /** Top-level picked folder this file belongs to — folder uploads collapse to
+   *  ONE queue row keyed by `(batchId, folderName)`. Undefined for loose files.
+   *  Runtime-only (not persisted): refresh-resumed items fall back to per-file
+   *  rows, which is acceptable since each resumes as its own batch. */
+  folderName?: string;
   totalSize: number;
   uploadedBytes: number;
   status: UploadStatus;

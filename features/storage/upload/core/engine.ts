@@ -46,6 +46,9 @@ import { useUploadsStore, type UploadItem } from "../stores/uploads.store";
 interface RuntimeEntry {
   persisted: PersistedUploadEntry;
   batchId: string;
+  /** Top-level picked folder (folder uploads) — drives queue-row grouping.
+   *  Runtime-only: not persisted, so resumed entries group per-file. */
+  folderName?: string;
   controller: AbortController;
   paused: boolean;
   /** True while `runFile` owns this entry — resume-while-draining must not
@@ -64,6 +67,9 @@ export interface EnqueueFile {
   path: string;
   /** Overrides the file's own name (folder uploads keep relative paths' leaf). */
   name?: string;
+  /** Top-level picked folder this file belongs to (folder uploads collapse to
+   *  one queue row); undefined for loose files. */
+  folderName?: string;
 }
 
 /** Polling interval while a part waits for global in-flight byte budget. */
@@ -148,7 +154,7 @@ class UploadEngine {
   /** Pre-flighted by the caller (`useUploadQueue`); this just enqueues. */
   enqueue(files: ReadonlyArray<EnqueueFile>, ownerId: string): void {
     const batchId = this.mintId();
-    for (const { file, path, name } of files) {
+    for (const { file, path, name, folderName } of files) {
       const id = this.mintId();
       const fileName = name ?? file.name;
       const persisted: PersistedUploadEntry = {
@@ -170,6 +176,7 @@ class UploadEngine {
       this.entries.set(id, {
         persisted,
         batchId,
+        folderName,
         controller: new AbortController(),
         paused: false,
         running: false,
@@ -354,6 +361,7 @@ class UploadEngine {
       batchId: entry.batchId,
       fileName: persisted.fileName,
       path: persisted.path,
+      folderName: entry.folderName,
       totalSize: persisted.totalSize,
       uploadedBytes: 0,
       status,

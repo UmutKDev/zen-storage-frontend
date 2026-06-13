@@ -98,6 +98,9 @@ export function useUploadQueue() {
             ? `${basePath}/${relativeDir}`
             : relativeDir
           : basePath,
+        // Files from a picked/dropped folder collapse to one queue row keyed by
+        // their top-level folder; loose files (no relativeDir) stay per-file.
+        folderName: relativeDir ? relativeDir.split("/")[0] : undefined,
       }));
       uploadEngine.enqueue(entries, ownerId);
     },

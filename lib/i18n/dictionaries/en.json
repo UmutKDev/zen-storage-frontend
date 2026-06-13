@@ -280,6 +280,11 @@
         "hide": "Hide",
         "empty": "Files you add appear here while they upload."
       },
+      "folder": {
+        "fileSuffix": "file",
+        "filesSuffix": "files",
+        "failedSuffix": "failed"
+      },
       "tray": {
         "title": "Uploads",
         "collapse": "Collapse uploads",
