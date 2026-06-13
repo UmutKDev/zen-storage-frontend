@@ -21,6 +21,7 @@ export {
   DropdownMenuGroup,
   DropdownMenuLabel,
   DropdownMenuItem,
+  DropdownMenuRichItem,
   DropdownMenuCheckboxItem,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
@@ -77,6 +78,7 @@ export {
   CardContent,
 } from "./card";
 export { Avatar, AvatarImage, AvatarFallback } from "./avatar";
+export { Logo } from "./logo";
 export {
   Sheet,
   SheetTrigger,

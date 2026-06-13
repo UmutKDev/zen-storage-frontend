@@ -1,7 +1,12 @@
 "use client"
 
 import * as React from "react"
-import { CheckIcon, ChevronRightIcon, CircleIcon } from "lucide-react"
+import {
+  CheckIcon,
+  ChevronRightIcon,
+  CircleIcon,
+  type LucideIcon,
+} from "lucide-react"
 import { DropdownMenu as DropdownMenuPrimitive } from "radix-ui"
 
 import { cn } from "@/lib/utils/index"
@@ -79,6 +84,66 @@ function DropdownMenuItem({
       )}
       {...props}
     />
+  )
+}
+
+/** Premium menu row: machined icon tile + label/description + optional ⌘ chip.
+ *  Used for the workspace/profile/notification/create menus. Plain
+ *  DropdownMenuItem stays for simple rows. */
+function DropdownMenuRichItem({
+  className,
+  icon: Icon,
+  label,
+  description,
+  kbd,
+  variant = "default",
+  ...props
+}: React.ComponentProps<typeof DropdownMenuPrimitive.Item> & {
+  icon?: LucideIcon
+  label: React.ReactNode
+  description?: React.ReactNode
+  kbd?: React.ReactNode
+  variant?: "default" | "destructive"
+}) {
+  return (
+    <DropdownMenuPrimitive.Item
+      data-slot="dropdown-menu-rich-item"
+      data-variant={variant}
+      className={cn(
+        "group/zsmenu relative flex cursor-default items-center gap-3 rounded-md px-2 py-1.5 text-sm outline-hidden select-none focus:bg-accent data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[variant=destructive]:focus:bg-destructive/10",
+        className
+      )}
+      {...props}
+    >
+      {Icon ? (
+        <span
+          aria-hidden
+          className={cn(
+            "zs-menu-icon group-focus/zsmenu:text-primary",
+            variant === "destructive" &&
+              "text-destructive group-focus/zsmenu:text-destructive"
+          )}
+        >
+          <Icon className="size-4" />
+        </span>
+      ) : null}
+      <span className="flex min-w-0 flex-1 flex-col gap-px text-left">
+        <span
+          className={cn(
+            "truncate font-medium tracking-[-0.01em] text-foreground",
+            variant === "destructive" && "text-destructive"
+          )}
+        >
+          {label}
+        </span>
+        {description ? (
+          <span className="truncate text-xs text-muted-foreground">
+            {description}
+          </span>
+        ) : null}
+      </span>
+      {kbd ? <kbd className="zs-menu-kbd">{kbd}</kbd> : null}
+    </DropdownMenuPrimitive.Item>
   )
 }
 
@@ -246,6 +311,7 @@ export {
   DropdownMenuGroup,
   DropdownMenuLabel,
   DropdownMenuItem,
+  DropdownMenuRichItem,
   DropdownMenuCheckboxItem,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,

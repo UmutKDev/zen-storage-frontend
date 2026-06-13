@@ -9,18 +9,21 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90",
+        // Gradient + inset-rim fills (.zs-* machined layer in globals.css).
+        default: "zs-btn-grad-primary text-primary-foreground",
         destructive:
-          "bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:bg-destructive/60 dark:focus-visible:ring-destructive/40",
-        outline:
-          "border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50",
-        secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+          "zs-btn-grad-destructive text-white focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40",
+        // Micro-glass control fills (the disciplined third tier).
+        outline: "zs-btn-micro",
+        secondary: "zs-btn-secondary-glass text-secondary-foreground",
         ghost:
           "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
         "ghost-destructive":
           "text-destructive hover:bg-destructive/10 hover:text-destructive focus-visible:ring-destructive/20 dark:hover:bg-destructive/20 dark:focus-visible:ring-destructive/40",
         link: "text-primary underline-offset-4 hover:underline",
+        // The hero action — heavier than primary. Compose the engraved well +
+        // ⌘U chip in the caller (zs-btn-upload__well / __kbd). ONE per view.
+        upload: "zs-btn-upload text-primary-foreground",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",
