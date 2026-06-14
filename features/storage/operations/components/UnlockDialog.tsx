@@ -9,9 +9,8 @@ import { SectionedDialog } from "./SectionedDialog";
 
 /**
  * Password gate for encrypted folders (click) and hidden items (double-Shift).
- * PRESENTATIONAL ONLY — built as the design-system primitive. Phase 5 wires the
- * in-memory secure-folder token source + the ⇧⇧ reveal gesture (CLAUDE.md
- * rule #5: tokens are never persisted). Not mounted anywhere yet.
+ * Presentational — the `SecureFolderDialogs` controller wires it to the
+ * secure-folder `useUnlock` hook (the minted token is in-memory only, rule #5).
  */
 export function UnlockDialog({
   open,
@@ -59,18 +58,18 @@ export function UnlockDialog({
             emblemTone={hidden ? "neutral" : "armed"}
             title={
               hidden
-                ? t("storage.secure.unlock.titleHidden")
-                : t("storage.secure.unlock.title")
+                ? t("storage.ops.secure.unlock.titleHidden")
+                : t("storage.ops.secure.unlock.title")
             }
             subtitle={
               hidden
-                ? t("storage.secure.unlock.subtitleHidden")
-                : t("storage.secure.unlock.subtitle")
+                ? t("storage.ops.secure.unlock.subtitleHidden")
+                : t("storage.ops.secure.unlock.subtitle")
             }
             footStart={
               <span className="zs-section-cipher">
                 <Lock className="size-3" />
-                {t("storage.secure.unlock.cipher")}
+                {t("storage.ops.secure.unlock.cipher")}
               </span>
             }
             footActions={
@@ -85,8 +84,8 @@ export function UnlockDialog({
                 </Button>
                 <Button type="submit" size="sm" disabled={pending || !password}>
                   {hidden
-                    ? t("storage.secure.unlock.reveal")
-                    : t("storage.secure.unlock.submit")}
+                    ? t("storage.ops.secure.unlock.reveal")
+                    : t("storage.ops.secure.unlock.submit")}
                 </Button>
               </>
             }
@@ -96,7 +95,7 @@ export function UnlockDialog({
                 htmlFor="zs-unlock-password"
                 className="text-sm font-medium text-foreground"
               >
-                {t("storage.secure.unlock.password")}
+                {t("storage.ops.secure.unlock.password")}
               </label>
               <div className="relative">
                 <Input
@@ -114,8 +113,8 @@ export function UnlockDialog({
                   onClick={() => setReveal((r) => !r)}
                   aria-label={
                     reveal
-                      ? t("storage.secure.unlock.hide")
-                      : t("storage.secure.unlock.show")
+                      ? t("storage.ops.secure.unlock.hide")
+                      : t("storage.ops.secure.unlock.show")
                   }
                   className="absolute top-1/2 right-1 -translate-y-1/2 rounded-md p-1.5 text-muted-foreground transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                 >

@@ -149,7 +149,8 @@ export function FileTile({
                 <span
                   className={cn(
                     "zs-status-chip",
-                    encrypted && "zs-status-chip--lock",
+                    encrypted && locked && "zs-status-chip--lock",
+                    encrypted && !locked && "zs-status-chip--unlock",
                   )}
                   role="img"
                   aria-label={chipLabel}

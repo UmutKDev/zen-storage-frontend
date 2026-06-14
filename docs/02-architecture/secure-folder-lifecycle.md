@@ -6,19 +6,26 @@
 
 ## 1. The store (`features/secure-folders/stores/secureFolders.store.ts`)
 
-- **In‑memory only. Tokens are NEVER persisted** — no localStorage, no sessionStorage, no cookies. This is a hard
-  requirement, not a preference.
-- Feature‑local Zustand store (not in global `stores/`), per the [folder plan](./ARCHITECTURE.md#folder-structure).
+- **`sessionStorage`‑only, tab‑scoped, expiry‑pruned** (amended — see [D‑P5.7](../07-decisions/DECISIONS.md)). Only the
+  backend‑minted, TTL‑bounded **session token** is kept; the **passphrase is NEVER stored** (it rides the
+  `X‑Folder‑Passphrase` header for one request and is dropped). Persisting to `sessionStorage` lets an unlock/reveal
+  **survive a page refresh** within the same tab; the browser clears it when the tab closes, and a rehydrate **prunes
+  any token that expired while the tab was away**. **No `localStorage`, no cookie, no cross‑tab persistence.** (The
+  original rule was strict in‑memory / never‑persisted; D‑P5.7 relaxes it to sessionStorage for the refresh‑survival UX
+  while keeping the passphrase unstored and the surface tab‑scoped + TTL‑bounded.)
+- Feature‑local Zustand store (not in global `stores/`), per the [folder plan](./ARCHITECTURE.md#folder-structure),
+  using `zustand/middleware`'s `persist` + `createJSONStorage(() => sessionStorage)`, `partialize`d to the token map and
+  a `merge` that drops expired entries on rehydrate.
 - **Enforced mechanically, not by goodwill.** `eslint.config.mjs` carries a targeted override on this exact file that
-  bans `zustand/middleware`'s `persist` and `MemberExpression` access to `localStorage`, `sessionStorage`, and
-  `document.cookie`. Reviewers can rely on lint — if it compiles clean, the rule held.
+  still bans `MemberExpression` access to `localStorage` and `document.cookie` — so the persistence can never be widened
+  to cross‑tab / at‑rest. `persist` + `sessionStorage` are now permitted on this file (and only this file).
 - Two logical namespaces:
   - **Encrypted** → header `X-Folder-Session`, minted by `Directory/Unlock`.
   - **Hidden** → header `X-Hidden-Session`, minted by `Directory/Reveal`.
-- Entry shape: `{ token, expiresAt }` keyed by the **returned root folder path** (`EncryptedFolderPath` /
-  `HiddenFolderPath`).
-- **Path marks** (which folders *are* encrypted/hidden, for badges) **may** persist to `sessionStorage` — marks are not
-  secrets; **tokens are**. Marks live in a separate, non‑token store and are exempt from the lint override above.
+- Entry shape: `{ token, expiresAt }` keyed by the **returned root folder path** (`EncryptedFolderPath`) for encrypted,
+  or the **reveal‑request path** (the current browse folder) for hidden — see the phase doc for that asymmetry.
+- **Path marks** (which folders *are* encrypted/hidden, for badges) are NOT a separate store — backend listing flags
+  (`IsEncrypted`/`IsLocked`/`IsHidden`/`IsConcealed`) drive the badges directly (D‑P5.6).
 
 ## 2. Mint
 
@@ -72,8 +79,10 @@ For `/Api/Cloud/*` requests the interceptor calls the registered getter (one res
 
 ## 7. Clear‑all (mandatory)
 Clear **all** tokens on:
-- **Sign‑out** (part of the [auth teardown](./auth-integration.md#4-sign-out-full-teardown)).
-- **Tab close** — see §11 for the exact event wiring (`pagehide` + `visibilitychange`, **never** `beforeunload`).
+- **Sign‑out** (part of the [auth teardown](./auth-integration.md#4-sign-out-full-teardown)) — `clearAll()` also wipes
+  the `sessionStorage` entry via the persist middleware.
+- **Tab close** — handled **natively** by `sessionStorage` (the browser drops it when the tab closes). See §11 (the old
+  `pagehide` handler was removed under D‑P5.7 — it also fired on refresh and would have defeated refresh‑survival).
 
 ## 8. Query‑key integration
 Surfaces that depend on a token fold it into their query key (e.g. `[scope,'cloud','directories',path,hiddenToken]`) so
@@ -85,36 +94,27 @@ A **global double‑Shift** key handler opens the reveal passphrase dialog → `
 that passphrase appear (token folded into the directories query key). Conceal/lock hides them again.
 
 ## 10. Risks (see also the phase doc)
-- Never‑persist guarantee — the targeted lint rule on `features/secure-folders/stores/secureFolders.store.ts` is the
-  primary guard; CI must fail on any new `persist` / `localStorage` / `sessionStorage` / `document.cookie` reference in
-  that file.
+- Persistence stays tab‑scoped — the targeted lint rule on `features/secure-folders/stores/secureFolders.store.ts` is the
+  primary guard; CI must fail on any new `localStorage` / `document.cookie` reference in that file (`sessionStorage` +
+  `persist` are now permitted there per D‑P5.7; the passphrase must never enter the persisted state).
 - Ancestor lookup correctness — dedicated unit tests over nested/sibling paths against `lib/utils/paths.ts.isAncestor`.
 - 403 vs wrong‑passphrase disambiguation — explicit handling to prevent loops.
 - Token‑source seam wiring — if `registerSecureFolderTokenSource` is not called from `app/providers.tsx`, the
   interceptor silently no‑ops; provider boot must register the getter (and tests should assert it).
 
-## 11. Tab close + bfcache
-Listen for **`visibilitychange`** and **`pagehide`** — **never `beforeunload`** (it blocks bfcache and fires
-unreliably on mobile Safari).
+## 11. Tab close + refresh + bfcache (amended — D‑P5.7)
+Under sessionStorage persistence there is **no `pagehide`/`visibilitychange` handler** (the file
+`features/secure-folders/lifecycle/tab-close.ts` was **removed**). A manual handler that cleared on `pagehide` would
+fire on a **refresh** too (refresh emits `pagehide` with `persisted === false`) and wipe the very tokens we now want to
+keep across a refresh. `sessionStorage`'s own scoping gives the exact lifecycle we want:
 
-Implementation lives in `features/secure-folders/lifecycle/tab-close.ts` and is registered once from
-`app/providers.tsx`.
-
-| Event | Condition | Action |
-|---|---|---|
-| `pagehide` | `event.persisted === false` | Tab is closing for real → **clear ALL tokens** (encrypted + hidden). |
-| `pagehide` | `event.persisted === true` | Page entering **bfcache** → **keep tokens**. A bfcache restore resurrects the in‑memory Zustand store intact, so the tokens are still valid (subject to TTL). |
-| `visibilitychange` | `document.visibilityState === 'hidden'` | **No‑op.** Backgrounding a tab is not closing it; clearing here would force a re‑prompt every time the user switches tabs. |
-
-```ts
-// features/secure-folders/lifecycle/tab-close.ts (shape)
-window.addEventListener('pagehide', (e) => {
-  if (!e.persisted) clearAllSecureFolderTokens();
-});
-window.addEventListener('visibilitychange', () => {
-  // intentionally empty — see table above
-});
-```
+| Event | Behaviour |
+|---|---|
+| **Refresh** (F5 / reload) | `sessionStorage` survives → the store **rehydrates** the tokens (expired ones pruned). The unlock/reveal is preserved — this is the whole point of D‑P5.7. |
+| **Tab / window close** | The browser **clears `sessionStorage`** for that tab → tokens gone. No code needed. |
+| **bfcache** (back/forward) | `sessionStorage` survives → tokens intact (subject to TTL). |
+| **Backgrounding** (tab switch) | Nothing happens — `sessionStorage` is untouched, so no re‑prompt on tab switch. |
+| **Sign‑out** | `clearAll()` empties the store **and** the `sessionStorage` entry (§7). |
 
 ## 12. Cross‑tab behavior (intentional per‑tab)
 Tokens are **per‑tab** at MVP. Unlocking `/work` in Tab A does **not** unlock it in Tab B; Tab B's next request to

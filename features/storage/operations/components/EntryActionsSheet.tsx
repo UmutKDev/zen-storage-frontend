@@ -2,11 +2,25 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Eye, FolderInput, Trash2, Upload, type LucideIcon } from "lucide-react";
+import {
+  Eye,
+  EyeOff,
+  FolderInput,
+  KeyRound,
+  Lock,
+  Trash2,
+  Unlock,
+  Upload,
+  type LucideIcon,
+} from "lucide-react";
 import { t } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import { useFlag } from "@/lib/flags";
 import { previewHref } from "@/lib/preview";
+import {
+  useSecureFolderUiStore,
+  type SecureActionKind,
+} from "@/features/secure-folders";
 import {
   Sheet,
   SheetContent,
@@ -15,7 +29,7 @@ import {
   SheetTitle,
 } from "@/components/ui";
 import type { FolderEntry } from "../../browse/lib/entries";
-import { folderHref } from "../../browse/lib/href";
+import { folderHref, folderPathOf } from "../../browse/lib/href";
 import { useUploadsStore } from "../../upload/stores/uploads.store";
 import { useDelete } from "../hooks/useDelete";
 import { useStorageUiStore } from "../stores/storageUi.store";
@@ -87,6 +101,18 @@ export function EntryActionsSheet({ path }: { path: string }) {
     if (shown?.kind === "dir") router.push(folderHref(path, shown.name));
     openUpload(true);
   };
+  const onSecure = (kind: SecureActionKind) => {
+    closeSheet();
+    if (!shown || shown.kind !== "dir") return;
+    useSecureFolderUiStore.getState().open({
+      kind,
+      path: folderPathOf(path, shown.name),
+      ...(kind === "unlock"
+        ? { mode: "folder", navigateTo: folderHref(path, shown.name) }
+        : {}),
+    });
+  };
+  const dir = shown?.kind === "dir" ? shown.dir : null;
 
   return (
     <>
@@ -107,6 +133,55 @@ export function EntryActionsSheet({ path }: { path: string }) {
                 label={t("storage.ops.menu.preview")}
                 onClick={onPreview}
               />
+            ) : null}
+            {dir && dir.IsEncrypted && dir.IsLocked ? (
+              <SheetAction
+                icon={Unlock}
+                label={t("storage.ops.secure.lockedFolder.action")}
+                onClick={() => onSecure("unlock")}
+              />
+            ) : null}
+            {dir && !dir.IsEncrypted ? (
+              <SheetAction
+                icon={Lock}
+                label={t("storage.ops.secure.encrypt.action")}
+                onClick={() => onSecure("encrypt")}
+              />
+            ) : null}
+            {dir && dir.IsEncrypted && !dir.IsLocked ? (
+              <>
+                <SheetAction
+                  icon={Unlock}
+                  label={t("storage.ops.secure.lock.action")}
+                  onClick={() => onSecure("lock")}
+                />
+                <SheetAction
+                  icon={KeyRound}
+                  label={t("storage.ops.secure.decrypt.action")}
+                  onClick={() => onSecure("decrypt")}
+                />
+              </>
+            ) : null}
+            {dir && !dir.IsHidden ? (
+              <SheetAction
+                icon={EyeOff}
+                label={t("storage.ops.secure.hide.action")}
+                onClick={() => onSecure("hide")}
+              />
+            ) : null}
+            {dir && dir.IsHidden ? (
+              <>
+                <SheetAction
+                  icon={Eye}
+                  label={t("storage.ops.secure.unhide.action")}
+                  onClick={() => onSecure("unhide")}
+                />
+                <SheetAction
+                  icon={EyeOff}
+                  label={t("storage.ops.secure.conceal.action")}
+                  onClick={() => onSecure("conceal")}
+                />
+              </>
             ) : null}
             <SheetAction
               icon={FolderInput}

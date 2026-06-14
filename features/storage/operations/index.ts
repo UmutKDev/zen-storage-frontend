@@ -1,6 +1,7 @@
 export { CreateMenu } from "./components/CreateMenu";
 export { EntryActionsMenu } from "./components/EntryActionsMenu";
 export { EntryActionsSheet } from "./components/EntryActionsSheet";
+export { SecureFolderDialogs } from "./components/SecureFolderDialogs";
 export { BulkActionBar } from "./components/BulkActionBar";
 export {
   DndMoveLayer,

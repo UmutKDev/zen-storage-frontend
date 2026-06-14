@@ -222,6 +222,7 @@
         "format": "Format",
         "encrypt": "Encrypt this folder",
         "encryptSoon": "Coming soon",
+        "encryptHint": "Set a password — you’ll need it to open this folder.",
         "cipher": "AES-256"
       },
       "secure": {
@@ -237,6 +238,54 @@
           "submit": "Unlock",
           "reveal": "Reveal",
           "error": "Incorrect password"
+        },
+        "lock": {
+          "action": "Lock",
+          "done": "Folder locked."
+        },
+        "encrypt": {
+          "action": "Encrypt",
+          "title": "Encrypt folder",
+          "subtitle": "Set a password. You’ll need it to open this folder.",
+          "submit": "Encrypt",
+          "done": "Folder encrypted.",
+          "error": "Couldn’t encrypt this folder."
+        },
+        "decrypt": {
+          "action": "Remove encryption",
+          "title": "Remove encryption?",
+          "subtitle": "Enter the folder password to decrypt it.",
+          "submit": "Decrypt",
+          "done": "Encryption removed.",
+          "error": "Couldn’t decrypt this folder."
+        },
+        "hide": {
+          "action": "Hide",
+          "title": "Hide folder",
+          "subtitle": "Set a password. You’ll need it to unhide this folder.",
+          "submit": "Hide",
+          "done": "Folder hidden.",
+          "error": "Couldn’t hide this folder."
+        },
+        "unhide": {
+          "action": "Unhide",
+          "title": "Unhide folder",
+          "subtitle": "Enter the folder password to unhide it.",
+          "submit": "Unhide",
+          "done": "Folder unhidden.",
+          "error": "Couldn’t unhide this folder."
+        },
+        "conceal": {
+          "action": "Conceal",
+          "done": "Folder concealed.",
+          "retry": "Couldn’t conceal — try again.",
+          "maybeIncomplete": "Conceal may not have completed. Re-check from another device if needed."
+        },
+        "passphraseMin": "Use at least 8 characters.",
+        "lockedFolder": {
+          "title": "This folder is locked",
+          "body": "Enter the folder password to view its contents.",
+          "action": "Unlock"
         }
       },
       "rename": {
@@ -381,7 +430,8 @@
       "newFolder": "New folder",
       "newFile": "New file",
       "searchInFolder": "Search this folder",
-      "searchEverywhere": "Search everywhere"
+      "searchEverywhere": "Search everywhere",
+      "revealHidden": "Reveal hidden folders"
     },
     "selection": {
       "deleteSelected": "Delete selected",
@@ -401,7 +451,8 @@
     "focusSearch": "Search this folder",
     "showHelp": "Show keyboard shortcuts",
     "toggleSidebar": "Toggle sidebar",
-    "uploadFiles": "Upload files"
+    "uploadFiles": "Upload files",
+    "revealHidden": "Reveal hidden folders"
   },
   "account": {
     "shell": {

@@ -2,17 +2,20 @@
 
 import { useState, type FormEvent } from "react";
 import { FolderPlus, Lock } from "lucide-react";
-import { basename } from "@/lib/utils";
+import { basename, cn } from "@/lib/utils";
 import { t } from "@/lib/i18n";
 import { Button, Dialog, DialogContent, Input } from "@/components/ui";
 import { useCreateFolder } from "../hooks/useCreateFolder";
 import { ConflictPrompt } from "./ConflictPrompt";
 import { SectionedDialog } from "./SectionedDialog";
 
+const MIN_PASSPHRASE = 8;
+
 /**
- * Create-folder dialog on the sectioned chrome. The encrypt option mirrors the
- * design but is disabled at MVP — encrypted folders are a Phase-5 secure
- * feature (the create mutation carries no encrypt field; we don't fake it).
+ * Create-folder dialog on the sectioned chrome. The encrypt toggle (Phase 5)
+ * reveals a passphrase field; when on, the folder is created encrypted
+ * (`IsEncrypted` + the `X-Folder-Passphrase` header — the passphrase is never
+ * stored).
  */
 export function NewFolderDialog({
   path,
@@ -24,10 +27,16 @@ export function NewFolderDialog({
   onOpenChange: (open: boolean) => void;
 }) {
   const [name, setName] = useState("");
+  const [encrypt, setEncrypt] = useState(false);
+  const [passphrase, setPassphrase] = useState("");
+  const [tooShort, setTooShort] = useState(false);
   const folder = useCreateFolder(path, () => onOpenChange(false));
   const handleOpenChange = (next: boolean) => {
     if (!next) {
       setName("");
+      setEncrypt(false);
+      setPassphrase("");
+      setTooShort(false);
       folder.cancelConflict();
     }
     onOpenChange(next);
@@ -36,7 +45,12 @@ export function NewFolderDialog({
   const submit = (e: FormEvent) => {
     e.preventDefault();
     const trimmed = name.trim();
-    if (trimmed) folder.mutate({ name: trimmed });
+    if (!trimmed) return;
+    if (encrypt && passphrase.length < MIN_PASSPHRASE) {
+      setTooShort(true);
+      return;
+    }
+    folder.mutate({ name: trimmed, encrypt, passphrase });
   };
 
   const destination = basename(path) || t("storage.breadcrumb.home");
@@ -77,7 +91,11 @@ export function NewFolderDialog({
                   <Button
                     type="submit"
                     size="sm"
-                    disabled={folder.isPending || name.trim().length === 0}
+                    disabled={
+                      folder.isPending ||
+                      name.trim().length === 0 ||
+                      (encrypt && passphrase.length === 0)
+                    }
                   >
                     {t("storage.ops.create.submit")}
                   </Button>
@@ -99,10 +117,15 @@ export function NewFolderDialog({
                   placeholder={t("storage.ops.create.namePlaceholder")}
                 />
               </div>
-              {/* Encrypt option — Phase 5 wires the actual encryption. */}
-              <div
-                className="zs-create-option cursor-not-allowed opacity-60"
-                aria-disabled
+              {/* Encrypt toggle — reveals the passphrase field when armed. */}
+              <button
+                type="button"
+                onClick={() => setEncrypt((e) => !e)}
+                aria-pressed={encrypt}
+                className={cn(
+                  "zs-create-option text-left",
+                  encrypt && "zs-create-option--on",
+                )}
               >
                 <span className="zs-create-option-glyph">
                   <Lock className="size-4" />
@@ -112,10 +135,43 @@ export function NewFolderDialog({
                     {t("storage.ops.create.encrypt")}
                   </span>
                   <span className="text-xs text-muted-foreground">
-                    {t("storage.ops.create.encryptSoon")}
+                    {t("storage.ops.create.encryptHint")}
                   </span>
                 </span>
-              </div>
+              </button>
+              {encrypt ? (
+                <div className="flex flex-col gap-1.5">
+                  <label
+                    htmlFor="zs-new-folder-passphrase"
+                    className="text-sm font-medium text-foreground"
+                  >
+                    {t("storage.ops.secure.unlock.password")}
+                  </label>
+                  <Input
+                    id="zs-new-folder-passphrase"
+                    type="password"
+                    value={passphrase}
+                    onChange={(e) => {
+                      setPassphrase(e.target.value);
+                      if (tooShort) setTooShort(false);
+                    }}
+                    aria-invalid={tooShort}
+                    aria-describedby={
+                      tooShort ? "zs-new-folder-passphrase-error" : undefined
+                    }
+                  />
+                  <p
+                    id="zs-new-folder-passphrase-error"
+                    className={cn(
+                      "text-xs",
+                      tooShort ? "text-destructive" : "text-muted-foreground",
+                    )}
+                    role={tooShort ? "alert" : undefined}
+                  >
+                    {t("storage.ops.secure.passphraseMin")}
+                  </p>
+                </div>
+              ) : null}
             </SectionedDialog>
           </form>
         )}

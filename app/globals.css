@@ -614,7 +614,18 @@
     height: 11px;
     display: block;
   }
+  /* Locked encrypted folder — amber closed padlock ("needs the passphrase"). */
   .zs-status-chip--lock {
+    color: var(--warning);
+    background: color-mix(in srgb, var(--warning) 12%, var(--surface-elevated));
+    box-shadow:
+      0 0 0 2px var(--surface),
+      inset 0 0 0 1px color-mix(in srgb, var(--warning) 34%, transparent),
+      inset 0 1px 0 0 var(--glass-highlight),
+      0 1px 2px rgb(0 0 0 / 0.1);
+  }
+  /* Unlocked encrypted folder — green open padlock ("you have access"). */
+  .zs-status-chip--unlock {
     color: var(--success);
     background: color-mix(in srgb, var(--success) 10%, var(--surface-elevated));
     box-shadow:

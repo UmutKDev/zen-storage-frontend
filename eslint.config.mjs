@@ -180,16 +180,16 @@ export default defineConfig([
     },
   },
 
-  // Secure-folder tokens are NEVER persisted (rule exists now; file lands in P5).
+  // Secure-folder tokens persist to sessionStorage ONLY (tab-scoped, expiry-pruned,
+  // passphrase never stored — rule #5, amended D-P5.7). localStorage + cookie stay
+  // hard-banned so the persistence can never be widened to cross-tab/at-rest.
   {
     files: ["features/secure-folders/stores/secureFolders.store.ts"],
     rules: {
-      "no-restricted-imports": ["error", { paths: [{ name: "zustand/middleware", importNames: ["persist"], message: "In-memory only." }] }],
       "no-restricted-syntax": [
         "error",
-        { selector: "MemberExpression[object.name='localStorage']" },
-        { selector: "MemberExpression[object.name='sessionStorage']" },
-        { selector: "MemberExpression[object.property.name='cookie']" },
+        { selector: "MemberExpression[object.name='localStorage']", message: "sessionStorage only — no cross-tab persistence." },
+        { selector: "MemberExpression[object.property.name='cookie']", message: "Never store secure-folder tokens in a cookie." },
       ],
     },
   },

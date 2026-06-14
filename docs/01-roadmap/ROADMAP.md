@@ -8,6 +8,18 @@
 > **Update rule:** edit the relevant phase summary or its `phases/` file — **don't rewrite** — and add a Changelog line.
 
 ## Changelog
+- **2026-06-14 (Phase 5 — Secure Folders, A+B+C)** — Encrypted + hidden folders on an **in-memory, never-persisted**
+  session-token lifecycle (rule #5). New leaf feature `features/secure-folders/` (one-way `storage → secure-folders`):
+  the 2-namespace token store (`isAncestor`/`resolveToken`; ESLint-banned persistence), the `registerSecureFolderTokenSource`
+  getter + the `/Cloud/*` interceptor (extracts the path from the query + JSON-stringified body → `X-Folder-Session`/
+  `X-Hidden-Session`), clear-all on sign-out + `pagehide` (never `beforeunload`). **Encrypted:** create/convert/decrypt +
+  unlock/lock (passphrase via `xFolderPassphrase`; `SecureFolderDialogs` controller; locked-row→unlock; `FolderLocked` 403
+  state; query-key token fold). **Hidden:** hide/unhide + **`⇧⇧` reveal** (double-tap-Shift in `useShortcutDispatcher` + an
+  accessible ⌘K command) + conceal; the hidden token is keyed by the **reveal-request path** (backend-verified); conceal is
+  **A4-atomic**. **D-P5.1–D-P5.6.** Green: tsc/lint/build + **246 vitest** + size-limit 795/820 KB; reviewers clean
+  (data-layer/a11y/design/silent-failure — added a `genericMessage` so non-403 unlock/reveal isn't silent). Remaining: live
+  backend walkthrough + the A5 socket contract (pending creds); two acknowledged deviations (no separate marks store; A8
+  comment not lint-enforced). **Next: Phase 6.**
 - **2026-06-14 (Phase 4 Stage C2 — document version history + diff + restore)** — Closes Phase 4. Editor files get a
   **document version panel** in the preview footer (sibling of the Stage-B object panel): lazy on expand, per-row
   **backend-computed diff** vs current (`DiffView` styles the server's unified-diff hunks — add/remove/context tokens +

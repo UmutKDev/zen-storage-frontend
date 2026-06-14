@@ -8,9 +8,10 @@ import { cn, fileMeta, formatBytes, formatDate, toneClass } from "@/lib/utils";
 import { t } from "@/lib/i18n";
 import { useFlag } from "@/lib/flags";
 import { previewHref } from "@/lib/preview";
+import { useSecureFolderUiStore } from "@/features/secure-folders";
 import { Checkbox } from "@/components/ui";
 import type { FolderEntry } from "../lib/entries";
-import { folderHref } from "../lib/href";
+import { folderHref, folderPathOf } from "../lib/href";
 import {
   EntryActionsMenu,
   isSelectableEntry,
@@ -77,6 +78,17 @@ export function BrowseRow({
   const router = useRouter();
   const previewEnabled = useFlag("preview");
   const opensPreview = entry.kind === "file" && previewEnabled;
+  // A locked encrypted folder opens the unlock dialog on click (then enters it).
+  const lockedEncrypted =
+    entry.kind === "dir" && entry.dir.IsEncrypted && entry.dir.IsLocked;
+  const interactive = opensPreview || lockedEncrypted;
+  const openUnlock = () =>
+    useSecureFolderUiStore.getState().open({
+      kind: "unlock",
+      path: folderPathOf(path, entry.name),
+      mode: "folder",
+      navigateTo: folderHref(path, entry.name),
+    });
 
   // Touch long-press → action sheet (the accessible alternative to desktop DnD).
   const coarse = useCoarsePointer();
@@ -155,23 +167,31 @@ export function BrowseRow({
         </Link>
       ) : (
         <div
-          role={opensPreview ? "button" : undefined}
-          tabIndex={opensPreview ? 0 : undefined}
+          role={interactive ? "button" : undefined}
+          tabIndex={interactive ? 0 : undefined}
           onClick={(e) => {
             if (longPress.consumeSuppressedClick() || suppressClickRef.current) return;
-            // Modifier clicks are selection gestures; a plain click opens preview.
-            if (opensPreview && !(e.shiftKey || e.metaKey || e.ctrlKey)) {
-              router.push(previewHref(entry.key));
-              return;
+            // Modifier clicks are selection gestures; a plain click opens preview
+            // (files) or the unlock dialog (locked encrypted folders).
+            if (!(e.shiftKey || e.metaKey || e.ctrlKey)) {
+              if (opensPreview) {
+                router.push(previewHref(entry.key));
+                return;
+              }
+              if (lockedEncrypted) {
+                openUnlock();
+                return;
+              }
             }
             void selection.onItemClick(entry, e);
           }}
           onKeyDown={
-            opensPreview
+            interactive
               ? (e) => {
                   if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
-                    router.push(previewHref(entry.key));
+                    if (opensPreview) router.push(previewHref(entry.key));
+                    else if (lockedEncrypted) openUnlock();
                   }
                 }
               : undefined

@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { sortEntries, toEntries } from "@/features/storage/browse/lib/entries";
+import {
+  applyOwnedUnlocks,
+  sortEntries,
+  toEntries,
+} from "@/features/storage/browse/lib/entries";
+import { resolveToken } from "@/features/secure-folders";
+import { folderPathOf } from "@/features/storage/browse/lib/href";
 
 const dir = (name: string) =>
   ({
@@ -7,6 +13,16 @@ const dir = (name: string) =>
     Prefix: `${name}/`,
     IsEncrypted: false,
     IsLocked: false,
+    IsHidden: false,
+    IsConcealed: false,
+  }) as never;
+
+const lockedDir = (name: string) =>
+  ({
+    Name: name,
+    Prefix: `${name}/`,
+    IsEncrypted: true,
+    IsLocked: true,
     IsHidden: false,
     IsConcealed: false,
   }) as never;
@@ -28,6 +44,39 @@ describe("toEntries", () => {
     expect(entries.map((e) => e.kind)).toEqual(["dir", "file"]);
     expect(entries[0].key).toBe("a/");
     expect(entries[1].key).toBe("k/b.txt");
+  });
+});
+
+describe("applyOwnedUnlocks", () => {
+  it("clears IsLocked on an encrypted dir the client holds a session for", () => {
+    const [out] = applyOwnedUnlocks([lockedDir("secret")], () => true);
+    expect(out.IsLocked).toBe(false);
+    expect(out.IsEncrypted).toBe(true); // still encrypted — only the lock clears
+  });
+
+  it("leaves a locked dir locked when there's no session", () => {
+    const [out] = applyOwnedUnlocks([lockedDir("secret")], () => false);
+    expect(out.IsLocked).toBe(true);
+  });
+
+  it("never touches a non-encrypted dir", () => {
+    const input = [dir("plain")];
+    expect(applyOwnedUnlocks(input, () => true)[0].IsLocked).toBe(false);
+  });
+
+  it("resolves the session ancestor-aware for a child listed from its parent", () => {
+    // Unlock keyed the token at the child's own path "work/secret"; viewing the
+    // parent "work" lists the child as locked. The override must still find the
+    // token (via folderPathOf + resolveToken) and unlock the row.
+    const encTokens = {
+      "work/secret": { token: "T", expiresAt: 9_999_999_999 },
+    };
+    const dirs = applyOwnedUnlocks(
+      [lockedDir("secret"), lockedDir("other")],
+      (d) => resolveToken(encTokens, folderPathOf("work", d.Name)) !== null,
+    );
+    expect(dirs[0].IsLocked).toBe(false); // work/secret → has token → unlocked
+    expect(dirs[1].IsLocked).toBe(true); // work/other → no token → stays locked
   });
 });
 

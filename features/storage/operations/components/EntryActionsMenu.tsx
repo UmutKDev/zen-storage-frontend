@@ -5,14 +5,19 @@ import { useRouter } from "next/navigation";
 import {
   Download,
   Eye,
+  EyeOff,
   FolderInput,
+  KeyRound,
+  Lock,
   MoreHorizontal,
   Pencil,
   Trash2,
+  Unlock,
 } from "lucide-react";
 import { t } from "@/lib/i18n";
 import { useFlag } from "@/lib/flags";
 import { previewHref } from "@/lib/preview";
+import { useSecureFolderUiStore } from "@/features/secure-folders";
 import {
   Button,
   DropdownMenu,
@@ -22,6 +27,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui";
 import type { FolderEntry } from "../../browse/lib/entries";
+import { folderPathOf } from "../../browse/lib/href";
 import { useRename } from "../hooks/useRename";
 import { useDelete } from "../hooks/useDelete";
 import { useDownload } from "../hooks/useDownload";
@@ -82,6 +88,84 @@ export function EntryActionsMenu({
               <Download className="size-4" />
               {t("storage.ops.menu.download")}
             </DropdownMenuItem>
+          ) : null}
+          {entry.kind === "dir" && !entry.dir.IsEncrypted ? (
+            <DropdownMenuItem
+              onSelect={() =>
+                useSecureFolderUiStore.getState().open({
+                  kind: "encrypt",
+                  path: folderPathOf(path, entry.name),
+                })
+              }
+            >
+              <Lock className="size-4" />
+              {t("storage.ops.secure.encrypt.action")}
+            </DropdownMenuItem>
+          ) : null}
+          {entry.kind === "dir" && entry.dir.IsEncrypted && !entry.dir.IsLocked ? (
+            <>
+              <DropdownMenuItem
+                onSelect={() =>
+                  useSecureFolderUiStore.getState().open({
+                    kind: "lock",
+                    path: folderPathOf(path, entry.name),
+                  })
+                }
+              >
+                <Unlock className="size-4" />
+                {t("storage.ops.secure.lock.action")}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onSelect={() =>
+                  useSecureFolderUiStore.getState().open({
+                    kind: "decrypt",
+                    path: folderPathOf(path, entry.name),
+                  })
+                }
+              >
+                <KeyRound className="size-4" />
+                {t("storage.ops.secure.decrypt.action")}
+              </DropdownMenuItem>
+            </>
+          ) : null}
+          {entry.kind === "dir" && !entry.dir.IsHidden ? (
+            <DropdownMenuItem
+              onSelect={() =>
+                useSecureFolderUiStore.getState().open({
+                  kind: "hide",
+                  path: folderPathOf(path, entry.name),
+                })
+              }
+            >
+              <EyeOff className="size-4" />
+              {t("storage.ops.secure.hide.action")}
+            </DropdownMenuItem>
+          ) : null}
+          {entry.kind === "dir" && entry.dir.IsHidden ? (
+            <>
+              <DropdownMenuItem
+                onSelect={() =>
+                  useSecureFolderUiStore.getState().open({
+                    kind: "unhide",
+                    path: folderPathOf(path, entry.name),
+                  })
+                }
+              >
+                <Eye className="size-4" />
+                {t("storage.ops.secure.unhide.action")}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onSelect={() =>
+                  useSecureFolderUiStore.getState().open({
+                    kind: "conceal",
+                    path: folderPathOf(path, entry.name),
+                  })
+                }
+              >
+                <EyeOff className="size-4" />
+                {t("storage.ops.secure.conceal.action")}
+              </DropdownMenuItem>
+            </>
           ) : null}
           <DropdownMenuSeparator />
           <DropdownMenuItem

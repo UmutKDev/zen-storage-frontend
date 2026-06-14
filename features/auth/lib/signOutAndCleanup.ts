@@ -2,6 +2,7 @@ import type { QueryClient } from "@tanstack/react-query";
 import { signOut } from "next-auth/react";
 import { disconnectSocket } from "@/lib/socket";
 import { teardownUploads } from "@/features/storage";
+import { clearAllSecureFolderTokens } from "@/features/secure-folders";
 import { authenticationApiFactory } from "@/service/factories";
 import { useUiStore, useWorkspaceStore } from "@/stores";
 
@@ -31,7 +32,8 @@ export async function signOutAndCleanup(queryClient: QueryClient): Promise<void>
   queryClient.clear();
   useWorkspaceStore.getState().reset();
   useUiStore.getState().reset();
-  // Secure-folder tokens are cleared by their own store from P5 (no-op now).
+  // Secure-folder session tokens are in-memory only (rule #5) — drop them all.
+  clearAllSecureFolderTokens();
 
   await signOut({ redirect: false });
 

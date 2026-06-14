@@ -42,10 +42,57 @@ function comboFor(e: KeyboardEvent): string | null {
  * `?`) never fire while typing or inside an overlay; modifier combos (⌘K, …) are
  * accelerators that work everywhere.
  */
+/** Window for a `⇧⇧` double-tap (ms). */
+const DOUBLE_SHIFT_MS = 400;
+
 export function useShortcutDispatcher(): void {
   useEffect(() => {
+    // Stateful `shift+shift` double-tap detection — a gesture `comboFor` can't
+    // express. Only *bare* Shift taps count (no other modifier, not held, not
+    // while typing / in an overlay), and any intervening non-Shift key breaks
+    // the window — so typing capitals never triggers it.
+    let lastShiftAt = 0;
+    let brokenSinceShift = false;
+
+    const run = (combo: string): boolean => {
+      const match = getShortcuts().find((s) => s.keys === combo);
+      if (!match) return false;
+      match.run();
+      return true;
+    };
+
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.defaultPrevented) return;
+
+      if (e.key === "Shift") {
+        const bare =
+          !e.metaKey &&
+          !e.ctrlKey &&
+          !e.altKey &&
+          !e.repeat &&
+          !isEditableTarget(e.target) &&
+          !isInOverlay(e.target);
+        if (!bare) {
+          lastShiftAt = 0;
+          return;
+        }
+        if (
+          !brokenSinceShift &&
+          lastShiftAt > 0 &&
+          e.timeStamp - lastShiftAt < DOUBLE_SHIFT_MS
+        ) {
+          if (run("shift+shift")) e.preventDefault();
+          lastShiftAt = 0;
+        } else {
+          lastShiftAt = e.timeStamp;
+        }
+        brokenSinceShift = false;
+        return;
+      }
+
+      // Any non-Shift key breaks the double-tap window.
+      brokenSinceShift = true;
+
       const combo = comboFor(e);
       if (!combo) return;
 

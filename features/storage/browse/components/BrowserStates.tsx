@@ -1,6 +1,6 @@
 "use client";
 
-import { FilterX, FolderOpen, SearchX } from "lucide-react";
+import { FilterX, FolderOpen, Lock, SearchX } from "lucide-react";
 import { t } from "@/lib/i18n";
 import type { SearchScope } from "../hooks/useSearch";
 import { Button, Skeleton } from "@/components/ui";
@@ -85,6 +85,28 @@ export function FilteredEmpty({ onClear }: { onClear: () => void }) {
         onClick={onClear}
       >
         {t("storage.filter.clear")}
+      </Button>
+    </div>
+  );
+}
+
+/** A locked encrypted folder reached directly (deep-link/refresh) or after the
+ *  session TTL expired — prompts for the passphrase instead of an error. */
+export function FolderLocked({ onUnlock }: { onUnlock: () => void }) {
+  return (
+    <div
+      className="flex flex-col items-center justify-center gap-3 py-16 text-center"
+      role="status"
+    >
+      <Lock className="size-10 text-muted-foreground" />
+      <p className="text-sm font-medium text-foreground">
+        {t("storage.ops.secure.lockedFolder.title")}
+      </p>
+      <p className="max-w-sm text-sm text-muted-foreground">
+        {t("storage.ops.secure.lockedFolder.body")}
+      </p>
+      <Button variant="outline" size="sm" className="mt-2" onClick={onUnlock}>
+        {t("storage.ops.secure.lockedFolder.action")}
       </Button>
     </div>
   );

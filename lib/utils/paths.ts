@@ -26,3 +26,16 @@ export function basename(path: string): string {
   const segments = toSegments(path);
   return segments[segments.length - 1] ?? "";
 }
+
+/**
+ * Is `ancestor` an ancestor of — or equal to — `path`? Segment-based, so
+ * `a/b` is an ancestor of `a/b/c` but NOT of `a/bc` (no string-prefix bug). The
+ * root (`""`) is an ancestor of every path. Drives the secure-folder
+ * ancestor-aware token lookup (unlock a parent → its children open too).
+ */
+export function isAncestor(ancestor: string, path: string): boolean {
+  const a = toSegments(ancestor);
+  const p = toSegments(path);
+  if (a.length > p.length) return false;
+  return a.every((segment, i) => segment === p[i]);
+}

@@ -4,12 +4,14 @@ import { type ReactNode, useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { t } from "@/lib/i18n";
 import { isPreviewableName } from "@/lib/preview";
+import { useSecureFolderUiStore } from "@/features/secure-folders";
 import {
   BROWSE_CONTENT_ID,
   BulkActionBar,
   CreateMenu,
   DndMoveLayer,
   EntryActionsSheet,
+  SecureFolderDialogs,
   useItemSelection,
 } from "../../operations";
 import { FileDropZone } from "../../upload/components/FileDropZone";
@@ -25,6 +27,7 @@ import {
   BrowserSkeleton,
   EmptyFolder,
   FilteredEmpty,
+  FolderLocked,
   SearchEmpty,
 } from "./BrowserStates";
 import { CommandSearch } from "./CommandSearch";
@@ -121,7 +124,15 @@ export function StorageBrowser({ path }: { path: string }) {
     );
   } else {
     // Error before loading: surface a failure immediately over a skeleton.
-    content = folder.isError ? (
+    content = folder.isLocked ? (
+      <FolderLocked
+        onUnlock={() =>
+          useSecureFolderUiStore
+            .getState()
+            .open({ kind: "unlock", path, mode: "folder" })
+        }
+      />
+    ) : folder.isError ? (
       <BrowserError onRetry={folder.refetch} />
     ) : folder.isPending ? (
       <BrowserSkeleton />
@@ -170,6 +181,7 @@ export function StorageBrowser({ path }: { path: string }) {
       </DndMoveLayer>
       <BulkActionBar path={path} selection={selection} />
       <EntryActionsSheet path={path} />
+      <SecureFolderDialogs />
       {/* Permanently mounted so the announcement isn't missed on first mount. */}
       <span aria-live="polite" className="sr-only">
         {liveMessage}

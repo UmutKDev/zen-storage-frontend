@@ -7,6 +7,7 @@ import { MotionConfig } from "framer-motion";
 import { SessionProvider } from "@/lib/auth/client";
 import { SessionSync } from "@/features/auth";
 import { CookieConsentBanner } from "@/features/account";
+import { secureFolderTokenGetter } from "@/features/secure-folders";
 import { Toaster, TooltipProvider } from "@/components/ui";
 import { isApiError } from "@/lib/api";
 import {
@@ -49,7 +50,9 @@ export function Providers({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     registerTeamSource(() => useWorkspaceStore.getState().teamId);
-    registerSecureFolderTokenSource(() => null); // real getter → Phase 5
+    // Secure-folder tokens persist to sessionStorage (tab-scoped, expiry-pruned,
+    // cleared on sign-out) — the store rehydrates itself, no lifecycle hook needed.
+    registerSecureFolderTokenSource(secureFolderTokenGetter);
   }, []);
 
   return (

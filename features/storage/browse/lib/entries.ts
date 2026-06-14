@@ -7,6 +7,29 @@ export type FolderEntry =
   | { kind: "dir"; key: string; name: string; dir: CloudDirectoryModel }
   | { kind: "file"; key: string; name: string; file: CloudObjectModel };
 
+/**
+ * Clear the backend's `IsLocked` on encrypted directories the client already
+ * holds a live session for. An encrypted folder unlocked elsewhere is listed
+ * from a **parent** with `IsLocked:true` — the parent listing request can't carry
+ * a *descendant's* session token (the token is keyed at the folder, not an
+ * ancestor of the parent), so the backend reports it locked and a click would
+ * re-prompt for the passphrase you already entered. `isUnlocked` reports whether
+ * the secure-folder store holds a token covering that directory; when it does the
+ * row stays a normal navigable folder (entering sends the token and succeeds).
+ * Expiry is intentionally ignored by the caller's resolver (render purity) — a
+ * stale token just 403s back into the in-place locked state.
+ */
+export function applyOwnedUnlocks(
+  dirs: ReadonlyArray<CloudDirectoryModel>,
+  isUnlocked: (dir: CloudDirectoryModel) => boolean,
+): CloudDirectoryModel[] {
+  return dirs.map((dir) =>
+    dir.IsEncrypted && dir.IsLocked && isUnlocked(dir)
+      ? { ...dir, IsLocked: false }
+      : dir,
+  );
+}
+
 export function toEntries(
   dirs: ReadonlyArray<CloudDirectoryModel>,
   files: ReadonlyArray<CloudObjectModel>,

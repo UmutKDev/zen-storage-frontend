@@ -12,11 +12,13 @@ import { useConflictMutation } from "./useConflictMutation";
 export function useCreateFolder(path: string, onDone: () => void) {
   const qc = useQueryClient();
   const ownerId = useOwnerId();
-  return useConflictMutation<{ name: string }>({
-    run: ({ name }, strategy) =>
+  return useConflictMutation<{ name: string; encrypt?: boolean; passphrase?: string }>({
+    run: ({ name, encrypt, passphrase }, strategy) =>
       createFolder({
         Path: childFolderPath(path, name),
         ConflictStrategy: strategy,
+        IsEncrypted: encrypt,
+        Passphrase: encrypt ? passphrase : undefined,
       }),
     onSuccess: () => {
       toast.success(t("storage.ops.create.createdFolder"));

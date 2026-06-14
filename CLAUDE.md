@@ -52,8 +52,11 @@ API fact, [`05-api`](./docs/05-api/API-INVENTORY.md) wins.
    Local‑only UI state uses idiomatic TS.
 4. **`ownerId`, never `userId`** for the storage‑owner value (`user.Id` *or* `team/{TeamId}`). It shows up as the
    query‑key **scope** and `X-Team-Id` handling. Treating it as a user UUID breaks team storage.
-5. **Secure‑folder tokens are NEVER persisted** (no localStorage/sessionStorage/cookie). In‑memory only,
-   ancestor‑aware, cleared on logout + tab close. The token reaches the `Instance` via the **inverted‑deps seam**
+5. **Secure‑folder tokens: passphrase NEVER stored; session token is `sessionStorage`‑only** (tab‑scoped,
+   expiry‑pruned on rehydrate — **amended by D‑P5.7**, was strict in‑memory). The TTL‑bounded token persists so an
+   unlock/reveal survives a **page refresh** in the same tab; **no `localStorage`, no cookie, no cross‑tab** (the lint
+   override on `secureFolders.store.ts` still bans those). Ancestor‑aware; cleared on **sign‑out** + tab close
+   (sessionStorage native — no `pagehide` handler). The token reaches the `Instance` via the **inverted‑deps seam**
    (`service/token-sources.ts` — `registerSecureFolderTokenSource`); `service/` never imports `@/features/`.
    → [`secure-folder-lifecycle`](./docs/02-architecture/secure-folder-lifecycle.md).
 6. **No hardcoded user‑facing copy.** All strings via i18n keys (EN at MVP). → [`i18n`](./docs/06-cross-cutting/i18n.md).
@@ -138,5 +141,6 @@ bunx tsc --noEmit           # type-check (no script alias)
 - Run anything that hits a real backend/DB destructively, or `git push --force` / push to `main`.
 - Hand‑edit `service/generates/*`.
 - Add team‑switch UI before Phase 8.
-- Persist secure‑folder tokens anywhere.
+- Store a secure‑folder **passphrase** anywhere, or persist the session token beyond `sessionStorage` (no
+  `localStorage`/cookie/cross‑tab — D‑P5.7).
 - Introduce a second state system or a parallel HTTP client.

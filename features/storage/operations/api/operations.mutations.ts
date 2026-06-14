@@ -12,13 +12,17 @@ import type { ConflictStrategy } from "../lib/conflict";
 export async function createFolder(input: {
   Path: string;
   ConflictStrategy?: ConflictStrategy;
+  IsEncrypted?: boolean;
+  /** Set only when creating an encrypted folder — rides `X-Folder-Passphrase`, never stored. */
+  Passphrase?: string;
 }): Promise<void> {
   await cloudDirectoryApiFactory.directoryCreate({
     directoryCreateRequestModel: {
       Path: input.Path,
-      IsEncrypted: false,
+      IsEncrypted: input.IsEncrypted ?? false,
       ConflictStrategy: input.ConflictStrategy,
     },
+    ...(input.Passphrase ? { xFolderPassphrase: input.Passphrase } : {}),
   });
 }
 

@@ -1,8 +1,11 @@
 "use client";
 
 import { useMemo } from "react";
+import { isApiError } from "@/lib/api";
+import { resolveToken, useSecureFoldersStore } from "@/features/secure-folders";
 import { useViewPrefs } from "../stores/viewPrefs.store";
-import { arrangeEntries, toEntries } from "../lib/entries";
+import { applyOwnedUnlocks, arrangeEntries, toEntries } from "../lib/entries";
+import { folderPathOf } from "../lib/href";
 import { useDirectories } from "./useDirectories";
 import { useObjects } from "./useObjects";
 
@@ -29,10 +32,18 @@ export function useFolderEntries(path: string) {
   const sortDir = useViewPrefs((s) => s.sortDir);
   const filterType = useViewPrefs((s) => s.filterType);
   const filterExt = useViewPrefs((s) => s.filterExt);
+  // Encrypted tokens the client currently holds — used to treat a folder this
+  // session already unlocked as enterable when it's listed from a parent (the
+  // backend can't know the parent request covers a descendant's session).
+  const encTokens = useSecureFoldersStore((s) => s.tokens.encrypted);
 
   const dirs = useMemo(
-    () => dedupeBy(dirsQuery.data ?? [], (d) => d.Prefix),
-    [dirsQuery.data],
+    () =>
+      applyOwnedUnlocks(
+        dedupeBy(dirsQuery.data ?? [], (d) => d.Prefix),
+        (d) => resolveToken(encTokens, folderPathOf(path, d.Name)) !== null,
+      ),
+    [dirsQuery.data, encTokens, path],
   );
   const files = useMemo(
     () => dedupeBy(filesQuery.data ?? [], (f) => f.Path.Key),
@@ -52,6 +63,11 @@ export function useFolderEntries(path: string) {
     isFiltered: filterType !== "all" || filterExt !== "",
     isPending: dirsQuery.isPending || filesQuery.isPending,
     isError: dirsQuery.isError || filesQuery.isError,
+    /** A `403 FORBIDDEN` listing = an encrypted folder reached without a session
+     *  (deep-link / TTL expiry) → the browser shows the unlock prompt, not an error. */
+    isLocked:
+      (isApiError(dirsQuery.error) && dirsQuery.error.code === "FORBIDDEN") ||
+      (isApiError(filesQuery.error) && filesQuery.error.code === "FORBIDDEN"),
     refetch: () => {
       void dirsQuery.refetch();
       void filesQuery.refetch();

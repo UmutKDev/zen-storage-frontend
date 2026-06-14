@@ -5,9 +5,25 @@
 >
 > Legend: ⏳ not started · 🚧 in progress · ✅ done · 🚫 blocked.
 
-**Updated:** 2026-06-14 · **Branch:** `v2` · **Round:** **Phase 4 Stage C2 landed — document version history + diff + restore. Phase 4 ✅ complete (A+B+C1+C2).**
+**Updated:** 2026-06-14 · **Branch:** `v2` · **Round:** **Phase 5 complete (A+B+C) — secure folders: encrypted + hidden, in-memory token lifecycle.**
 
 ## Where we are
+**Phase 5 is complete — secure folders.** A new leaf feature `features/secure-folders/` owns an **in-memory, never-persisted**
+session-token lifecycle (CLAUDE rule #5) consumed one-way by storage. **Stage A (token spine):** the 2-namespace zustand
+token store (`isAncestor`/`resolveToken` ancestor lookup; ESLint-banned persistence — verified firing), the real
+`registerSecureFolderTokenSource` getter, the `/Cloud/*` interceptor that extracts the target path from the query **+ the
+JSON-stringified body** and injects `X-Folder-Session`/`X-Hidden-Session`, and clear-all on **sign-out + `pagehide`** (never
+`beforeunload`). **Stage B (encrypted):** create-encrypted (NewFolderDialog toggle + passphrase), convert/decrypt + unlock/lock
+(passphrase via the `xFolderPassphrase` header; the `SecureFolderDialogs` controller + `PassphraseDialog`); a locked-row click
+→ unlock + navigate in; a `403` listing → in-place `FolderLocked`; the resolved token folds into the storage query keys so
+unlock/lock refetch. **Stage C (hidden):** hide/unhide + **`⇧⇧` (double-tap-Shift) reveal** (+ an accessible ⌘K command) + conceal;
+the hidden token is keyed by the **reveal-request path** (so the parent listing surfaces hidden children); conceal is A4-atomic
+(network-fail leaves the folder revealed). Green: `tsc`+`lint`+`build` + **246 Vitest** (+~37) + `size-limit` **795/820 KB** (no
+new deps); reviewers clean (data-layer / a11y-state / design-system / casl-on-the-backend-fix / silent-failure-hunter — the last
+prompted a `genericMessage` so a non-403 unlock/reveal failure isn't a silent dead dialog). **Decisions:** [D-P5.1–D-P5.6](../07-decisions/DECISIONS.md).
+**Next: Phase 6 (advanced) — Phase 5 live backend walkthrough + the A5 socket contract pending creds.**
+
+## Earlier — Phase 4 (Preview + Share)
 **Phase 4 Stage C2 landed — Phase 4 is complete.** Editor files now get a **document version history** panel in the
 preview footer (sibling of the Stage-B object-version panel): lazy-fetched on expand, each row shows a **backend-computed
 diff** vs the current content (`DiffView` renders the server's unified-diff hunks — colored add/remove/context lines +

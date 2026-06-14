@@ -1,7 +1,9 @@
 "use client";
 
+import { useMemo } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import {
+  Eye,
   FileText,
   FolderInput,
   FolderPlus,
@@ -12,6 +14,8 @@ import {
 } from "lucide-react";
 import { t } from "@/lib/i18n";
 import { useCommand } from "@/lib/command-palette";
+import { useShortcut, type Shortcut } from "@/lib/shortcuts";
+import { useSecureFolderUiStore } from "@/features/secure-folders";
 import { useStorageUiStore, type ItemSelection } from "../../operations";
 import { useUploadsStore } from "../../upload/stores/uploads.store";
 import type { SearchScope } from "./useSearch";
@@ -35,6 +39,28 @@ export function useStorageCommands(opts: {
   const openCreate = useStorageUiStore((s) => s.openCreateDialog);
   const openBulk = useStorageUiStore((s) => s.openBulkDialog);
   const openUpload = useUploadsStore((s) => s.setDialogOpen);
+
+  // ⇧⇧ reveals hidden folders in the current folder (+ a palette command as the
+  // accessible alternative). Both open the reveal dialog at the current `path`.
+  const openReveal = () =>
+    useSecureFolderUiStore
+      .getState()
+      .open({ kind: "reveal", path: opts.path });
+  useShortcut(
+    useMemo<Shortcut>(
+      () => ({
+        id: "storage.reveal-hidden",
+        keys: "shift+shift",
+        scope: "storage",
+        description: t("shortcuts.revealHidden"),
+        run: () =>
+          useSecureFolderUiStore
+            .getState()
+            .open({ kind: "reveal", path: opts.path }),
+      }),
+      [opts.path],
+    ),
+  );
 
   const runSearch = (scope: SearchScope, query: string) => {
     const q = query.trim();
@@ -69,6 +95,15 @@ export function useStorageCommands(opts: {
     icon: FileText,
     keywords: ["create", "document"],
     run: () => openCreate("file"),
+  });
+  useCommand({
+    id: "storage:reveal-hidden",
+    group: "actions",
+    label: t("command.actions.revealHidden"),
+    icon: Eye,
+    shortcutHint: "⇧⇧",
+    keywords: ["hidden", "show", "secret"],
+    run: openReveal,
   });
 
   useCommand(
