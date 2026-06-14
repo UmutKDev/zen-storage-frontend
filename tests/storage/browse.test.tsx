@@ -63,7 +63,8 @@ describe("StorageBrowser", () => {
 
     expect(await screen.findByText("Photos")).toBeInTheDocument();
     expect(await screen.findByText("notes.txt")).toBeInTheDocument();
-    expect(screen.getByText("Storage")).toBeInTheDocument();
+    // (The storage-usage bar now lives in the sidebar — SidebarUsageCard — not
+    // in the browser surface; it's covered by its own test.)
   });
 
   it("shows the empty state for an empty folder", async () => {

@@ -84,7 +84,7 @@ describe("CreateMenu", () => {
     renderWithProviders(<CreateMenu path="docs" />);
 
     await user.click(screen.getByRole("button", { name: "New" }));
-    await user.click(screen.getByRole("menuitem", { name: "New folder" }));
+    await user.click(screen.getByRole("menuitem", { name: /Directory/ }));
     const dialog = await screen.findByRole("dialog");
     await user.type(within(dialog).getByLabelText("Folder name"), "Reports");
     await user.click(within(dialog).getByRole("button", { name: "Create" }));
@@ -101,7 +101,7 @@ describe("CreateMenu", () => {
     renderWithProviders(<CreateMenu path="" />);
 
     await user.click(screen.getByRole("button", { name: "New" }));
-    await user.click(screen.getByRole("menuitem", { name: "New folder" }));
+    await user.click(screen.getByRole("menuitem", { name: /Directory/ }));
     const dialog = await screen.findByRole("dialog");
     await user.type(within(dialog).getByLabelText("Folder name"), "Reports");
     await user.click(within(dialog).getByRole("button", { name: "Create" }));

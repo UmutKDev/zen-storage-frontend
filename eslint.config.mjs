@@ -93,11 +93,18 @@ export default defineConfig([
       "no-restricted-imports": [
         "error",
         {
-          paths: [{ name: "axios", message: "Use @/service/factories on the shared Instance." }],
+          paths: [
+            { name: "axios", message: "Use @/service/factories on the shared Instance." },
+            // Server-only seam: lib/auth/server.ts is RSC / route-handler only
+            // (it `import "server-only"`). Client code must never pull it into a
+            // bundle. Un-banned for server contexts below (app/**/route.ts, lib/auth/**).
+            { name: "@/lib/auth/server", message: "Server-only seam — lib/auth/server is RSC/route-handler only; never import it from client code." },
+          ],
           patterns: [
             { group: ["axios/*"] },
             { group: ["@/service/generates/*"], message: "Import via @/service/models." },
             { group: ["@/features/*/!(index)", "@/features/*/*/!(index)"], message: "Feature barrel only." },
+            { group: ["@/lib/auth/server", "@/lib/auth/server/*"], message: "Server-only seam — lib/auth/server is RSC/route-handler only; never import it from client code." },
           ],
         },
       ],
@@ -127,6 +134,27 @@ export default defineConfig([
   // service/ is the ONE sanctioned axios user (the Instance + interceptors).
   // The feature-side "no raw HTTP" ban still applies everywhere else.
   { files: ["service/**"], rules: { "no-restricted-imports": "off" } },
+
+  // Server-only seam UN-ban: route handlers + the auth lib itself ARE legitimate
+  // server contexts and may import @/lib/auth/server. Flat config replaces (not
+  // merges) the rule, so the other import bans (axios / generates / feature
+  // barrel) are re-stated here; only the server-seam entry is dropped.
+  {
+    files: ["app/**/route.ts", "app/**/route.tsx", "lib/auth/**"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [{ name: "axios", message: "Use @/service/factories on the shared Instance." }],
+          patterns: [
+            { group: ["axios/*"] },
+            { group: ["@/service/generates/*"], message: "Import via @/service/models." },
+            { group: ["@/features/*/!(index)", "@/features/*/*/!(index)"], message: "Feature barrel only." },
+          ],
+        },
+      ],
+    },
+  },
 
   // The single allow-listed S3 PUT fetch (lands in P3); keep the export-* ban.
   { files: ["features/storage/upload/api/presigned-put.ts"], rules: { "no-restricted-syntax": ["error", { selector: "ExportAllDeclaration" }] } },

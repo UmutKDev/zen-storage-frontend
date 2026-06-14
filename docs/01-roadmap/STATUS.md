@@ -5,9 +5,22 @@
 >
 > Legend: ⏳ not started · 🚧 in progress · ✅ done · 🚫 blocked.
 
-**Updated:** 2026-06-14 · **Branch:** `v2` · **Round:** "Zen" design‑system treatment applied across all built surfaces (cross‑cutting refinement); Phase 3 Stage D (search + palette + touch) still remains.
+**Updated:** 2026-06-14 · **Branch:** `v2` · **Round:** **Phase 3 Stage D landed — Phase 3 (Storage Core) is now ✅ complete.**
 
 ## Where we are
+**Phase 3 Stage D closed Phase 3.** Storage is now fully searchable, filterable, and command-driven. **Search** (`Cloud/Search`,
+scope toggle current↔global default current, shareable `?q=&scope=` URL, debounced, `SearchEmpty`/`FilteredEmpty` states) +
+**type/extension filter** (client-side over the loaded window, persisted in `viewPrefs`) feed the same `ListView`/`GridView` via a
+shared `arrangeEntries`. The **⌘K command palette** rides a neutral `lib/command-palette` registry (inverted deps — shell
+contributes navigation, storage contributes actions/selection/search; the locked ⌘K↔selection contract opens the bulk dialog over
+the surface's resolved `selectedEntries`), backed by a real **central shortcut dispatcher** (`lib/shortcuts/useShortcutDispatcher` —
+one keydown handler, text-input/overlay guarded; ⌘U migrated off its self-listener) and a `?` **help overlay**. **Touch**: a
+coarse-pointer long-press opens a bottom `Sheet` (Move / Add files / Delete) — the accessible alternative to the desktop
+MouseSensor DnD, which is untouched. The **server-only seam** is now ESLint-policed (`@/lib/auth/server` banned from client globs,
+un-banned for route handlers + `lib/auth`). Green: `tsc` + `lint` + `build` + **148 Vitest**; reviewer sweep applied (data-layer +
+design-system + a11y/state). **Next product task: Phase 4 (Preview + Share) and/or Phase 5 (Secure Folders).**
+
+## Earlier — Zen design treatment
 **The "Zen" premium design treatment landed across every built surface** (a cross‑cutting refinement on top of
 Phases 0–3C, not a new phase). The flat shadcn wrappers gained the refined look the design docs always specified —
 realized as cva variants + a disciplined `.zs-*` machined CSS layer in `app/globals.css` (semantic tokens only;
@@ -65,7 +78,7 @@ live backend contract smoke passed. Authenticated end-to-end walkthrough pending
 | 0 | Foundation + Design System | ✅ | All sub-tasks closed: data layer, design system, 0.0a CSP/headers, 0.4a privacy, 0.8a intercepting-routes (confirmed), 0.14a supply-chain CI |
 | 1 | Auth | ✅ | Full: multi-step login (+2FA **+passkey**), register, reset, route protection, sign-out teardown, **legal pages + consent banner**. Verified live vs API + 16 tests |
 | 2 | App Shell + Account | ✅ | Full: shell (sidebar/topbar/theme/profile/bell, inert workspace slot) + profile (optimistic, avatar read-only) + security (password, 2FA, passkeys, sessions) + read-only subscription + flagged API-keys stub. 32 vitest + 4 e2e; reviewers applied; live contract smoke |
-| 3 | Storage Core | 🚧 | **Staged in 4 parts.** A (browse) ✅ · B1 (single-item ops) ✅ · B2 (multi-select + bulk + DnD) ✅ · C (upload pipeline: `UploadPart` proxy, IndexedDB resume, conflict gate, quota pre-flight, tray + drop zone + folder upload) ✅. Only D (search+palette+touch) pending |
+| 3 | Storage Core | ✅ | **Staged in 4 parts, all done.** A (browse) ✅ · B1 (single-item ops) ✅ · B2 (multi-select + bulk + DnD) ✅ · C (upload pipeline) ✅ · D (search + filter + ⌘K palette + central shortcut dispatcher + help overlay + touch bottom-sheet + server-seam ESLint) ✅ 2026-06-14 |
 | 4 | Preview + Share | ⏳ | Share = presigned URL ✓; CDN resize via wsrv.nl ✓ (both resolved) |
 | 5 | Secure Folders | ⏳ | token never‑persist guarantee |
 | 6 | Advanced | ⏳ | socket‑first + poll for jobs |
@@ -93,10 +106,30 @@ live backend contract smoke passed. Authenticated end-to-end walkthrough pending
    without re-sending part 1, forced 409 (REPLACE/KEEP_BOTH/SKIP + apply-to-all on a folder drop), quota/max-size
    pre-flight block, folder drop + folder picker, zero-byte file; plus the B1/B2 items (selection matrix, bulk ops w/
    partial 409, DnD move, bulk download).
-2. **Phase 3 Stage D — search/filter/sort + ⌘K command palette + touch bottom-sheet** closes Phase 3. See the
-   [Phase 3 checklist](./phases/phase-3-storage-core.md).
+2. **Phase 3 is complete.** Begin **Phase 4 (Preview + Share)** and/or **Phase 5 (Secure Folders)** — both depend only
+   on Phase 3 and are independent of each other. See [Phase 4](./phases/phase-4-preview-share.md) /
+   [Phase 5](./phases/phase-5-secure-folders.md).
 
 ## Recent status entries
+- **2026-06-14 (Phase 3 Stage D — search + filter + ⌘K palette + touch + server-seam → Phase 3 ✅)** — Closed Phase 3.
+  **Search:** `getSearch` on `cloudApiFactory.search` (envelope-unwrapped), `storageKeys.search` (ownerId + scope + path
+  + query + extension), `useSearch` (≥2-char `enabled` gate, AbortSignal, keepPrevious), `CommandSearch` (URL `?q=&scope=`
+  source of truth via debounced derive-on-render + scope toggle), search-mode switch + `SearchEmpty`/`FilteredEmpty`.
+  **Filter:** `filterEntries`/`arrangeEntries` (categories from `lib/utils/file-meta` `extensionCategory`), `viewPrefs`
+  `filterType`/`filterExt` (v2), `FilterMenu` (mirrors `SortMenu`). **Palette + shortcuts:** neutral
+  `lib/command-palette` registry (`useCommand`/`useCommands` via `useSyncExternalStore`) — shell contributes nav, storage
+  contributes actions/selection/search via `useStorageCommands`; feature-local `storageUi` store lifts the bulk/create/
+  **sheet** triggers out of component state so the palette can fire them while `BulkActionBar` runs the bulk path over
+  `selectedEntries` (the **locked ⌘K↔selection contract**, test-covered); `features/shell/CommandPalette` (`shouldFilter`
+  off + manual filter); real central `useShortcutDispatcher` (one keydown, text-input/overlay guard, generic
+  `mod+<letter>`) + `ShortcutProvider` (⌘K/?/⌘\) + `ShortcutsHelp`; ⌘U migrated off its self-listener. **Touch:**
+  `useCoarsePointer` + `useLongPress` (touch-only, `consumeSuppressedClick`) → bottom `Sheet` `EntryActionsSheet`
+  (Move/Add files/Delete) on `BrowseRow`/`BrowseCard`; desktop MouseSensor DnD untouched. **Seam:** `eslint.config.mjs`
+  bans `@/lib/auth/server` from client globs (un-banned for `app/**/route.ts` + `lib/auth/**`), verified by
+  `tests/lint/server-seam.test.ts` (ESLint Node API). Mounted provider + palette + help in `(app)/layout`;
+  `renderWithProviders` now supplies router/pathname/searchParams contexts (also fixed 3 stale post-Zen test assertions).
+  Green: `tsc`/`lint`/`build` + **148 vitest** (+12). Reviewer sweep applied: design NIT (`rounded-[5px]`→`rounded-sm`);
+  a11y — `SheetDescription` added, search live region gated on `!isFetching`, loading skeleton labeled. Phase 3 ✅.
 - **2026-06-14 (Zen alignment — sidebar + usage)** — Closed the remaining gaps vs the Zen app‑chrome reference.
   **Storage‑usage now lives in the sidebar only** (per the design — chat6 "kullanım bilgisi artık yalnızca
   sidebar'da"): new bottom‑pinned `SidebarUsageCard` (solid card, gradient fill, collapses to a `{pct}%` chip),

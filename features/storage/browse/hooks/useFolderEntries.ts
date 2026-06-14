@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { useViewPrefs } from "../stores/viewPrefs.store";
-import { sortEntries, toEntries } from "../lib/entries";
+import { arrangeEntries, toEntries } from "../lib/entries";
 import { useDirectories } from "./useDirectories";
 import { useObjects } from "./useObjects";
 
@@ -27,6 +27,8 @@ export function useFolderEntries(path: string) {
   const filesQuery = useObjects(path);
   const sortKey = useViewPrefs((s) => s.sortKey);
   const sortDir = useViewPrefs((s) => s.sortDir);
+  const filterType = useViewPrefs((s) => s.filterType);
+  const filterExt = useViewPrefs((s) => s.filterExt);
 
   const dirs = useMemo(
     () => dedupeBy(dirsQuery.data ?? [], (d) => d.Prefix),
@@ -36,13 +38,18 @@ export function useFolderEntries(path: string) {
     () => dedupeBy(filesQuery.data ?? [], (f) => f.Path.Key),
     [filesQuery.data],
   );
+  const raw = useMemo(() => toEntries(dirs, files), [dirs, files]);
   const entries = useMemo(
-    () => sortEntries(toEntries(dirs, files), sortKey, sortDir),
-    [dirs, files, sortKey, sortDir],
+    () => arrangeEntries(raw, { sortKey, sortDir, filterType, filterExt }),
+    [raw, sortKey, sortDir, filterType, filterExt],
   );
 
   return {
     entries,
+    /** Count before the type/extension filter — lets the browser show a
+     *  "filter hid everything" state instead of the "empty folder" state. */
+    totalCount: raw.length,
+    isFiltered: filterType !== "all" || filterExt !== "",
     isPending: dirsQuery.isPending || filesQuery.isPending,
     isError: dirsQuery.isError || filesQuery.isError,
     refetch: () => {

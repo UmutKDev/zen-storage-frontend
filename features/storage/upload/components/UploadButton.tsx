@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { Upload } from "lucide-react";
 import { t } from "@/lib/i18n";
+import { useShortcut, type Shortcut } from "@/lib/shortcuts";
 import { Button } from "@/components/ui";
 import { useUploadsStore } from "../stores/uploads.store";
 import { UploadDialog } from "./UploadDialog";
@@ -13,22 +14,26 @@ import { UploadDialog } from "./UploadDialog";
  * the existing multipart queue + background tray. Exactly ONE per view.
  *
  * The dialog's open state lives in the uploads store so the background tray can
- * hide while the dialog is open (the dialog already shows the queue).
+ * hide while the dialog is open (the dialog already shows the queue). ⌘U is
+ * registered with the central shortcut dispatcher (storage scope) so it shows in
+ * the help overlay and goes through the one keyboard handler.
  */
 export function UploadButton({ path }: { path: string }) {
   const open = useUploadsStore((s) => s.dialogOpen);
   const setOpen = useUploadsStore((s) => s.setDialogOpen);
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "u") {
-        e.preventDefault();
-        setOpen(true);
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [setOpen]);
+  useShortcut(
+    useMemo<Shortcut>(
+      () => ({
+        id: "storage.upload",
+        keys: "mod+u",
+        scope: "storage",
+        description: t("shortcuts.uploadFiles"),
+        run: () => useUploadsStore.getState().setDialogOpen(true),
+      }),
+      [],
+    ),
+  );
 
   // Clear the shared flag if this button leaves the tree (e.g. navigating
   // away) so the tray isn't left hidden with no dialog on screen.

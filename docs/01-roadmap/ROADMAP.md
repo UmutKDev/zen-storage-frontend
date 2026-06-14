@@ -8,6 +8,16 @@
 > **Update rule:** edit the relevant phase summary or its `phases/` file — **don't rewrite** — and add a Changelog line.
 
 ## Changelog
+- **2026-06-14 (Phase 3 Stage D — search + filter + ⌘K palette + touch + server-seam → Phase 3 ✅)** — Closes Phase 3.
+  **Search** (`Cloud/Search` via the factory; scope toggle current↔global, default current; shareable `?q=&scope=` URL;
+  debounced; `SearchEmpty`/`FilteredEmpty` states) + **type/extension filter** (client-side, `viewPrefs`-persisted) share
+  one `arrangeEntries` and reuse `ListView`/`GridView`. **⌘K command palette** on a neutral `lib/command-palette` registry
+  (inverted deps: shell→nav, storage→actions/selection/search; the locked ⌘K↔selection contract opens the bulk dialog over
+  the surface's resolved `selectedEntries`) + a real **central shortcut dispatcher** (`lib/shortcuts/useShortcutDispatcher`,
+  ⌘U migrated in) + `?` **help overlay**. **Touch**: coarse-pointer long-press → bottom `Sheet` (Move/Add files/Delete),
+  desktop MouseSensor DnD untouched. **Server-only seam** ESLint-policed (`@/lib/auth/server` banned from client globs,
+  un-banned for route handlers + `lib/auth`; verified via the ESLint Node API). Green: tsc/lint/build + **148 vitest**
+  (+12); reviewer sweep applied (data-layer + design-system + a11y/state). **Next: Phase 4 / Phase 5.**
 - **2026-06-11 (Phase 3 Stage C — upload pipeline)** — The heaviest Phase 3 task ships: full multipart upload on the
   **`UploadPart` proxy** (D-P3.2 — 100% factory calls; presigned-PUT path intentionally unused). Singleton queue
   engine with locked caps (3 files / 4 parts / 60 MB in-flight / 8 MiB parts, `lib/upload/config.ts`), per-part base64

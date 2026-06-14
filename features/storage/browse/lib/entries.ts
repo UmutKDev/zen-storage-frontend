@@ -1,5 +1,6 @@
+import { extensionCategory, fileExtension } from "@/lib/utils";
 import type { CloudDirectoryModel, CloudObjectModel } from "@/service/models";
-import type { SortDir, SortKey } from "../stores/viewPrefs.store";
+import type { FilterType, SortDir, SortKey } from "../stores/viewPrefs.store";
 
 /** A unified browse-list entry: either a directory or a file/object. */
 export type FolderEntry =
@@ -60,4 +61,52 @@ export function sortEntries(
   const dirs = entries.filter((e) => e.kind === "dir").sort(byName);
   const files = entries.filter((e) => e.kind === "file").sort(compare);
   return [...dirs, ...files];
+}
+
+/**
+ * Client-side type/extension filter over the loaded window. An extension filter
+ * implies files (folders carry no extension, so they drop out when `ext` is set).
+ * `type === "all"` is the no-op pass-through; `"folder"` keeps directories;
+ * any file category compares against {@link extensionCategory}.
+ */
+export function filterEntries(
+  entries: ReadonlyArray<FolderEntry>,
+  filter: { type: FilterType; ext: string },
+): FolderEntry[] {
+  const ext = filter.ext.trim().toLowerCase();
+  return entries.filter((e) => {
+    if (ext && (e.kind !== "file" || fileExtension(e.name) !== ext)) return false;
+    switch (filter.type) {
+      case "all":
+        return true;
+      case "folder":
+        return e.kind === "dir";
+      default:
+        return (
+          e.kind === "file" &&
+          extensionCategory(fileExtension(e.name)) === filter.type
+        );
+    }
+  });
+}
+
+/** The view preferences that shape a browse/search entry list. */
+export interface ArrangePrefs {
+  sortKey: SortKey;
+  sortDir: SortDir;
+  filterType: FilterType;
+  filterExt: string;
+}
+
+/** Filter then sort — the single arrange step shared by folder browse and
+ *  search results so both honor the same view preferences. */
+export function arrangeEntries(
+  entries: ReadonlyArray<FolderEntry>,
+  prefs: ArrangePrefs,
+): FolderEntry[] {
+  return sortEntries(
+    filterEntries(entries, { type: prefs.filterType, ext: prefs.filterExt }),
+    prefs.sortKey,
+    prefs.sortDir,
+  );
 }

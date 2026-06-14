@@ -153,7 +153,43 @@
       "generic": "File",
       "fileSuffix": "file"
     },
-    "search": { "placeholder": "Search files…", "shortcut": "⌘K", "comingSoon": "Search is coming soon" },
+    "search": {
+      "placeholder": "Search files…",
+      "shortcut": "⌘K",
+      "label": "Search",
+      "scopeLabel": "Search scope",
+      "currentScope": "This folder",
+      "globalScope": "Everywhere",
+      "clear": "Clear search",
+      "broaden": "Search everywhere",
+      "resultsSuffix": "results",
+      "oneResult": "1 result",
+      "noResultsTitle": "No matches",
+      "noResultsDescription": "No files match your search.",
+      "errorTitle": "Search failed"
+    },
+    "filter": {
+      "label": "Filter",
+      "all": "All items",
+      "folder": "Folders",
+      "image": "Images",
+      "video": "Videos",
+      "audio": "Audio",
+      "doc": "Documents",
+      "text": "Text",
+      "archive": "Archives",
+      "active": "Filtered",
+      "clear": "Clear filter",
+      "noMatchTitle": "No matching items",
+      "noMatchDescription": "Nothing in this folder matches the current filter."
+    },
+    "sheet": {
+      "title": "Actions",
+      "description": "Choose an action for this item.",
+      "move": "Move to…",
+      "addFiles": "Add files",
+      "delete": "Delete"
+    },
     "item": { "folder": "Folder", "openFolder": "Open folder" },
     "ops": {
       "new": "New",
@@ -322,6 +358,49 @@
         "quotaBatch": "Blocked — storage limit reached."
       }
     }
+  },
+  "command": {
+    "placeholder": "Type a command or search…",
+    "empty": "No matching commands.",
+    "for": "for",
+    "groups": {
+      "navigation": "Navigate",
+      "actions": "Actions",
+      "selection": "Selection",
+      "search": "Search"
+    },
+    "nav": {
+      "storage": "Go to Storage",
+      "account": "Account",
+      "security": "Security",
+      "subscription": "Subscription"
+    },
+    "actions": {
+      "uploadHere": "Upload files",
+      "newFolder": "New folder",
+      "newFile": "New file",
+      "searchInFolder": "Search this folder",
+      "searchEverywhere": "Search everywhere"
+    },
+    "selection": {
+      "deleteSelected": "Delete selected",
+      "moveSelected": "Move selected"
+    }
+  },
+  "shortcuts": {
+    "helpTitle": "Keyboard shortcuts",
+    "helpDescription": "Keyboard shortcuts grouped by where they apply.",
+    "trigger": "Keyboard shortcuts",
+    "scopes": {
+      "global": "Global",
+      "storage": "Storage",
+      "preview": "Preview"
+    },
+    "openPalette": "Open command palette",
+    "focusSearch": "Search this folder",
+    "showHelp": "Show keyboard shortcuts",
+    "toggleSidebar": "Toggle sidebar",
+    "uploadFiles": "Upload files"
   },
   "account": {
     "shell": {

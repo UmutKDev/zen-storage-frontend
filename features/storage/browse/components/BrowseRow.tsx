@@ -12,8 +12,11 @@ import {
   EntryActionsMenu,
   isSelectableEntry,
   useDndMove,
+  useStorageUiStore,
   type ItemSelection,
 } from "../../operations";
+import { useCoarsePointer } from "../hooks/useCoarsePointer";
+import { useLongPress } from "../hooks/useLongPress";
 import { EntryStatusChip, entryIsHidden, entryStatus } from "./EntryStatusChip";
 
 function RowContent({ entry }: { entry: FolderEntry }) {
@@ -69,6 +72,13 @@ export function BrowseRow({
   const { blocked, suppressClickRef } = useDndMove();
   const childPath = path ? `${path}/${entry.name}` : entry.name;
 
+  // Touch long-press → action sheet (the accessible alternative to desktop DnD).
+  const coarse = useCoarsePointer();
+  const longPress = useLongPress({
+    enabled: coarse && selectable,
+    onLongPress: () => useStorageUiStore.getState().openSheet(entry),
+  });
+
   const drag = useDraggable({
     id: entry.key,
     data: { entry },
@@ -95,6 +105,7 @@ export function BrowseRow({
     <div
       ref={setRefs}
       {...drag.listeners}
+      {...longPress.handlers}
       onMouseDown={onMouseDown}
       data-selected={selected}
       className={cn(
@@ -124,6 +135,10 @@ export function BrowseRow({
         <Link
           href={folderHref(path, entry.name)}
           onClick={(e) => {
+            if (longPress.consumeSuppressedClick()) {
+              e.preventDefault();
+              return;
+            }
             if (suppressClickRef.current || selection.onItemClick(entry, e)) {
               e.preventDefault();
             }
@@ -134,7 +149,10 @@ export function BrowseRow({
         </Link>
       ) : (
         <div
-          onClick={(e) => void selection.onItemClick(entry, e)}
+          onClick={(e) => {
+            if (longPress.consumeSuppressedClick()) return;
+            void selection.onItemClick(entry, e);
+          }}
           className="flex min-w-0 flex-1 items-center gap-3 px-2 py-2.5"
         >
           <RowContent entry={entry} />

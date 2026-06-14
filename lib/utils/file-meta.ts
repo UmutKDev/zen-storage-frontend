@@ -79,6 +79,28 @@ const TONE_CLASS: Record<FileTone, string> = {
   slate: "zs-tone-slate",
 };
 
+/**
+ * Coarse file categories used by the browse **type filter** (FilterMenu). A
+ * single source of truth so the filter and the icon/tone map never drift —
+ * `extensionCategory` is the only classifier. "other" covers unknown/uncategorized
+ * extensions (matched only by the "all" filter).
+ */
+export type FileCategory =
+  | "image"
+  | "video"
+  | "audio"
+  | "doc"
+  | "text"
+  | "archive"
+  | "other";
+
+export const IMAGE_EXT = new Set(["jpg", "jpeg", "png", "gif", "webp", "svg"]);
+export const VIDEO_EXT = new Set(["mp4", "mov", "webm"]);
+export const AUDIO_EXT = new Set(["mp3", "wav"]);
+export const DOC_EXT = new Set(["pdf", "doc", "docx", "csv", "xls", "xlsx"]);
+export const TEXT_EXT = new Set(["txt", "md"]);
+export const ARCHIVE_EXT = new Set(["zip", "rar", "7z", "gz", "tar"]);
+
 const THUMBNAIL_EXT = new Set([
   "jpg",
   "jpeg",
@@ -90,7 +112,17 @@ const THUMBNAIL_EXT = new Set([
   "mov",
   "webm",
 ]);
-const VIDEO_EXT = new Set(["mp4", "mov", "webm"]);
+
+/** Classify a lowercased extension into a coarse {@link FileCategory}. */
+export function extensionCategory(ext: string): FileCategory {
+  if (IMAGE_EXT.has(ext)) return "image";
+  if (VIDEO_EXT.has(ext)) return "video";
+  if (AUDIO_EXT.has(ext)) return "audio";
+  if (DOC_EXT.has(ext)) return "doc";
+  if (TEXT_EXT.has(ext)) return "text";
+  if (ARCHIVE_EXT.has(ext)) return "archive";
+  return "other";
+}
 
 /** The `.zs-tone-*` class for a tone (so callers never string-concat raw). */
 export function toneClass(tone: FileTone): string {

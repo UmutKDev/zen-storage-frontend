@@ -1,8 +1,9 @@
 # Phase 3 — Storage Core (Personal)
 
-> **Status:** 🚧 in progress — **Stage A (browse) ✅** + **Stage B1 (single-item operations) ✅ 2026-06-07** +
-> **Stage B2 (multi-select + bulk + DnD) ✅ 2026-06-10** + **Stage C (upload pipeline) ✅ 2026-06-11**;
-> D (search + palette + touch) pending. **Staged in ~4 parts** (decided D-P3.1; B split B1→B2).
+> **Status:** ✅ complete — **Stage A (browse) ✅** + **Stage B1 (single-item operations) ✅ 2026-06-07** +
+> **Stage B2 (multi-select + bulk + DnD) ✅ 2026-06-10** + **Stage C (upload pipeline) ✅ 2026-06-11** +
+> **Stage D (search + filter + ⌘K palette + touch sheet + server-seam) ✅ 2026-06-14**. **Staged in ~4 parts**
+> (decided D-P3.1; B split B1→B2).
 > · **Depends on:** [Phase 2](./phase-2-shell-account.md) · **Blocks:** Phases 4–6.
 > **Feature specs:** [storage-browse](../../04-features/storage-browse.md) · [storage-upload](../../04-features/storage-upload.md)
 > · [storage-operations](../../04-features/storage-operations.md) · [storage-search-filter](../../04-features/storage-search-filter.md)
@@ -69,14 +70,17 @@ duplicate scan / archive (Phase 6); team context UI (Phase 8).
       no silent overwrite (B1, single). **apply‑to‑all** for bulk batches ✅ B2: one batch call → one 409 with
       `ConflictCount/TotalItems` → one strategy retry covers the batch; partial-batch SKIP retries server-side (D-P3.9).
 
-### 3.7 — Search / filter / sort → see [storage-search-filter](../../04-features/storage-search-filter.md)
-- [ ] Filter + sort (by type/size/date/name; persists per session).
-- [ ] Search with **scope toggle** (global vs current folder, **default current**) via `Cloud/Search` (Path +
-      Extension); no‑results state.
+### 3.7 — Search / filter / sort ✅ (Stage D) → see [storage-search-filter](../../04-features/storage-search-filter.md)
+- [x] Filter + sort (sort done in Stage A; **filter** added — by type folder/image/video/audio/doc/text/archive +
+      extension, client-side over the loaded window; persists per session in `viewPrefs` sessionStorage).
+- [x] Search with **scope toggle** (global vs current folder, **default current**) via `Cloud/Search` (Path +
+      Extension); shareable URL (`?q=&scope=`); no‑results state (`SearchEmpty` + broaden/clear) + `FilteredEmpty`.
 
-### 3.8 — Command palette (added scope)
-- [ ] **Command palette** (Cmd/Ctrl‑K) over the shortcut foundation from Phase 0: navigate + actions + fuzzy
-      current‑folder search (+ "search everywhere"). See [keyboard-shortcuts](../../06-cross-cutting/keyboard-shortcuts.md).
+### 3.8 — Command palette (added scope) ✅ (Stage D)
+- [x] **Command palette** (Cmd/Ctrl‑K) over a neutral `lib/command-palette` registry (mirrors `lib/shortcuts`):
+      navigate (shell-owned) + actions/selection/search (storage-contributed) + a "search everywhere" query command.
+      Central shortcut **dispatcher** built (`lib/shortcuts/useShortcutDispatcher`) + `?` help overlay; ⌘U migrated
+      into the registry. See [keyboard-shortcuts](../../06-cross-cutting/keyboard-shortcuts.md).
 
 > **Favorites / Recents / Tags / Storage insights are NOT in MVP** (decided): they require backend APIs first and are
 > deferred to **[Phase 9](./phase-9-organization.md)** — no client‑side interim. See
@@ -192,6 +196,35 @@ duplicate scan / archive (Phase 6); team context UI (Phase 8).
   (D-P3.3) + `NoSuchUpload`→404 mapping gap; upload socket notification dedupe (Phase 6); re-run the engine-dimension
   review (session-limited this round).
 
+## Stage D verification (2026-06-14)
+- **Green:** `tsc`, `lint`, `build` (18 routes; `/storage/[[...path]]` dynamic → `useSearchParams` needs no Suspense),
+  **148 Vitest** (+12: `filter`/`arrangeEntries` matrices, `command-palette/registry` register/snapshot/subscribe/
+  stale-disposer, the **⌘K↔selection contract** end-to-end, `useLongPress` timing/move-cancel/click-suppress/disabled,
+  the **server-seam** ESLint rule via the ESLint Node API).
+- **Built:** **Search** — `search.queries.ts` (`getSearch` on the factory, envelope-unwrapped), `storageKeys.search`
+  (ownerId + scope + path + query + extension), `useSearch` (≥2-char gate, AbortSignal, keepPrevious), `CommandSearch`
+  (URL `?q=&scope=` as source of truth, debounced derive-on-render echo, scope toggle), search-mode switch +
+  `SearchEmpty`/`FilteredEmpty` in `StorageBrowser`/`BrowserStates`. **Filter** — `filterEntries`/`arrangeEntries`
+  (categories from `lib/utils/file-meta` `extensionCategory`), `viewPrefs` `filterType`/`filterExt` (v2), `FilterMenu`
+  (mirrors `SortMenu`). **Palette** — neutral `lib/command-palette` registry (`useCommand`/`useCommands` via
+  `useSyncExternalStore`), feature-local `storageUi` store (bulk/create/**sheet** triggers; `BulkActionBar`/`CreateMenu`
+  lifted onto it), `useStorageCommands` (presence-gated selection commands + query commands), `features/shell/CommandPalette`
+  (`shouldFilter`-off + manual filter; static nav). **Shortcuts** — `useShortcutDispatcher` (one keydown, text-input/
+  overlay guard, generic `mod+<letter>`), `ShortcutProvider` (⌘K / ? / ⌘\), `ShortcutsHelp` overlay, ⌘U migrated off its
+  self-listener. **Touch** — `useCoarsePointer` (`useSyncExternalStore`), `useLongPress` (touch-only, `consumeSuppressedClick`),
+  `EntryActionsSheet` (bottom Sheet) wired into `BrowseRow`/`BrowseCard`. **Seam** — `eslint.config.mjs` ban + un-ban.
+  Mounted in `(app)/layout`: `ShortcutProvider` + `CommandPalette` + `ShortcutsHelp`. Test harness: `renderWithProviders`
+  now supplies app-router/pathname/searchParams contexts.
+- **Reviewer sweep applied** (data-layer + design-system + a11y/state): data-layer clean (envelope unwrap honored,
+  ownerId-scoped keys, abort + ≥2-char gate); design-system clean (semantic tokens, wrapped primitives, reduced-motion
+  via shared Dialog/Sheet) — fixed the one NIT (`rounded-[5px]`→`rounded-sm`); a11y — added `SheetDescription` to
+  `EntryActionsSheet` (HIGH), gated the search result-count live region on `!isFetching` to avoid a stale-count announce
+  (MED), labeled the loading skeleton (LOW). **Deferred/tracked:** arrow-key roving list/grid nav + keyboard range-select
+  (Stage A/B2 deferral, unchanged); per-file fuzzy results inside the palette (the inline search box + "search
+  everywhere" cover in-context search); folder-token in the `search` query key (Phase 5, surface-wide); live
+  authenticated walkthrough on a touch device (needs creds/device) — search default-current + global toggle + filter
+  persist + no-results + long-press sheet.
+
 ## Risks & mitigations
 | Risk | Mitigation |
 |---|---|
@@ -252,14 +285,16 @@ Locked decisions surfaced by the HIGH/MEDIUM audit. These extend §3 acceptance 
 
 ### Mobile / touch
 
-- [ ] **Touch DnD alternative.** Long-press on a row (mobile) opens a bottom sheet with **Move to / Add files /
-      Delete**. Desktop DnD is unchanged; the sheet is the touch-only path.
+- [x] **Touch DnD alternative.** (Stage D) Long-press on a row/card (coarse pointer) opens a bottom `Sheet` with
+      **Move to / Add files / Delete** (`useLongPress` touch-only + `useCoarsePointer`; reuses MoveDialog /
+      DeleteConfirmDialog / upload). Desktop DnD (MouseSensor) is unchanged — the two paths never overlap.
 
 ### Command palette ↔ selection contract
 
-- [ ] **⌘K reads `selectionStore.selectedKeys`.** Bulk actions exposed in the palette (e.g., "Delete selected", "Move
-      selected") operate on whatever the selection store currently holds. Acceptance: select 5+ files, open ⌘K, run
-      "Delete selected" → all 5 are deleted via the bulk path.
+- [x] **⌘K reads `selectionStore.selectedKeys`.** (Stage D) The storage surface contributes "Delete selected" /
+      "Move selected" to the palette only while a selection exists; running one calls `storageUi.openBulkDialog`, and
+      `BulkActionBar` (which owns `selectedEntries`) runs the existing bulk path. Acceptance covered by a test (select
+      2+, run the registered command → bulk delete over the resolved entries).
 
 ### OwnerId & query-key scope
 
@@ -270,9 +305,10 @@ Locked decisions surfaced by the HIGH/MEDIUM audit. These extend §3 acceptance 
 
 ### Server-only seam enforcement
 
-- [ ] **Server-only seam ESLint.** `lib/auth/server.ts` cannot be imported from any file with `"use client"` at the
-      top. ESLint (`no-restricted-imports` + `boundaries`) blocks the import at lint time with a clear error pointing
-      at the seam.
+- [x] **Server-only seam ESLint.** (Stage D) `@/lib/auth/server` is banned by `no-restricted-imports` (path + pattern)
+      across the client globs, with a narrow un-ban for `app/**/route.ts` + `lib/auth/**`. Verified by
+      `tests/lint/server-seam.test.ts` (ESLint Node API: blocked from a feature/component file, allowed from a route
+      handler / the auth lib).
 
 | Cap | Value | Source |
 |---|---|---|

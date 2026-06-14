@@ -9,8 +9,9 @@ describe("ui primitives", () => {
 
     const button = screen.getByRole("button", { name: "Click me" });
     expect(button).toBeInTheDocument();
-    // Brand action uses the `primary` token channel…
-    expect(button.className).toContain("bg-primary");
+    // Brand action uses the `primary` token channel (Zen gradient fill +
+    // primary-foreground text)…
+    expect(button.className).toContain("text-primary-foreground");
     // …and never a raw hex literal.
     expect(button.className).not.toMatch(/#[0-9a-fA-F]{3,8}/);
   });

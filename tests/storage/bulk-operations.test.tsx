@@ -1,9 +1,10 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
-import { screen, waitFor, within } from "@testing-library/react";
+import { act, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { renderWithProviders } from "../test-utils";
 import { useWorkspaceStore } from "@/stores";
 import { ApiError } from "@/lib/api";
+import { getCommands } from "@/lib/command-palette";
 import { useViewPrefs } from "@/features/storage/browse/stores/viewPrefs.store";
 import { useSelectionStore } from "@/features/storage/operations/stores/selection.store";
 
@@ -276,5 +277,45 @@ describe("bulk download", () => {
     );
     await user.click(download);
     expect(getDownloadUrl).not.toHaveBeenCalled();
+  });
+});
+
+describe("⌘K ↔ selection contract", () => {
+  it("contributes Delete selected only while a selection exists, and it deletes via the bulk path", async () => {
+    deleteEntries.mockResolvedValue(undefined);
+    const user = userEvent.setup();
+    renderWithProviders(<StorageBrowser path="" />);
+    await screen.findByText("a.txt");
+
+    // No selection → the palette selection command is not registered.
+    expect(
+      getCommands().some((c) => c.id === "storage:delete-selected"),
+    ).toBe(false);
+
+    await selectFiles(user); // a.txt + b.txt
+
+    // Selection present → the storage surface contributes the command.
+    await waitFor(() =>
+      expect(
+        getCommands().some((c) => c.id === "storage:delete-selected"),
+      ).toBe(true),
+    );
+
+    // Running it is exactly what ⌘K "Delete selected" does — it opens the bulk
+    // delete dialog over the resolved selection (the palette never touches it).
+    const command = getCommands().find(
+      (c) => c.id === "storage:delete-selected",
+    );
+    act(() => command?.run?.());
+
+    const dialog = await screen.findByRole("alertdialog");
+    expect(within(dialog).getByText("Delete 2 items?")).toBeInTheDocument();
+    await user.click(within(dialog).getByRole("button", { name: "Delete" }));
+
+    await waitFor(() => expect(deleteEntries).toHaveBeenCalledTimes(1));
+    expect(deleteEntries.mock.calls[0]?.[0]).toEqual([
+      { Key: "k/a.txt", IsDirectory: false },
+      { Key: "k/b.txt", IsDirectory: false },
+    ]);
   });
 });

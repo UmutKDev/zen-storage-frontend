@@ -12,8 +12,11 @@ import {
   EntryActionsMenu,
   isSelectableEntry,
   useDndMove,
+  useStorageUiStore,
   type ItemSelection,
 } from "../../operations";
+import { useCoarsePointer } from "../hooks/useCoarsePointer";
+import { useLongPress } from "../hooks/useLongPress";
 import { EntryStatusChip, entryIsHidden, entryStatus } from "./EntryStatusChip";
 
 function CardInner({
@@ -74,6 +77,13 @@ export function BrowseCard({
   const { blocked, suppressClickRef } = useDndMove();
   const childPath = path ? `${path}/${entry.name}` : entry.name;
 
+  // Touch long-press → action sheet (the accessible alternative to desktop DnD).
+  const coarse = useCoarsePointer();
+  const longPress = useLongPress({
+    enabled: coarse && selectable,
+    onLongPress: () => useStorageUiStore.getState().openSheet(entry),
+  });
+
   const drag = useDraggable({
     id: entry.key,
     data: { entry },
@@ -98,6 +108,7 @@ export function BrowseCard({
     <div
       ref={setRefs}
       {...drag.listeners}
+      {...longPress.handlers}
       onMouseDown={onMouseDown}
       data-selected={selected}
       className={cn(
@@ -110,6 +121,10 @@ export function BrowseCard({
         <Link
           href={folderHref(path, entry.name)}
           onClick={(e) => {
+            if (longPress.consumeSuppressedClick()) {
+              e.preventDefault();
+              return;
+            }
             if (suppressClickRef.current || selection.onItemClick(entry, e)) {
               e.preventDefault();
             }
@@ -120,7 +135,10 @@ export function BrowseCard({
         </Link>
       ) : (
         <div
-          onClick={(e) => void selection.onItemClick(entry, e)}
+          onClick={(e) => {
+            if (longPress.consumeSuppressedClick()) return;
+            void selection.onItemClick(entry, e);
+          }}
           className="h-full"
         >
           <CardInner entry={entry} selected={selected} />

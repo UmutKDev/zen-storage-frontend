@@ -9,6 +9,8 @@ export {
   fileExtension,
   isThumbnailable,
   isVideo,
+  extensionCategory,
   type FileMeta,
   type FileTone,
+  type FileCategory,
 } from "./file-meta";

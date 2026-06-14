@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Download, FolderInput, Trash2, X } from "lucide-react";
 import { t } from "@/lib/i18n";
@@ -10,16 +10,19 @@ import type { ItemSelection } from "../hooks/useItemSelection";
 import { useDelete } from "../hooks/useDelete";
 import { useDownload } from "../hooks/useDownload";
 import { focusBrowseContent } from "../lib/feedback";
+import { useStorageUiStore } from "../stores/storageUi.store";
 import { DeleteConfirmDialog } from "./DeleteConfirmDialog";
 import { MoveDialog } from "./MoveDialog";
-
-type OpenDialog = null | "move" | "delete";
 
 /**
  * Floating bar shown while a selection exists: count, select-all, then bulk
  * move / download / delete over the selected entries. Each bulk mutation is a
  * single backend call; download loops presigns over files only (dirs are
  * skipped, the button disables when the selection holds no files).
+ *
+ * The move/delete dialogs are driven by the `storageUi` store so the ⌘K palette
+ * can open them too — but they always operate on THIS surface's resolved
+ * `selection.selectedEntries`, so the bulk path is identical either way.
  */
 export function BulkActionBar({
   path,
@@ -28,11 +31,20 @@ export function BulkActionBar({
   path: string;
   selection: ItemSelection;
 }) {
-  const [dialog, setDialog] = useState<OpenDialog>(null);
-  const del = useDelete(path, () => setDialog(null));
+  const dialog = useStorageUiStore((s) => s.bulkDialog);
+  const setDialog = useStorageUiStore((s) => s.openBulkDialog);
+  const closeDialog = useStorageUiStore((s) => s.closeBulkDialog);
+  const del = useDelete(path, () => closeDialog());
   const { downloadMany, isPending: downloading } = useDownload();
   const files = selection.selectedEntries.filter((e) => e.kind === "file");
   const noFiles = files.length === 0;
+
+  // A bulk dialog must never outlive its selection — otherwise an intent left
+  // over from a prior selection would auto-reopen on the next one. Close it when
+  // the selection empties (Esc, folder change, completion).
+  useEffect(() => {
+    if (selection.count === 0) closeDialog();
+  }, [selection.count, closeDialog]);
 
   // Clearing unmounts this bar — hand focus to the browse surface first, so a
   // keyboard user (or Radix's dialog-close restore) doesn't land on <body>.
@@ -109,20 +121,20 @@ export function BulkActionBar({
         ) : null}
       </AnimatePresence>
 
-      {dialog === "move" ? (
+      {dialog === "move" && selection.count > 0 ? (
         <MoveDialog
           entries={selection.selectedEntries}
           currentPath={path}
           open
-          onOpenChange={(o) => !o && setDialog(null)}
+          onOpenChange={(o) => !o && closeDialog()}
           onMoved={clearAndRefocus}
         />
       ) : null}
-      {dialog === "delete" ? (
+      {dialog === "delete" && selection.count > 0 ? (
         <DeleteConfirmDialog
           entries={selection.selectedEntries}
           open
-          onOpenChange={(o) => !o && setDialog(null)}
+          onOpenChange={(o) => !o && closeDialog()}
           onConfirm={() => {
             // Keep the selection on failure so the user can retry.
             void del.remove(selection.selectedEntries).then((ok) => {
