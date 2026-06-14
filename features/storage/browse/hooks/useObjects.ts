@@ -3,7 +3,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { useResolvedToken } from "@/features/secure-folders";
 import { useOwnerId } from "../../lib/useOwnerId";
-import { getObjects, isSameFolderKey, storageKeys } from "../api";
+import {
+  BROWSE_REFETCH_INTERVAL_MS,
+  getObjects,
+  isSameFolderKey,
+  storageKeys,
+} from "../api";
 
 /** File objects for a folder (single call, no pagination). */
 export function useObjects(path: string) {
@@ -25,5 +30,11 @@ export function useObjects(path: string) {
     // skeleton. See `isSameFolderKey`.
     placeholderData: (prev, prevQuery) =>
       isSameFolderKey(baseKey, prevQuery?.queryKey) ? prev : undefined,
+    // Keep the listing fresh against changes made elsewhere (uploads, new folders,
+    // moves, deletes) — poll in the background (paused while the tab is hidden) and
+    // refetch on window focus. The retained data + `placeholderData` mean these
+    // refreshes swap entries in silently, with no skeleton/white flash.
+    refetchInterval: BROWSE_REFETCH_INTERVAL_MS,
+    refetchOnWindowFocus: true,
   });
 }

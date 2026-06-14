@@ -282,6 +282,9 @@
           "maybeIncomplete": "Conceal may not have completed. Re-check from another device if needed."
         },
         "passphraseMin": "Use at least 8 characters.",
+        "expired": {
+          "hidden": "Session expired — hidden items concealed."
+        },
         "lockedFolder": {
           "title": "This folder is locked",
           "body": "Enter the folder password to view its contents.",

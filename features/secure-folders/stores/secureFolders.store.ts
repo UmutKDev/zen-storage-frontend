@@ -120,28 +120,49 @@ export const useSecureFoldersStore = create<SecureFoldersState>()(
   ),
 );
 
+/** The nearest-ancestor token resolved for a path, with the bits a caller needs
+ *  to act on it: the store **key** it's filed under (the minted root path, for
+ *  `clearToken`) and its `expiresAt` (to schedule the TTL re-lock). */
+export interface ResolvedTokenEntry {
+  key: string;
+  token: string;
+  /** Unix epoch **seconds**. */
+  expiresAt: number;
+}
+
 /**
- * Resolve the **nearest ancestor** token for `path` within one namespace's entry
- * map — the heart of ancestor-aware reuse: unlocking `a` covers `a/b/c` without
+ * Resolve the **nearest ancestor** entry for `path` within one namespace's map —
+ * the heart of ancestor-aware reuse: unlocking `a` covers `a/b/c` without
  * re-prompting. When `nowSeconds` is given, expired entries are skipped (the
  * interceptor getter passes the clock so a stale token is never sent); when it's
  * omitted, expiry is ignored (the React query-key fold only needs to react to
  * set/clear — expiry isn't a store mutation, so it can't move the key anyway,
  * and reading the clock in render is impure). Pure + `now`-injectable for tests.
  */
+export function resolveTokenEntry(
+  entries: NamespaceMap,
+  path: string,
+  nowSeconds?: number,
+): ResolvedTokenEntry | null {
+  let best: ResolvedTokenEntry | null = null;
+  for (const [key, entry] of Object.entries(entries)) {
+    if (nowSeconds !== undefined && entry.expiresAt <= nowSeconds) continue;
+    if (!isAncestor(key, path)) continue;
+    // Prefer the nearest ancestor (longest matching key); any valid one works.
+    if (!best || key.length > best.key.length)
+      best = { key, token: entry.token, expiresAt: entry.expiresAt };
+  }
+  return best;
+}
+
+/** Token-only variant of {@link resolveTokenEntry} — the common case (header
+ *  attach, query-key fold) that only cares about the value, not its filing key. */
 export function resolveToken(
   entries: NamespaceMap,
   path: string,
   nowSeconds?: number,
 ): string | null {
-  let best: { key: string; token: string } | null = null;
-  for (const [key, entry] of Object.entries(entries)) {
-    if (nowSeconds !== undefined && entry.expiresAt <= nowSeconds) continue;
-    if (!isAncestor(key, path)) continue;
-    // Prefer the nearest ancestor (longest matching key); any valid one works.
-    if (!best || key.length > best.key.length) best = { key, token: entry.token };
-  }
-  return best?.token ?? null;
+  return resolveTokenEntry(entries, path, nowSeconds)?.token ?? null;
 }
 
 /** Imperative clear-all for the sign-out teardown (also wipes `sessionStorage`

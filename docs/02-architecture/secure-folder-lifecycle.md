@@ -72,6 +72,18 @@ For `/Api/Cloud/*` requests the interceptor calls the registered getter (one res
   a fresh token, and retry the original request.
 - Distinguish **"needs token"** (re‑prompt) from **"wrong passphrase"** (error + retry) to avoid prompt loops; cap
   consecutive re‑prompts.
+- **Active TTL re‑lock while viewing (realized).** Expiry can't wait for the next request — a user sitting inside a
+  secure folder must not keep seeing decrypted/revealed content past the token's `ExpiresAt`. `useSecureFolderExpiry(path)`
+  (mounted by `StorageBrowser`) schedules a timer to the **nearest covering token's** `ExpiresAt` per namespace; on fire
+  it `clearToken(...)` (the store mutation drops the query‑key token fold → the listing refetches **without** the header →
+  the backend `403`s → the locked state renders — the same path manual lock/conceal takes). **Encrypted** also re‑opens
+  the unlock dialog (the exact `open({kind:'unlock', path, mode:'folder'})` the locked state's Unlock button fires, so a
+  descendant `path` resolves via the API‑returned root). **Hidden** clears only — the revealed children silently re‑hide,
+  with a polite toast (`storage.ops.secure.expired.hidden`) so the content change is perceivable. The timer reads the
+  clock at fire time (render‑pure resolve ignores expiry); re‑unlocking reschedules to the fresh `ExpiresAt`.
+- **Backstops for the away case.** Background tabs throttle timers, so the listing queries (`useDirectories`/`useObjects`)
+  also `refetchOnWindowFocus` and poll on an interval (`BROWSE_REFETCH_INTERVAL_MS`, 60s, paused while hidden) — a poll
+  or focus refetch that lands after expiry sends no header (the getter drops it) and `403`s into the same locked flow.
 
 ## 6. Explicit lock / conceal
 - `Directory/Lock` (encrypted) and `Directory/Conceal` (hidden) invalidate server‑side sessions; the client **drops the
@@ -169,8 +181,9 @@ root. Otherwise the path itself leaks (filename, parent chain, mtime) to a conne
 to see it.
 
 **MVP simplification:** sockets don't carry per‑namespace tokens yet, so encrypted/hidden folders **do not emit
-live events**. Changes inside a secure folder surface on the **next refetch** (manual refresh, navigation,
-invalidation from a same‑tab mutation).
+live events**. Changes inside a secure folder surface on the **next refetch** — and the browse listings now refetch on
+window focus + a 60s background poll (`BROWSE_REFETCH_INTERVAL_MS`, paused while the tab is hidden), so changes from
+elsewhere appear without a manual reload — in addition to navigation and same‑tab mutation invalidation.
 
 **Revisit in Phase 6:** per‑namespace socket auth (token attached on `subscribe` / sent via a separate auth frame)
 so encrypted folders can join the live‑updates path without leaking metadata.

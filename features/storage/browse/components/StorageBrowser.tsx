@@ -4,7 +4,10 @@ import { type ReactNode, useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { t } from "@/lib/i18n";
 import { isPreviewableName } from "@/lib/preview";
-import { useSecureFolderUiStore } from "@/features/secure-folders";
+import {
+  useSecureFolderExpiry,
+  useSecureFolderUiStore,
+} from "@/features/secure-folders";
 import {
   BROWSE_CONTENT_ID,
   BulkActionBar,
@@ -57,6 +60,9 @@ export function StorageBrowser({ path }: { path: string }) {
 
   const selection = useItemSelection(entries, path);
   useStorageCommands({ path, selection });
+  // While inside an encrypted/hidden folder, re-lock (and re-prompt for encrypted)
+  // the instant the session token's TTL lapses — content can't outlive its token.
+  useSecureFolderExpiry(path);
 
   // Publish the ordered previewable-file keys (in display order) for the preview
   // modal's ←/→ navigation — a neutral hand-off so preview never imports browse

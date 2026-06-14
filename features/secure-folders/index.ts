@@ -11,6 +11,7 @@ export {
   type SecureActionKind,
 } from "./stores/secureFolderUi.store";
 export { useResolvedToken } from "./hooks/useResolvedToken";
+export { useSecureFolderExpiry } from "./hooks/useSecureFolderExpiry";
 export { useUnlock } from "./hooks/useUnlock";
 export { useLock } from "./hooks/useLock";
 export { useEncrypt } from "./hooks/useEncrypt";

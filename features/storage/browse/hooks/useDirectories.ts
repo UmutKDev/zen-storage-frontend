@@ -3,7 +3,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { useResolvedToken } from "@/features/secure-folders";
 import { useOwnerId } from "../../lib/useOwnerId";
-import { getDirectories, isSameFolderKey, storageKeys } from "../api";
+import {
+  BROWSE_REFETCH_INTERVAL_MS,
+  getDirectories,
+  isSameFolderKey,
+  storageKeys,
+} from "../api";
 
 /** Combine the resolved secure-folder tokens into one query-key segment so any
  *  unlock/reveal (set) or lock/conceal (clear) refetches this listing. */
@@ -34,5 +39,11 @@ export function useDirectories(path: string, enabled = true) {
     // skeleton. See `isSameFolderKey`.
     placeholderData: (prev, prevQuery) =>
       isSameFolderKey(baseKey, prevQuery?.queryKey) ? prev : undefined,
+    // Keep the listing fresh against changes made elsewhere (uploads, new folders,
+    // moves, deletes) — poll in the background (paused while the tab is hidden) and
+    // refetch on window focus. The retained data + `placeholderData` mean these
+    // refreshes swap entries in silently, with no skeleton/white flash.
+    refetchInterval: BROWSE_REFETCH_INTERVAL_MS,
+    refetchOnWindowFocus: true,
   });
 }
