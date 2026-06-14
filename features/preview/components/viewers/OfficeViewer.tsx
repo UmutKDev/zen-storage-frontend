@@ -1,11 +1,36 @@
 "use client";
 
+import { useEffect, useRef, type RefObject } from "react";
 import { Download, FileText } from "lucide-react";
 import { Button, Skeleton } from "@/components/ui";
 import { t } from "@/lib/i18n";
 import { useDownload } from "@/features/storage";
 import type { CloudObjectModel } from "@/service/models";
 import { useOfficeEmbed } from "../../hooks/useOfficeEmbed";
+
+/**
+ * Hand focus back to the parent document whenever the cross-origin office iframe
+ * grabs it. A focused cross-origin frame swallows keyboard events, so the modal's
+ * Escape-to-close (Radix listens on `document`) silently stops working until focus
+ * happens to leave the frame — the "press Escape a few times to close" bug. The
+ * embed is read-only (mouse scroll/click still work without keyboard focus), so
+ * bouncing focus out the instant it's stolen keeps the modal reliably closable
+ * with no loss of function. Returns focus to `document.body`, which Radix's focus
+ * trap then pulls back into the dialog.
+ */
+function useReleaseIframeFocus(ref: RefObject<HTMLIFrameElement | null>) {
+  useEffect(() => {
+    const onWindowBlur = () => {
+      if (document.activeElement !== ref.current) return;
+      // Defer past the browser settling focus into the frame, then bounce it out.
+      window.setTimeout(() => {
+        if (document.activeElement === ref.current) ref.current?.blur();
+      }, 0);
+    };
+    window.addEventListener("blur", onWindowBlur);
+    return () => window.removeEventListener("blur", onWindowBlur);
+  }, [ref]);
+}
 
 /** Centered "couldn't render — download" fallback (error / unsupported / too large). */
 function OfficeFallback({ onDownload }: { onDownload: () => void }) {
@@ -39,6 +64,8 @@ export function OfficeViewer({ object }: { object: CloudObjectModel }) {
   const { embedUrl, isPending, isError } = useOfficeEmbed(object.Path.Key);
   const { download } = useDownload();
   const onDownload = () => download(object.Path.Key);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  useReleaseIframeFocus(iframeRef);
 
   if (isError) return <OfficeFallback onDownload={onDownload} />;
 
@@ -57,6 +84,7 @@ export function OfficeViewer({ object }: { object: CloudObjectModel }) {
   return (
     <div className="flex h-full w-full flex-col">
       <iframe
+        ref={iframeRef}
         src={embedUrl}
         title={object.Name}
         // The Office Online viewer POSTs a form to load its WOPI render frame
