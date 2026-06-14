@@ -14,6 +14,28 @@ export function fromSegments(segments: readonly string[]): string {
   return segments.filter(Boolean).join("/");
 }
 
+/**
+ * Build the folder path from raw `[[...path]]` route segments. Next hands these
+ * back **percent-encoded**, so each is decoded before joining — otherwise a space
+ * (or any encoded char) survives into the path and gets **double-encoded** by the
+ * API query serializer (`Betul Cakmak` → `Betul%2520Cakmak`), so the backend
+ * can't find the folder. Decoding is safe-guarded against a malformed hand-typed
+ * URL. (The preview route already decodes its single segment via `decodePreviewKey`.)
+ */
+export function fromRouteSegments(
+  segments: readonly string[] | undefined,
+): string {
+  return fromSegments(
+    (segments ?? []).map((segment) => {
+      try {
+        return decodeURIComponent(segment);
+      } catch {
+        return segment;
+      }
+    }),
+  );
+}
+
 /** Parent path of a given path (empty string at the root). */
 export function parentPath(path: string): string {
   const segments = toSegments(path);

@@ -29,7 +29,9 @@ export async function getObjects(
   signal?: AbortSignal,
 ): Promise<CloudObjectModel[]> {
   const res = await cloudApiFactory.listObjects(
-    { path, delimiter: true },
+    // `isMetadataProcessing` makes the backend compute object metadata
+    // (thumbnails, dimensions) the grid needs. Directories force it off server-side.
+    { path, delimiter: true, isMetadataProcessing: true },
     { signal },
   );
   return itemsOf<CloudObjectModel>(res.data);
