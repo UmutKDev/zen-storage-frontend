@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { FolderInput, Trash2, Upload, type LucideIcon } from "lucide-react";
+import { Eye, FolderInput, Trash2, Upload, type LucideIcon } from "lucide-react";
 import { t } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
+import { useFlag } from "@/lib/flags";
+import { previewHref } from "@/lib/preview";
 import {
   Sheet,
   SheetContent,
@@ -58,6 +60,7 @@ export function EntryActionsSheet({ path }: { path: string }) {
   const closeSheet = useStorageUiStore((s) => s.closeSheet);
   const openUpload = useUploadsStore((s) => s.setDialogOpen);
   const router = useRouter();
+  const previewEnabled = useFlag("preview");
 
   const [dialog, setDialog] = useState<null | "move" | "delete">(null);
   const del = useDelete(path, () => setDialog(null));
@@ -67,6 +70,10 @@ export function EntryActionsSheet({ path }: { path: string }) {
   const [shown, setShown] = useState<FolderEntry | null>(entry);
   if (entry !== null && entry !== shown) setShown(entry);
 
+  const onPreview = () => {
+    closeSheet();
+    if (shown?.kind === "file") router.push(previewHref(shown.file.Path.Key));
+  };
   const onMove = () => {
     closeSheet();
     setDialog("move");
@@ -94,6 +101,13 @@ export function EntryActionsSheet({ path }: { path: string }) {
             </SheetDescription>
           </SheetHeader>
           <div className="flex flex-col gap-1 px-2 pb-4">
+            {shown?.kind === "file" && previewEnabled ? (
+              <SheetAction
+                icon={Eye}
+                label={t("storage.ops.menu.preview")}
+                onClick={onPreview}
+              />
+            ) : null}
             <SheetAction
               icon={FolderInput}
               label={t("storage.sheet.move")}

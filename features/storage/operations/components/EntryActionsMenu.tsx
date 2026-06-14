@@ -1,14 +1,18 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Download,
+  Eye,
   FolderInput,
   MoreHorizontal,
   Pencil,
   Trash2,
 } from "lucide-react";
 import { t } from "@/lib/i18n";
+import { useFlag } from "@/lib/flags";
+import { previewHref } from "@/lib/preview";
 import {
   Button,
   DropdownMenu,
@@ -39,6 +43,8 @@ export function EntryActionsMenu({
   const rename = useRename(entry, path, () => setDialog(null));
   const del = useDelete(path, () => setDialog(null));
   const { download } = useDownload();
+  const router = useRouter();
+  const previewEnabled = useFlag("preview");
   const close = () => setDialog(null);
 
   return (
@@ -55,6 +61,14 @@ export function EntryActionsMenu({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-44">
+          {entry.kind === "file" && previewEnabled ? (
+            <DropdownMenuItem
+              onSelect={() => router.push(previewHref(entry.file.Path.Key))}
+            >
+              <Eye className="size-4" />
+              {t("storage.ops.menu.preview")}
+            </DropdownMenuItem>
+          ) : null}
           <DropdownMenuItem onSelect={() => setDialog("rename")}>
             <Pencil className="size-4" />
             {t("storage.ops.menu.rename")}

@@ -5,20 +5,73 @@
 >
 > Legend: ⏳ not started · 🚧 in progress · ✅ done · 🚫 blocked.
 
-**Updated:** 2026-06-14 · **Branch:** `v2` · **Round:** **Phase 3 Stage D landed — Phase 3 (Storage Core) is now ✅ complete.**
+**Updated:** 2026-06-14 · **Branch:** `v2` · **Round:** **Phase 4 Stage C2 landed — document version history + diff + restore. Phase 4 ✅ complete (A+B+C1+C2).**
 
 ## Where we are
-**Phase 3 Stage D closed Phase 3.** Storage is now fully searchable, filterable, and command-driven. **Search** (`Cloud/Search`,
-scope toggle current↔global default current, shareable `?q=&scope=` URL, debounced, `SearchEmpty`/`FilteredEmpty` states) +
-**type/extension filter** (client-side over the loaded window, persisted in `viewPrefs`) feed the same `ListView`/`GridView` via a
-shared `arrangeEntries`. The **⌘K command palette** rides a neutral `lib/command-palette` registry (inverted deps — shell
-contributes navigation, storage contributes actions/selection/search; the locked ⌘K↔selection contract opens the bulk dialog over
-the surface's resolved `selectedEntries`), backed by a real **central shortcut dispatcher** (`lib/shortcuts/useShortcutDispatcher` —
-one keydown handler, text-input/overlay guarded; ⌘U migrated off its self-listener) and a `?` **help overlay**. **Touch**: a
-coarse-pointer long-press opens a bottom `Sheet` (Move / Add files / Delete) — the accessible alternative to the desktop
-MouseSensor DnD, which is untouched. The **server-only seam** is now ESLint-policed (`@/lib/auth/server` banned from client globs,
-un-banned for route handlers + `lib/auth`). Green: `tsc` + `lint` + `build` + **148 Vitest**; reviewer sweep applied (data-layer +
-design-system + a11y/state). **Next product task: Phase 4 (Preview + Share) and/or Phase 5 (Secure Folders).**
+**Phase 4 Stage C2 landed — Phase 4 is complete.** Editor files now get a **document version history** panel in the
+preview footer (sibling of the Stage-B object-version panel): lazy-fetched on expand, each row shows a **backend-computed
+diff** vs the current content (`DiffView` renders the server's unified-diff hunks — colored add/remove/context lines +
+stats — **no diff library**), and — when the editor holds the lock — **restore**/delete behind a confirm. A **restore**
+replaces the current content and **reloads the open editor in place** (reusing the editor's 409-reload path via a new
+`editor.store` reload signal, so the edit lock is kept); the panel reads the editor's `canEdit` from the store to hide
+restore/delete on a read-only (locked-by-other / lock-lost) doc while keeping diffs viewable. **Backend gap fixed first:**
+`GET Cloud/Documents/Versions` was untyped (`void`) in the generated client — it lacked the `@ApiSuccessResponse`
+decorator its siblings have; mirrored the object endpoint in `nestjs-storage` (reusing `CloudVersionListResponseModel`)
+and regenerated the committed client (only `listVersions`'s return type changed). Green: `tsc`+`lint`+`build` +
+**193 Vitest** (+8) + `size-limit` **790.8 / 820 KB** (no new deps); reviewer sweep clean (casl/data-layer/design-system;
+a11y added a `role="status"` diff live region + a diff-error Retry). **Decision:** [D-P4.8](../07-decisions/DECISIONS.md).
+**Next: Phase 5 (secure folders) — Phase 4 live walkthrough against the backend pending creds.**
+
+## Earlier — Phase 4 Stage C1 (CodeMirror document editor)
+**Phase 4 Stage C1 landed**: text/code files (`EDITOR_EXT`) open in a **CodeMirror 6 editor** with the full
+collaborative-safety lifecycle. The editor is **lazy-loaded** (`next/dynamic`, +11 MIT packages in a ~233 KB chunk —
+zero initial-load cost). On open it `readContent` (with draft) + `acquireLock` (5-min TTL; `423` → read-only "Locked by
+{name}" banner); a ~3-min **heartbeat** (`extendLock`) keeps the lock (loss → "lock expired" read-only). Edits **auto-save
+a draft** (throttled ≤1/10s); explicit **Save/⌘S commits** via `updateContent` with `ExpectedContentHash` — a **409**
+shows a "changed elsewhere — Reload" banner and keeps the text as a draft. An **unsaved-changes guard** (a feature-local
+`editor.store` the modal consults) prompts Save/Discard/Cancel on close; the **lock releases** on close/unmount;
+`pagehide`/`visibilitychange` flush a best-effort draft (never `beforeunload`). Syntax highlighting via a curated lang set
+(js/ts/json/md/html/css/python/yaml → plain). Green: `tsc`+`lint`+`build`+`size-limit` + **185 Vitest** (+11); reviewer
+sweep clean (a11y added a `role="status"` live region + a distinct lock-expired copy). **Decisions:**
+[D-P4.5](../07-decisions/DECISIONS.md) (CodeMirror set + lazy chunk + lifecycle; size gate 480→820 KB).
+
+## Earlier — Phase 4 Stage B (office + object versions)
+**Phase 4 Stage B landed**: the preview modal handles **office files** + **object version history**.
+**Office** (docx/xlsx/pptx) renders via the **Microsoft Office Online viewer** — a sandboxed `<iframe>` to
+`view.officeapps.live.com` (CSP `frame-src` gained it, [D-P4.3](../07-decisions/DECISIONS.md)), `src` = a fresh presigned
+URL; **zero new deps, no XSS surface**, with a download-to-view fallback + an in-viewer disclosure (office content egresses
+to Microsoft — [privacy §9b](../06-cross-cutting/privacy-compliance.md)). **Object version history** is a collapsible modal
+footer (`VersionHistoryPanel`, lazy on expand): list `Cloud/Versions`, restore + delete (each behind a confirm; latest
+can't be deleted); `invalidateScope` refetches object+versions+folder+usage ([D-P4.4](../07-decisions/DECISIONS.md)).
+
+## Earlier — Phase 4 Stage A (preview core + share)
+**Phase 4 Stage A landed** (first of 3 stages — [D-P4.0](../07-decisions/DECISIONS.md)): files now **open in a deep-linkable
+preview modal**. A new `features/preview` feature mounts into the existing `@modal/(.)preview/[key]` interceptor (with a
+non-intercepted `preview/[key]` route backing refresh / shared links; `[key]` is percent-encoded). Viewers: **image** (CDN-scaled
+via `getImageCdnUrl` from `Metadata.Width/Height`, SVG/ICO unscaled), **video** + **audio** (native players, unsupported-codec
+fallback), **PDF** (sandboxed `<iframe>` streaming the signed CDN URL — CSP `frame-src` gained the CDN, [D-P4.1](../07-decisions/DECISIONS.md)),
+and a graceful **download-to-view** `UnsupportedViewer` for everything else. The toolbar (download/share/delete/fullscreen/close)
+**reuses storage's `useDelete`/`useDownload` + confirm dialog**; **share** mints a `Cloud/PresignedUrl` → Web Share API or
+clipboard + a TTL note; an **`AvGate`** blocks infected files (body+download+share) and warns (`role=status`) while a scan is
+pending (polls `Cloud/Scan/Status`). **←/→ arrow nav** walks the previewable files of the current view (the browser publishes the
+ordered key list to a storage-owned store the preview reads — keeping the two features acyclic, [D-P4.2](../07-decisions/DECISIONS.md));
+**a plain click on a file now opens preview** (selection moved fully to the checkbox / modifier-click). Behind the `preview` flag
+(default on). Green: `tsc` + `lint` + `build` (both preview routes split; `[[...path]]` unaffected) + **166 Vitest**; reviewer
+sweep applied (data-layer clean; design-system + a11y each 1 finding, fixed). **Deferred:** scaled-vs-original *download* (view is
+scaled, original download works), office preview (Stage B), the document editor + version history (Stage B/C). **Next: Phase 4
+Stage B (office + object version history), then Stage C (document editor + doc versions/diff) — or Phase 5.**
+
+## Earlier — Phase 3 Stage D (closed Phase 3)
+**Phase 3 Stage D closed Phase 3 (Storage Core ✅).** Storage is fully searchable, filterable, and command-driven. **Search**
+(`Cloud/Search`, scope toggle current↔global default current, shareable `?q=&scope=` URL, debounced, `SearchEmpty`/`FilteredEmpty`
+states) + **type/extension filter** (client-side over the loaded window, persisted in `viewPrefs`) feed the same
+`ListView`/`GridView` via a shared `arrangeEntries`. The **⌘K command palette** rides a neutral `lib/command-palette` registry
+(inverted deps — shell contributes navigation, storage contributes actions/selection/search; the locked ⌘K↔selection contract opens
+the bulk dialog over the surface's resolved `selectedEntries`), backed by a real **central shortcut dispatcher**
+(`lib/shortcuts/useShortcutDispatcher` — one keydown handler, text-input/overlay guarded; ⌘U migrated off its self-listener) and a
+`?` **help overlay**. **Touch**: a coarse-pointer long-press opens a bottom `Sheet` (Move / Add files / Delete) — the accessible
+alternative to the desktop MouseSensor DnD, which is untouched. The **server-only seam** is ESLint-policed (`@/lib/auth/server`
+banned from client globs, un-banned for route handlers + `lib/auth`).
 
 ## Earlier — Zen design treatment
 **The "Zen" premium design treatment landed across every built surface** (a cross‑cutting refinement on top of

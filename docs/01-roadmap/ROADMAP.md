@@ -8,6 +8,47 @@
 > **Update rule:** edit the relevant phase summary or its `phases/` file — **don't rewrite** — and add a Changelog line.
 
 ## Changelog
+- **2026-06-14 (Phase 4 Stage C2 — document version history + diff + restore)** — Closes Phase 4. Editor files get a
+  **document version panel** in the preview footer (sibling of the Stage-B object panel): lazy on expand, per-row
+  **backend-computed diff** vs current (`DiffView` styles the server's unified-diff hunks — add/remove/context tokens +
+  stats — **no diff library**), and lock-gated **restore**/delete behind a confirm. **Restore reloads the open editor in
+  place** (a new `editor.store` `reloadNonce` signal drives the editor's existing 409 `onReload`, keeping the lock); the
+  panel reads the editor's `canEdit` from the store to hide actions on a read-only doc (diffs stay viewable). **Backend
+  gap fixed + client regenerated:** `GET Cloud/Documents/Versions` emitted `void` (missing `@ApiSuccessResponse`); mirrored
+  the object endpoint in `nestjs-storage` (reuses `CloudVersionListResponseModel`) — the only client diff was
+  `listVersions`'s return type. Green: tsc/lint/build + **193 vitest** (+8) + size-limit **790.8/820 KB** (no new deps);
+  reviewer sweep clean (casl/data-layer/design-system; a11y added a `role="status"` diff live region + a diff-error
+  Retry). **D-P4.8.** **Next: Phase 5 (secure folders).**
+- **2026-06-14 (Phase 4 Stage C1 — CodeMirror document editor)** — Text/code files (`EDITOR_EXT`) open in a **CodeMirror
+  6** editor (+11 MIT packages, **lazy** `next/dynamic` chunk ~233 KB — zero initial-load cost; **D-P4.5**). Full
+  collaborative-safety lifecycle: `readContent`(+draft) + `acquireLock` (5-min TTL, `423`→read-only "Locked by {name}"),
+  ~3-min `extendLock` **heartbeat** (loss→"lock expired"), throttled (≤1/10s) `saveDraft`, explicit **commit** via
+  `updateContent` + `ExpectedContentHash` (**409**→"changed elsewhere — Reload", text kept as a draft), **unsaved-changes
+  guard** (Save/Discard/Cancel via the `editor.store` modal seam), `releaseLock` on close, `pagehide`/`visibilitychange`
+  best-effort draft (never `beforeunload`). New `"editor"` `ViewerKind` + `editorLanguageForName`; the object version
+  footer is suppressed for editor files (C2 fills it). size-limit gate 480→820 KB (lazy editor chunk). Green: tsc/lint/
+  build/size + **185 vitest** (+11); reviewer sweep clean (a11y added `role="status"` + a lock-expired copy; data-layer
+  confirmed no Idempotency-Key on the Documents mutations). **Next: Stage C2 (document versions + diff) — or Phase 5.**
+- **2026-06-14 (Phase 4 Stage B — office preview + object version history)** — Office (docx/xlsx/pptx) renders via the
+  **Microsoft Office Online viewer**: a sandboxed `<iframe>` to `view.officeapps.live.com` (CSP `frame-src` += it,
+  **D-P4.3**), `src` = a fresh presigned URL → **zero new deps, no XSS surface**, with a download-to-view fallback + an
+  in-viewer disclosure (office content egresses to Microsoft — privacy §9b). **Object version history** = a collapsible
+  modal footer (`VersionHistoryPanel`, lazy on expand): `Cloud/Versions` list + restore + delete (confirm each; latest
+  protected), `invalidateScope` refetches object+versions+folder+usage (**D-P4.4**). New `"office"` `ViewerKind` +
+  `OFFICE_EMBED_EXT`; `lib/preview/office-embed`. Green: tsc/lint/build + **174 vitest** (+8); reviewer sweep clean
+  (data-layer confirmed no Idempotency-Key needed on restore/delete-version). **Next: Stage C (document editor + doc
+  versions/diff) — or Phase 5.**
+- **2026-06-14 (Phase 4 Stage A — preview core + share)** — Opens Phase 4 (staged A/B/C, D-P4.0). New `features/preview`:
+  a deep-linkable `FilePreviewModal` mounted into the `@modal/(.)preview/[key]` interceptor + a non-intercepted
+  `preview/[key]` route (refresh/shared-link backstop; `[key]` percent-encoded). **Viewers**: image (CDN-scaled via
+  `getImageCdnUrl`, SVG/ICO unscaled), video + audio (native, codec fallback), **PDF** (sandboxed `<iframe>` on the signed
+  CDN URL — CSP `frame-src` += CDN, **D-P4.1**), `UnsupportedViewer` download-to-view fallback. **Toolbar** reuses
+  storage's `useDelete`/`useDownload` + confirm dialog; **share** = `Cloud/PresignedUrl` → Web Share/clipboard + TTL note;
+  **`AvGate`** (polls `Cloud/Scan/Status`) blocks infected + warns pending. **←/→ nav** over a storage-published
+  previewable-key store (acyclic, **D-P4.2**); plain file click now opens preview (selection → checkbox/modifier). Pure
+  helpers in neutral `lib/preview`. Behind the `preview` flag (default on). Green: tsc/lint/build + **166 vitest** (+18);
+  reviewer sweep (data-layer clean; design-system + a11y each 1, fixed). **Deferred:** scaled-vs-original *download*,
+  office (Stage B), document editor + version history (Stage B/C). **Next: Stage B / Stage C — or Phase 5.**
 - **2026-06-14 (Phase 3 Stage D — search + filter + ⌘K palette + touch + server-seam → Phase 3 ✅)** — Closes Phase 3.
   **Search** (`Cloud/Search` via the factory; scope toggle current↔global, default current; shareable `?q=&scope=` URL;
   debounced; `SearchEmpty`/`FilteredEmpty` states) + **type/extension filter** (client-side, `viewPrefs`-persisted) share
@@ -119,8 +160,8 @@
 | 0 | Foundation + Design System | [phase-0](./phases/phase-0-foundation.md) | ✅ done (all sub-tasks incl. 0.8a + 0.14a) |
 | 1 | Auth | [phase-1](./phases/phase-1-auth.md) | ✅ done (incl. passkey + legal/consent) |
 | 2 | App Shell + Account | [phase-2](./phases/phase-2-shell-account.md) | ✅ done (shell + profile + security + subscription) |
-| 3 | Storage Core | [phase-3](./phases/phase-3-storage-core.md) | 🚧 A (browse) + B1 (single-item ops) done; B2/C/D pending |
-| 4 | Preview + Share | [phase-4](./phases/phase-4-preview-share.md) | ⏳ |
+| 3 | Storage Core | [phase-3](./phases/phase-3-storage-core.md) | ✅ done (browse + ops + bulk/DnD + upload + search/filter/⌘K/touch) |
+| 4 | Preview + Share | [phase-4](./phases/phase-4-preview-share.md) | 🚧 Stage A (preview core + share) + B (office via MS embed + object versions) + C1 (CodeMirror doc editor) done; C2 (doc versions/diff) pending |
 | 5 | Secure Folders | [phase-5](./phases/phase-5-secure-folders.md) | ⏳ |
 | 6 | Advanced | [phase-6](./phases/phase-6-advanced.md) | ⏳ |
 | 7 | Public & Polish (**MVP done**) | [phase-7](./phases/phase-7-public-polish.md) | ⏳ |

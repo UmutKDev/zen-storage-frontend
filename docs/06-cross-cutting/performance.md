@@ -36,7 +36,7 @@ P0, gated in CI from P7. Budgets fail the build on regression; loosening require
 | App shell first‑load JS | 180 KB | shell + providers + Query + Instance |
 | Storage route JS (initial, excl. shell) | 70 KB | list/grid + selection + virtualization |
 | Preview route JS (initial, excl. shell) | 60 KB | viewer host; CodeMirror/PDF lazy |
-| CodeMirror chunk (lazy) | 220 KB | loaded only on text preview |
+| CodeMirror chunk (lazy) | ~235 KB | loaded only on text/code preview (Stage C1; measured `basicSetup` + 7 langs + theme, MIT). The 220 KB was a pre-impl estimate — see D-P4.5. |
 | PDF.js chunk (lazy) | 250 KB | loaded only on PDF preview |
 | Framer Motion (LazyMotion `domAnimation`) | 25 KB | full `domMax` only on opt‑in routes |
 

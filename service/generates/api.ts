@@ -10822,7 +10822,7 @@ export const CloudDocumentsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async listVersions(key: string, xTeamId?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+        async listVersions(key: string, xTeamId?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CloudVersionListResponseBaseModel>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.listVersions(key, xTeamId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['CloudDocumentsApi.listVersions']?.[localVarOperationServerIndex]?.url;
@@ -10985,7 +10985,7 @@ export const CloudDocumentsApiFactory = function (configuration?: Configuration,
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listVersions(requestParameters: CloudDocumentsApiListVersionsRequest, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+        listVersions(requestParameters: CloudDocumentsApiListVersionsRequest, options?: RawAxiosRequestConfig): AxiosPromise<CloudVersionListResponseBaseModel> {
             return localVarFp.listVersions(requestParameters.key, requestParameters.xTeamId, options).then((request) => request(axios, basePath));
         },
         /**

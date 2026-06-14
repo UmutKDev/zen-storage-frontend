@@ -1,8 +1,9 @@
 "use client";
 
-import { type ReactNode, useState } from "react";
+import { type ReactNode, useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { t } from "@/lib/i18n";
+import { isPreviewableName } from "@/lib/preview";
 import {
   BROWSE_CONTENT_ID,
   BulkActionBar,
@@ -16,6 +17,7 @@ import { UploadButton } from "../../upload/components/UploadButton";
 import { useFolderEntries } from "../hooks/useFolderEntries";
 import { SEARCH_MIN_CHARS, useSearch, type SearchScope } from "../hooks/useSearch";
 import { useStorageCommands } from "../hooks/useStorageCommands";
+import { usePreviewNavStore } from "../stores/previewNav.store";
 import { useViewPrefs } from "../stores/viewPrefs.store";
 import { BreadcrumbBar } from "./BreadcrumbBar";
 import {
@@ -52,6 +54,20 @@ export function StorageBrowser({ path }: { path: string }) {
 
   const selection = useItemSelection(entries, path);
   useStorageCommands({ path, selection });
+
+  // Publish the ordered previewable-file keys (in display order) for the preview
+  // modal's ←/→ navigation — a neutral hand-off so preview never imports browse
+  // internals (storage writes, preview reads).
+  const previewKeys = useMemo(
+    () =>
+      entries
+        .filter((e) => e.kind === "file" && isPreviewableName(e.name))
+        .map((e) => e.key),
+    [entries],
+  );
+  useEffect(() => {
+    usePreviewNavStore.getState().setKeys(previewKeys);
+  }, [previewKeys]);
 
   const broadenSearch = () =>
     router.replace(

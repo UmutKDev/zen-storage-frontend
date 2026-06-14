@@ -14,7 +14,8 @@ const must: Record<string, RegExp> = {
   "permissions-policy":
     /camera=\(\)[\s\S]*microphone=\(\)[\s\S]*interest-cohort=\(\)/,
   "cross-origin-opener-policy": /^same-origin$/,
-  "cross-origin-embedder-policy": /^credentialless$/,
+  // No Cross-Origin-Embedder-Policy — it blocks the cross-origin preview
+  // iframes (CDN PDF + Office viewer). See D-P4.6 / security-headers.md §5.
   "referrer-policy": /^strict-origin-when-cross-origin$/,
   "x-content-type-options": /^nosniff$/,
 };

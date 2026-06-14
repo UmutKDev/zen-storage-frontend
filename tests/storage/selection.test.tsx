@@ -6,6 +6,25 @@ import { useWorkspaceStore } from "@/stores";
 import { useViewPrefs } from "@/features/storage/browse/stores/viewPrefs.store";
 import { useSelectionStore } from "@/features/storage/operations/stores/selection.store";
 
+// Capture router.push so we can assert a plain file click opens the preview
+// (Phase 4). usePathname/useSearchParams stay real (read from the test-utils
+// context providers).
+const push = vi.fn();
+vi.mock("next/navigation", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("next/navigation")>();
+  return {
+    ...actual,
+    useRouter: () => ({
+      push,
+      replace: vi.fn(),
+      prefetch: vi.fn(),
+      back: vi.fn(),
+      forward: vi.fn(),
+      refresh: vi.fn(),
+    }),
+  };
+});
+
 const getDirectories = vi.fn();
 const getObjects = vi.fn();
 const getStorageUsage = vi.fn();
@@ -82,18 +101,18 @@ describe("multi-select", () => {
     expect(await screen.findAllByText(/2 selected/)).not.toHaveLength(0);
   });
 
-  it("plain click on a file replaces the selection", async () => {
+  it("plain click on a file opens the preview, leaving selection untouched", async () => {
     const user = userEvent.setup();
     renderWithProviders(<StorageBrowser path="" />);
     await screen.findByText("a.txt");
 
     await user.click(screen.getByText("a.txt"));
-    expect(checkbox("a.txt")).toBeChecked();
 
-    await user.click(screen.getByText("b.txt"));
-    expect(checkbox("b.txt")).toBeChecked();
+    // Navigates to the preview deep link; does NOT select the file (selection
+    // is now a checkbox / modifier-click gesture).
+    expect(push).toHaveBeenCalledWith("/storage/preview/k%2Fa.txt");
     expect(checkbox("a.txt")).not.toBeChecked();
-    expect(screen.getAllByText(/1 selected/)).not.toHaveLength(0);
+    expect(screen.queryByText(/selected/)).not.toBeInTheDocument();
   });
 
   it("ctrl/cmd-click toggles items into the selection", async () => {

@@ -15,7 +15,12 @@ export const STATIC_HEADERS: Record<string, string> = {
   "Referrer-Policy": "strict-origin-when-cross-origin",
   "X-DNS-Prefetch-Control": "on",
   "Cross-Origin-Opener-Policy": "same-origin",
-  "Cross-Origin-Embedder-Policy": "credentialless",
+  // No `Cross-Origin-Embedder-Policy`. COEP — even `credentialless` — blocks
+  // cross-origin preview iframes: `credentialless` only relaxes no-cors
+  // *subresources* (e.g. CDN images), NOT nested iframes, and we can't make the
+  // CDN (PDF preview) or the Microsoft Office Online viewer send COEP. The app
+  // uses no SharedArrayBuffer / cross-origin isolation, so COEP buys nothing
+  // here. COOP + CORP stay. (D-P4.6)
   "Cross-Origin-Resource-Policy": "same-site",
   // No X-Frame-Options — CSP `frame-ancestors 'none'` covers it.
   "Permissions-Policy": [
@@ -63,7 +68,11 @@ export function buildCsp(nonce: string): string {
     `connect-src 'self' ${apiOrigin} ${wsOrigin} https://*.s3.amazonaws.com ${cdn}`,
     `media-src 'self' blob: ${cdn}`,
     "worker-src 'self' blob:",
-    "frame-src 'self' blob:",
+    // `blob:` = the same-origin PDF preview (fetched then rendered as a blob,
+    // D-P4.7). The Microsoft Office Online viewer is the only EXTERNAL frame
+    // source (D-P4.3). The CDN is NOT framed (PDF is a blob now) — it's only
+    // fetched, so it lives in `connect-src`, not here.
+    "frame-src 'self' blob: https://view.officeapps.live.com",
     "frame-ancestors 'none'",
     "form-action 'self'",
     "base-uri 'self'",

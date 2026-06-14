@@ -419,7 +419,7 @@ const { status, data } = await apiInstance.find(
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **listVersions**
-> listVersions()
+> CloudVersionListResponseBaseModel listVersions()
 
 Returns the version history for the document.
 
@@ -453,7 +453,7 @@ const { status, data } = await apiInstance.listVersions(
 
 ### Return type
 
-void (empty response body)
+**CloudVersionListResponseBaseModel**
 
 ### Authorization
 
@@ -462,13 +462,14 @@ void (empty response body)
 ### HTTP request headers
 
  - **Content-Type**: Not defined
- - **Accept**: Not defined
+ - **Accept**: application/json
 
 
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** |  |  -  |
+|**200** | Success |  -  |
+|**500** | Internal Server Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

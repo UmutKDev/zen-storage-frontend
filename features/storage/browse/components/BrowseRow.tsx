@@ -2,9 +2,12 @@
 
 import Link from "next/link";
 import type { MouseEvent } from "react";
+import { useRouter } from "next/navigation";
 import { useDraggable, useDroppable } from "@dnd-kit/core";
 import { cn, fileMeta, formatBytes, formatDate, toneClass } from "@/lib/utils";
 import { t } from "@/lib/i18n";
+import { useFlag } from "@/lib/flags";
+import { previewHref } from "@/lib/preview";
 import { Checkbox } from "@/components/ui";
 import type { FolderEntry } from "../lib/entries";
 import { folderHref } from "../lib/href";
@@ -71,6 +74,9 @@ export function BrowseRow({
   const selected = selection.isSelected(entry.key);
   const { blocked, suppressClickRef } = useDndMove();
   const childPath = path ? `${path}/${entry.name}` : entry.name;
+  const router = useRouter();
+  const previewEnabled = useFlag("preview");
+  const opensPreview = entry.kind === "file" && previewEnabled;
 
   // Touch long-press → action sheet (the accessible alternative to desktop DnD).
   const coarse = useCoarsePointer();
@@ -149,11 +155,28 @@ export function BrowseRow({
         </Link>
       ) : (
         <div
+          role={opensPreview ? "button" : undefined}
+          tabIndex={opensPreview ? 0 : undefined}
           onClick={(e) => {
-            if (longPress.consumeSuppressedClick()) return;
+            if (longPress.consumeSuppressedClick() || suppressClickRef.current) return;
+            // Modifier clicks are selection gestures; a plain click opens preview.
+            if (opensPreview && !(e.shiftKey || e.metaKey || e.ctrlKey)) {
+              router.push(previewHref(entry.key));
+              return;
+            }
             void selection.onItemClick(entry, e);
           }}
-          className="flex min-w-0 flex-1 items-center gap-3 px-2 py-2.5"
+          onKeyDown={
+            opensPreview
+              ? (e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    router.push(previewHref(entry.key));
+                  }
+                }
+              : undefined
+          }
+          className="flex min-w-0 flex-1 items-center gap-3 rounded-md px-2 py-2.5 outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <RowContent entry={entry} />
         </div>

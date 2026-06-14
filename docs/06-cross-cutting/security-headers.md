@@ -88,13 +88,13 @@ Permissions-Policy:
 | Header | Value | Why |
 |---|---|---|
 | `Cross-Origin-Opener-Policy` | `same-origin` | Process isolation; mitigates XS‑Leaks. |
-| `Cross-Origin-Embedder-Policy` | `credentialless` | Allows third‑party subresources without CORP, still gates SAB. We do **not** need full `require-corp` and it would break CDN images that don't send CORP. |
+| `Cross-Origin-Embedder-Policy` | **(not set)** | **Removed (D-P4.6).** Any COEP — including `credentialless` — blocks the §6 cross‑origin **preview iframes** (CDN PDF, Microsoft Office viewer). `credentialless` only relaxes no‑cors **subresources** (CDN images load fine), NOT nested iframes, and we can't make the CDN / Microsoft send COEP. The app uses no `SharedArrayBuffer` / cross‑origin isolation, so COEP gained nothing. |
 | `Cross-Origin-Resource-Policy` | `same-site` | App routes; CDN responses are governed by the CDN. |
 
-- `credentialless` is chosen over `require-corp` deliberately: the wsrv.nl CDN does not consistently send
-  `Cross-Origin-Resource-Policy`, and `credentialless` lets us keep using it without per‑asset proxying.
-- If we ever need `SharedArrayBuffer` (e.g. a Wasm preview pipeline) we revisit and move to `require-corp` plus a
-  CORP‑aware image proxy.
+- **No COEP** — it is fundamentally incompatible with embedding the cross‑origin preview iframes this phase needs (§6).
+  The bug was masked pre‑Phase‑4 (no iframes) and surfaced in dev (STATIC_HEADERS apply in dev; CSP is prod‑only).
+- If we ever need `SharedArrayBuffer` (e.g. a Wasm preview pipeline) we revisit — but it would require `require-corp`
+  **and** moving every cross‑origin preview to a same‑origin proxy (blob/stream), since third‑party iframes can't carry COEP.
 
 ## 6. Preview iframe sandbox
 
@@ -115,8 +115,8 @@ Sandbox matrix (decisions locked):
 
 | Content | `sandbox` value | Rationale |
 |---|---|---|
-| Office → HTML conversion | `allow-scripts` (no `allow-same-origin`) | Scripts run in a null origin; cannot read app cookies/storage. |
-| PDF (native browser viewer) | `allow-scripts allow-same-origin` | Browser PDF viewer needs same‑origin for navigation; served from `blob:` so origin is opaque already. |
+| **Office (Microsoft Online viewer)** — as built (D-P4.3) | `allow-scripts allow-same-origin allow-popups allow-forms allow-downloads` | We embed `view.officeapps.live.com` (not a local HTML conversion). The viewer **POSTs a form** to load its WOPI render frame (`allow-forms` is mandatory) + offers a download. Cross-origin to the app → `allow-scripts`+`allow-same-origin` grant no escape against us; top-nav stays withheld. `frame-src` includes the viewer; **COEP removed** so the cross-origin frame loads (D-P4.6). |
+| **PDF (browser viewer)** — as built (D-P4.7) | none (same-origin `blob:`) | Bytes pulled via the **factory** (`Cloud/Download`, `responseType: blob`) and rendered as a same-origin `blob:` forced to `application/pdf` — sidesteps Edge/SmartScreen, COEP, and `X-Frame-Options` that broke a direct cross-origin iframe, and stays factory-only (no raw `fetch`). No sandbox needed (own bytes, can't be HTML; browser disables PDF JS). Large/failed → open-in-new-tab + download. |
 | Markdown / text (CodeMirror) | not iframed | Rendered in‑app; sanitized through the markdown pipeline. |
 | Images / video / audio | not iframed | Rendered with native elements; `img-src`/`media-src` already constrains origins. |
 | Embedded shares (Phase 4 share links opened in‑app) | `allow-scripts` only | Same as office conversion; never grant `allow-forms` or `allow-top-navigation`. |
@@ -152,7 +152,7 @@ const must = {
   'content-security-policy': /default-src 'self'.*nonce-.*frame-ancestors 'none'/s,
   'permissions-policy': /camera=\(\).*microphone=\(\).*interest-cohort=\(\)/s,
   'cross-origin-opener-policy': /^same-origin$/,
-  'cross-origin-embedder-policy': /^credentialless$/,
+  // No cross-origin-embedder-policy — removed (D-P4.6) so preview iframes embed.
   'referrer-policy': /^strict-origin-when-cross-origin$/,
   'x-content-type-options': /^nosniff$/,
 };

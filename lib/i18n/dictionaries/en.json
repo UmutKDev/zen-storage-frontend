@@ -195,6 +195,7 @@
       "new": "New",
       "menu": {
         "actions": "Actions",
+        "preview": "Preview",
         "rename": "Rename",
         "move": "Move",
         "download": "Download",
@@ -570,5 +571,80 @@
       "generic": "Something went wrong. Please try again.",
       "rateLimitedPrefix": "Too many attempts. Retry in"
     }
+  },
+  "preview": {
+    "title": "File preview",
+    "loading": "Loading preview…",
+    "error": "Couldn’t load this file",
+    "close": "Close preview",
+    "download": "Download",
+    "fullscreen": "Enter fullscreen",
+    "exitFullscreen": "Exit fullscreen",
+    "prev": "Previous file",
+    "next": "Next file",
+    "navHint": "Use the left and right arrow keys to move between files.",
+    "unsupported": "No preview available",
+    "downloadToView": "Download the file to view it.",
+    "openInNewTab": "Open in new tab",
+    "av": {
+      "pendingBody": "This file is still being scanned for malware. Download with care.",
+      "infectedTitle": "Malware detected",
+      "infectedBody": "This file was flagged by the malware scanner and can’t be previewed, downloaded, or shared."
+    },
+    "video": {
+      "codecUnsupported": "This video format can’t be played here. Download it to view."
+    },
+    "audio": {
+      "codecUnsupported": "This audio format can’t be played here. Download it to view."
+    },
+    "office": {
+      "loading": "Loading document…",
+      "externalNote": "Opened in Microsoft’s online viewer.",
+      "downloadFallback": "Download instead",
+      "error": "Couldn’t open this document"
+    },
+    "versions": {
+      "title": "Version history",
+      "current": "Current",
+      "empty": "No previous versions.",
+      "error": "Couldn’t load versions",
+      "restore": "Restore",
+      "restoreTitle": "Restore this version?",
+      "restoreConfirm": "This makes the selected version the current one. The existing current version is kept in history.",
+      "restored": "Version restored",
+      "restoreReplacesBody": "This makes the selected version the current content and reloads the editor. Any unsaved edits will be lost.",
+      "delete": "Delete",
+      "deleteTitle": "Delete this version?",
+      "deleteConfirm": "This permanently removes the selected version. It cannot be undone.",
+      "deleted": "Version deleted"
+    },
+    "diff": {
+      "title": "Changes vs current",
+      "viewDiff": "View changes",
+      "noChanges": "No changes from the current content.",
+      "loading": "Loading changes…",
+      "error": "Couldn’t load the changes"
+    },
+    "editor": {
+      "lockedBy": "Locked by",
+      "readOnly": "Read-only",
+      "lockLost": "Your edit lock expired — read-only",
+      "save": "Save",
+      "saving": "Saving…",
+      "saved": "Saved",
+      "draftRestored": "Unsaved draft restored",
+      "conflictReload": "This document changed elsewhere. Reload to get the latest — your edits are kept as a draft.",
+      "unsavedTitle": "Unsaved changes",
+      "unsavedBody": "You have unsaved changes. Save them before closing?",
+      "discard": "Discard"
+    }
+  },
+  "share": {
+    "button": "Share",
+    "webShareTitle": "Shared file",
+    "copied": "Link copied",
+    "ttlNote": "This link is valid for a limited time.",
+    "copyFailed": "Couldn’t copy the link.",
+    "forbidden": "You don’t have permission to share this file."
   }
 }

@@ -149,13 +149,29 @@ The frontend does not decide whether to notify — it makes notification operati
 Anything outside these phases that touches PII (new endpoint, new event, new cookie) is a **stop‑and‑review** moment;
 update this doc and the consent matrix before shipping.
 
+## 9b. Office preview — third‑party document viewer (Phase 4 Stage B)
+
+docx/xlsx/pptx previews render through the **Microsoft Office Online viewer**
+(`view.officeapps.live.com`, [D‑P4.3](../07-decisions/DECISIONS.md)): the file's **presigned URL** is handed to a
+sandboxed `<iframe>`, and **Microsoft fetches + renders the document content on their servers**. This is a **third‑party
+sub‑processor + international transfer** (Microsoft, US) of **user file *content*** — not just metadata. Treatment:
+- **Disclosure**: the viewer footer states "Opened in Microsoft's online viewer" and always offers a direct download instead.
+- **Minimization**: only a short‑lived presigned URL is sent (no app session, no PII beyond the file itself); no analytics/
+  telemetry is attached to the embed.
+- **Best‑effort**: office preview is non‑essential — any failure/too‑large/unsupported case falls back to download, so the
+  feature can be gated or removed without loss of core function.
+- **Open** (see §10): add Microsoft to the `/data-processing` sub‑processor list + international‑transfer notes, and decide
+  whether office preview should sit behind explicit consent (vs. the current disclose‑and‑download‑fallback model) before MVP
+  public launch.
+
 ## 10. Open items
 
 - Decide whether error monitoring runs under **essential** (security) or **analytics** consent. Default plan: analytics
   gate, with a minimal crash‑only fallback that fires only on `chunkLoadError` / boot failures (no user context). Owner:
   P0 spike, lock before P1.
 - Confirm TR DPO appointment requirement (Veri Sorumluları Sicili / VERBİS threshold) and reflect in `/privacy`.
-- Sub‑processor list: needs final vendor confirmations (storage backend, email, error monitor, analytics).
+- Sub‑processor list: needs final vendor confirmations (storage backend, email, error monitor, analytics, **Microsoft
+  Office Online viewer** for office preview — §9b). Decide office‑preview consent gating vs. disclose‑and‑fallback before P7.
 - Data residency: do we offer EU‑only buckets at MVP? Defer to backend; surface in `/data-processing` when ready.
 - Age gating: minimum age clause in ToS — confirm 16 (GDPR default) vs lower MS‑specific thresholds; TR has no explicit
   digital age but parental consent applies under 18.

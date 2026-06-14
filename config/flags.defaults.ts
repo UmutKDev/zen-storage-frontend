@@ -5,6 +5,9 @@
 export const flagDefaults = {
   /** Command palette (⌘K) — lands in Phase 3, plumbing ready from Phase 0. */
   commandPalette: true,
+  /** File preview + share modal — lands in Phase 4. Off → rows don't open the
+   *  modal and the preview route renders nothing. */
+  preview: true,
   /** First-run onboarding tour — finished in Phase 7. */
   onboarding: false,
   /** Team workspace switching — activates in Phase 8. */
