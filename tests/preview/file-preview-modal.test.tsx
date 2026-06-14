@@ -8,6 +8,9 @@ const findObject = vi.fn();
 const getScanStatus = vi.fn();
 const getShareUrl = vi.fn();
 
+// Mutable nav-key list the storage mock reads (set per test).
+const { navKeys } = vi.hoisted(() => ({ navKeys: { current: [] as string[] } }));
+
 vi.mock("@/features/preview/api", async (importOriginal) => {
   const actual =
     await importOriginal<typeof import("@/features/preview/api")>();
@@ -22,7 +25,7 @@ vi.mock("@/features/storage", () => ({
   useDownload: () => ({ download: vi.fn(), downloadMany: vi.fn(), isPending: false }),
   DeleteConfirmDialog: () => null,
   usePreviewNavStore: (selector: (s: { keys: string[] }) => unknown) =>
-    selector({ keys: [] }),
+    selector({ keys: navKeys.current }),
 }));
 
 const { FilePreviewModal } = await import("@/features/preview");
@@ -45,6 +48,7 @@ const imageObject = (over: Record<string, unknown> = {}) => ({
 
 beforeEach(() => {
   vi.clearAllMocks();
+  navKeys.current = [];
   useWorkspaceStore.getState().setOwner("u1");
   getScanStatus.mockResolvedValue(null); // no scan record → not gated
 });
@@ -119,6 +123,50 @@ describe("FilePreviewModal", () => {
     expect(
       screen.getByRole("button", { name: "Try again" }),
     ).toBeInTheDocument();
+  });
+
+  it("navigates ←/→ in place — swaps the file via history, not a route change", async () => {
+    navKeys.current = ["k/photo.jpg", "k/next.png"];
+    findObject.mockImplementation((key: string) =>
+      Promise.resolve(
+        imageObject(
+          key === "k/next.png"
+            ? {
+                Name: "next.png",
+                Extension: "png",
+                Metadata: undefined,
+                Path: {
+                  Host: "cdn",
+                  Key: "k/next.png",
+                  Url: "https://cdn.storage.umutk.me/k/next.png",
+                },
+              }
+            : {},
+        ),
+      ),
+    );
+    const replaceState = vi.spyOn(window.history, "replaceState");
+    const user = userEvent.setup();
+
+    renderWithProviders(<FilePreviewModal previewKey="k/photo.jpg" mode="page" />);
+    await screen.findByRole("img", { name: "photo.jpg" });
+
+    await user.keyboard("{ArrowRight}");
+
+    // The next file resolves + the URL is updated IN PLACE (history.replaceState,
+    // not a Next route push — so the dialog never remounts).
+    await waitFor(() =>
+      expect(findObject).toHaveBeenCalledWith("k/next.png", expect.anything()),
+    );
+    expect(
+      replaceState.mock.calls.some(
+        (c) => c[2] === "/storage/preview/k%2Fnext.png",
+      ),
+    ).toBe(true);
+    expect(
+      await screen.findByRole("img", { name: "next.png" }),
+    ).toBeInTheDocument();
+    replaceState.mockRestore();
   });
 
   it("falls back to the unsupported view for non-previewable files", async () => {

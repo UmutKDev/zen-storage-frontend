@@ -5,12 +5,12 @@ import { t } from "@/lib/i18n";
  *  surfaces an unsupported codec via the fallback child. */
 export function VideoViewer({ object }: { object: CloudObjectModel }) {
   return (
-    <div className="flex h-full w-full items-center justify-center p-4">
+    <div className="zs-preview-stage flex h-full w-full items-center justify-center p-4">
       <video
         src={object.Path.Url}
         controls
         preload="metadata"
-        className="max-h-full max-w-full rounded-md"
+        className="max-h-full max-w-full rounded-md shadow-e3"
       >
         {t("preview.video.codecUnsupported")}
       </video>

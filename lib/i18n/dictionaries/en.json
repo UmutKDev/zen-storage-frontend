@@ -634,6 +634,28 @@
     "prev": "Previous file",
     "next": "Next file",
     "navHint": "Use the left and right arrow keys to move between files.",
+    "moreActions": "More actions",
+    "showDetails": "Show details",
+    "hideDetails": "Hide details",
+    "zoom": {
+      "in": "Zoom in",
+      "out": "Zoom out",
+      "fit": "Fit to screen"
+    },
+    "rail": {
+      "details": "Details",
+      "versions": "Versions",
+      "detailsLabel": "Details",
+      "type": "Type",
+      "size": "Size",
+      "modified": "Modified",
+      "ownerLabel": "Owner",
+      "owner": "You",
+      "avClean": "Scanned · no threats found",
+      "avScanning": "Scanning for threats…",
+      "avThreat": "Threat found",
+      "copyShareLink": "Copy share link"
+    },
     "unsupported": "No preview available",
     "downloadToView": "Download the file to view it.",
     "openInNewTab": "Open in new tab",

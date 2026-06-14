@@ -49,15 +49,19 @@ function DialogOverlay({
 
 function DialogContent({
   className,
+  overlayClassName,
   children,
   showCloseButton = true,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean
+  /** Extra classes for the backdrop overlay (e.g. the preview lightbox's
+   *  dark blurred `.zs-preview-backdrop`). Defaults to the standard `bg-black/50`. */
+  overlayClassName?: string
 }) {
   return (
     <DialogPortal data-slot="dialog-portal">
-      <DialogOverlay />
+      <DialogOverlay className={overlayClassName} />
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(

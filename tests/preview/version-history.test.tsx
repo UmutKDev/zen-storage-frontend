@@ -14,8 +14,8 @@ vi.mock("@/features/preview/api", async (importOriginal) => {
   return { ...actual, listVersions, restoreVersion, deleteVersion };
 });
 
-const { VersionHistoryPanel } = await import(
-  "@/features/preview/components/VersionHistoryPanel"
+const { VersionHistoryRail } = await import(
+  "@/features/preview/components/VersionHistoryRail"
 );
 
 const version = (id: string, isLatest = false) => ({
@@ -27,33 +27,23 @@ const version = (id: string, isLatest = false) => ({
   ETag: id,
 });
 
-const panelToggle = () =>
-  screen.getByRole("button", { name: /version history/i });
-
 beforeEach(() => {
   vi.clearAllMocks();
   useWorkspaceStore.getState().setOwner("u1");
 });
 afterEach(() => useWorkspaceStore.getState().reset());
 
-describe("VersionHistoryPanel", () => {
-  it("is collapsed by default and fetches versions only on expand", async () => {
+describe("VersionHistoryRail", () => {
+  it("fetches versions on mount (the rail tab is the disclosure)", async () => {
     listVersions.mockResolvedValue({
       Key: "k/doc.txt",
       Versions: [version("v1", true), version("v2")],
     });
-    const user = userEvent.setup();
-    renderWithProviders(<VersionHistoryPanel previewKey="k/doc.txt" />);
-
-    expect(listVersions).not.toHaveBeenCalled();
-    expect(panelToggle()).toHaveAttribute("aria-expanded", "false");
-
-    await user.click(panelToggle());
+    renderWithProviders(<VersionHistoryRail previewKey="k/doc.txt" />);
 
     await waitFor(() => expect(listVersions).toHaveBeenCalledTimes(1));
-    expect(panelToggle()).toHaveAttribute("aria-expanded", "true");
     // Latest version shows a "current" badge and offers no actions.
-    expect(screen.getByText("Current")).toBeInTheDocument();
+    expect(await screen.findByText("Current")).toBeInTheDocument();
   });
 
   it("restores an older version after confirm", async () => {
@@ -63,9 +53,8 @@ describe("VersionHistoryPanel", () => {
     });
     restoreVersion.mockResolvedValue(undefined);
     const user = userEvent.setup();
-    renderWithProviders(<VersionHistoryPanel previewKey="k/doc.txt" />);
+    renderWithProviders(<VersionHistoryRail previewKey="k/doc.txt" />);
 
-    await user.click(panelToggle());
     await screen.findByText("Current");
 
     await user.click(screen.getByRole("button", { name: /^Restore —/ }));
@@ -82,10 +71,7 @@ describe("VersionHistoryPanel", () => {
 
   it("shows the empty state when there are no versions", async () => {
     listVersions.mockResolvedValue({ Key: "k/doc.txt", Versions: [] });
-    const user = userEvent.setup();
-    renderWithProviders(<VersionHistoryPanel previewKey="k/doc.txt" />);
-
-    await user.click(panelToggle());
+    renderWithProviders(<VersionHistoryRail previewKey="k/doc.txt" />);
 
     expect(
       await screen.findByText(/no previous versions/i),

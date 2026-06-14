@@ -1,8 +1,6 @@
 "use client";
 
 import { useCallback, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { previewHref } from "@/lib/preview";
 import { usePreviewNavStore } from "@/features/storage";
 
 function isEditableTarget(target: EventTarget | null): boolean {
@@ -13,12 +11,15 @@ function isEditableTarget(target: EventTarget | null): boolean {
 /**
  * ←/→ navigation across the previewable files of the current folder view. Reads
  * the ordered key list published by `StorageBrowser` (storage → neutral store).
- * Uses `router.replace` (not push) so Back closes the modal instead of walking
- * back through every previewed file. On a cold deep-link the list is empty →
- * both directions disabled.
+ * Navigation is delegated to `onNavigate` — the modal swaps the file IN PLACE
+ * (internal state + `history.replaceState`) rather than a Next route change, so
+ * the dialog never remounts (fullscreen/rail/zoom survive, no loading flash). On
+ * a cold deep-link the list is empty → both directions disabled.
  */
-export function usePreviewNavigation(currentKey: string) {
-  const router = useRouter();
+export function usePreviewNavigation(
+  currentKey: string,
+  onNavigate: (key: string) => void,
+) {
   const keys = usePreviewNavStore((s) => s.keys);
 
   const index = keys.indexOf(currentKey);
@@ -27,9 +28,9 @@ export function usePreviewNavigation(currentKey: string) {
 
   const goTo = useCallback(
     (key: string | null) => {
-      if (key) router.replace(previewHref(key));
+      if (key) onNavigate(key);
     },
-    [router],
+    [onNavigate],
   );
   const goPrev = useCallback(() => goTo(prevKey), [goTo, prevKey]);
   const goNext = useCallback(() => goTo(nextKey), [goTo, nextKey]);

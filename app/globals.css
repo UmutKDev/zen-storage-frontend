@@ -172,6 +172,11 @@
   /* Motion easing token (mirrors lib/motion/tokens.ts `easing.standard`) so
    * CSS transitions can share the design-system curve via `ease-standard`. */
   --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  /* Decelerate curve (mirrors `easing.decelerate`) for emphasised entrances. */
+  --ease-decelerate: cubic-bezier(0, 0, 0, 1);
+  /* Duration tokens (mirror lib/motion/tokens.ts `duration.base/slow`). */
+  --duration-base: 200ms;
+  --duration-slow: 320ms;
 }
 
 /*
@@ -1002,6 +1007,132 @@
     background: color-mix(in srgb, var(--accent) 80%, var(--surface));
     box-shadow: 0 0 0 1px var(--ring), inset 0 1px 0 0 var(--glass-highlight);
   }
+
+  /* ── File preview lightbox (Zen) ─────────────────────────────────────────
+   * A near-fullscreen glass lightbox: dark blurred backdrop, slow decelerate
+   * slide-in, a dark media stage, a collapsible details rail, and a floating
+   * image zoom pill. These classes intentionally override the generic dialog
+   * chrome (the dialog primitive hard-codes bg-black/50 + a zoom entrance), so
+   * a couple of `!important`s are scoped to this one premium surface. */
+
+  /* Dark, blurred backdrop — beats the dialog's default `bg-black/50`. */
+  .zs-preview-backdrop {
+    background-color: rgba(8, 8, 11, 0.64) !important;
+    -webkit-backdrop-filter: blur(8px) saturate(120%);
+    backdrop-filter: blur(8px) saturate(120%);
+  }
+
+  /* Near-fullscreen shell. Size/radius/glass come from utilities + the
+   * `glass-overlay` base; this adds the slide-in entrance + a smooth morph
+   * between windowed and fullscreen layouts. */
+  .zs-preview-shell {
+    transition:
+      width var(--duration-base) var(--ease-standard),
+      height var(--duration-base) var(--ease-standard),
+      border-radius var(--duration-base) var(--ease-standard);
+  }
+  .zs-preview-shell[data-state="open"] {
+    animation: zs-preview-shell-in var(--duration-slow) var(--ease-decelerate) both
+      !important;
+  }
+
+  /* Dark media stage — media floats on a true dark backdrop with a soft wash. */
+  .zs-preview-stage {
+    background:
+      radial-gradient(
+        110% 90% at 50% 0%,
+        rgba(255, 255, 255, 0.07),
+        transparent 55%
+      ),
+      #0b0b0d;
+  }
+
+  /* Collapsible right details rail. */
+  .zs-preview-rail {
+    width: 300px;
+    flex-shrink: 0;
+    border-left: 1px solid var(--border);
+    transition: width var(--duration-base) var(--ease-standard);
+  }
+  .zs-preview-rail--collapsed {
+    width: 0;
+    border-left: none;
+  }
+  .zs-preview-rail-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+  }
+
+  /* Floating image zoom controls — micro-glass dark pill on the stage. */
+  .zs-preview-zoom-pill {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 4px 6px;
+    border-radius: 9999px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(20, 20, 22, 0.66);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    box-shadow: var(--shadow-e2);
+  }
+
+  /* Details rail label↔value row. */
+  .zs-preview-detail-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 7px 0;
+  }
+
+  /* The zoomable image — transition kept in CSS so reduced-motion can zero it
+   * (the dynamic `transform: scale()` + load `opacity` stay inline). */
+  .zs-preview-zoomable {
+    transition:
+      transform var(--duration-base) var(--ease-standard),
+      opacity var(--duration-base) var(--ease-standard);
+  }
+
+  /* Full-stage diff overlay (document versions). Darkens + blurs the stage
+   * beneath; the chrome colors stay inline (always over this dark surface). */
+  .zs-preview-diff-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    background: rgba(8, 8, 11, 0.7);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+  }
+
+  /* Thin indeterminate load-bar pinned to the top of the preview body — shown
+   * while the next file resolves (the previous stays via placeholderData). */
+  .zs-preview-loadbar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    overflow: hidden;
+    z-index: 20;
+    pointer-events: none;
+  }
+  .zs-preview-loadbar::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    height: 100%;
+    width: 40%;
+    border-radius: 9999px;
+    background: var(--primary);
+    animation: zs-preview-loadbar 1.1s var(--ease-standard) infinite;
+  }
 }
 
 /* Keyframes + reduced-motion neutralizers — unlayered so they reliably win. */
@@ -1045,6 +1176,28 @@
   animation: zs-shake 0.4s var(--ease-standard);
 }
 
+/* Preview lightbox shell entrance — slow decelerate rise. */
+@keyframes zs-preview-shell-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.975);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Indeterminate sweep for the preview load-bar. */
+@keyframes zs-preview-loadbar {
+  from {
+    left: -40%;
+  }
+  to {
+    left: 100%;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .zs-btn-upload:hover {
     transform: none;
@@ -1053,6 +1206,20 @@
   .zs-rail__fill--wait,
   .zs-shake {
     animation: none;
+  }
+  .zs-preview-shell[data-state="open"] {
+    animation: none !important;
+  }
+  .zs-preview-shell,
+  .zs-preview-rail,
+  .zs-preview-zoomable {
+    transition: none;
+  }
+  /* Static full-width bar still signals "loading" without the sweep. */
+  .zs-preview-loadbar::after {
+    animation: none;
+    left: 0;
+    width: 100%;
   }
 }
 
@@ -1065,6 +1232,23 @@
   }
   .zs-btn-secondary-glass {
     background: var(--secondary);
+  }
+  /* Drop the backdrop blur; keep it opaque-dark so the lightbox still reads. */
+  .zs-preview-backdrop {
+    background-color: rgba(8, 8, 11, 0.92) !important;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  /* The on-stage controls fall back to solid dark fills (no blur). */
+  .zs-preview-zoom-pill {
+    background: rgb(20, 20, 22);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .zs-preview-diff-overlay {
+    background: rgba(8, 8, 11, 0.95);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
   }
 }
 
