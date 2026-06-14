@@ -13,7 +13,11 @@ export function useCreateFile(path: string, onDone: () => void) {
   const ownerId = useOwnerId();
   return useConflictMutation<{ name: string }>({
     run: ({ name }, strategy) =>
-      createFile({ Path: path, Name: name, ConflictStrategy: strategy }),
+      createFile({
+        Path: path.length === 0 ? "/" : path,
+        Name: name,
+        ConflictStrategy: strategy,
+      }),
     onSuccess: () => {
       toast.success(t("storage.ops.create.createdFile"));
       if (ownerId) invalidateFolder(qc, ownerId, path);
