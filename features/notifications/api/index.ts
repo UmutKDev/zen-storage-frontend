@@ -1,2 +1,7 @@
-export { getUnreadCount } from "./notifications.queries";
-export type { UnreadCount } from "./notifications.queries";
+export { notificationKeys } from "./notifications.keys";
+export {
+  getNotifications,
+  getUnreadCount,
+  markAsRead,
+  markAllAsRead,
+} from "./notifications.queries";

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Bell } from "lucide-react";
 import { t } from "@/lib/i18n";
 import {
@@ -7,17 +8,18 @@ import {
   Button,
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui";
 import { useUnreadCount } from "../hooks/useUnreadCount";
+import { NotificationPanel } from "./NotificationPanel";
 
 /**
- * Topbar notification bell + unread-count badge. The inbox panel content lands
- * in Phase 6; for now the menu shows an empty state.
+ * Topbar notification bell + unread-count badge. Opening the dropdown reveals
+ * the Zen inbox panel; the list only fetches while open (the panel gates its
+ * query on `open`). The badge count polls every 60s via `useUnreadCount`.
  */
 export function NotificationBell() {
+  const [open, setOpen] = useState(false);
   const { data } = useUnreadCount();
   const count = data?.Count ?? 0;
   const label =
@@ -26,7 +28,7 @@ export function NotificationBell() {
       : t("account.shell.notifications.label");
 
   return (
-    <DropdownMenu>
+    <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
@@ -46,14 +48,8 @@ export function NotificationBell() {
           )}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-72">
-        <DropdownMenuLabel>
-          {t("account.shell.notifications.label")}
-        </DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <p className="px-2 py-6 text-center text-sm text-muted-foreground">
-          {t("account.shell.notifications.none")}
-        </p>
+      <DropdownMenuContent align="end" className="w-[348px] p-0">
+        <NotificationPanel open={open} />
       </DropdownMenuContent>
     </DropdownMenu>
   );

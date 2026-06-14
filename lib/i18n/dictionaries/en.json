@@ -488,7 +488,11 @@
       "notifications": {
         "label": "Notifications",
         "none": "You’re all caught up.",
-        "unreadSuffix": "unread"
+        "unreadSuffix": "unread",
+        "newSuffix": "new",
+        "markAllRead": "Mark all read",
+        "loadMore": "Load more",
+        "error": "Couldn’t load notifications."
       }
     },
     "nav": {

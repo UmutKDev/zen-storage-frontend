@@ -170,6 +170,10 @@ docs/LoginCheckResponseBaseModel.md
 docs/LoginCheckResponseModel.md
 docs/LoginRequestModel.md
 docs/NotificationApi.md
+docs/NotificationHistoryItemListBaseModel.md
+docs/NotificationHistoryItemListModelResult.md
+docs/NotificationHistoryItemModel.md
+docs/NotificationType.md
 docs/PaginationResponseModel.md
 docs/PasskeyLoginBeginRequestModel.md
 docs/PasskeyLoginBeginResponseBaseModel.md
@@ -231,6 +235,8 @@ docs/TwoFactorSetupResponseModel.md
 docs/TwoFactorStatusResponseBaseModel.md
 docs/TwoFactorStatusResponseModel.md
 docs/TwoFactorVerifyRequestModel.md
+docs/UnreadCountResponseBaseModel.md
+docs/UnreadCountResponseModel.md
 docs/UserApi.md
 docs/UserDateModel.md
 docs/UserFindResponseBaseModel.md
@@ -240,6 +246,7 @@ docs/UserListResponseListModelResult.md
 docs/UserListResponseModel.md
 docs/UserPostBodyRequestModel.md
 docs/UserPutBodyRequestModel.md
+docs/UserSubscriptionResponseBaseModel.md
 docs/UserSubscriptionResponseModel.md
 docs/WebhookCreateRequestModel.md
 docs/WebhookUpdateRequestModel.md

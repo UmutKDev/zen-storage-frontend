@@ -1245,6 +1245,67 @@ export interface LoginRequestModel {
     'Email': string;
     'Password': string;
 }
+export interface NotificationHistoryItemListBaseModel {
+    'Result': NotificationHistoryItemListModelResult;
+    'Status': BaseStatusModel;
+}
+export interface NotificationHistoryItemListModelResult {
+    'Options': PaginationResponseModel;
+    'Items': Array<NotificationHistoryItemModel>;
+}
+export interface NotificationHistoryItemModel {
+    'Id': string;
+    'Type': NotificationType;
+    'Title': string;
+    'Message': string;
+    'Data'?: object | null;
+    'IsRead': boolean;
+    /**
+     * ISO timestamp the notification was created
+     */
+    'CreatedAt': string;
+    /**
+     * ISO timestamp it was read
+     */
+    'ReadAt'?: string;
+}
+
+
+
+export const NotificationType = {
+    UploadFailed: 'UPLOAD_FAILED',
+    FileMoved: 'FILE_MOVED',
+    ArchiveCreateProgress: 'ARCHIVE_CREATE_PROGRESS',
+    ArchiveCreateComplete: 'ARCHIVE_CREATE_COMPLETE',
+    ArchiveCreateFailed: 'ARCHIVE_CREATE_FAILED',
+    ArchiveExtractProgress: 'ARCHIVE_EXTRACT_PROGRESS',
+    ArchiveExtractComplete: 'ARCHIVE_EXTRACT_COMPLETE',
+    ArchiveExtractFailed: 'ARCHIVE_EXTRACT_FAILED',
+    QuotaWarning: 'QUOTA_WARNING',
+    QuotaExceeded: 'QUOTA_EXCEEDED',
+    TeamInvitationReceived: 'TEAM_INVITATION_RECEIVED',
+    TeamInvitationAccepted: 'TEAM_INVITATION_ACCEPTED',
+    TeamInvitationDeclined: 'TEAM_INVITATION_DECLINED',
+    SubscriptionChanged: 'SUBSCRIPTION_CHANGED',
+    SubscriptionCancelled: 'SUBSCRIPTION_CANCELLED',
+    Error: 'ERROR',
+    RateLimit: 'RATE_LIMIT',
+    DocumentCreated: 'DOCUMENT_CREATED',
+    DocumentUpdated: 'DOCUMENT_UPDATED',
+    DocumentLocked: 'DOCUMENT_LOCKED',
+    DocumentUnlocked: 'DOCUMENT_UNLOCKED',
+    DuplicateScanProgress: 'DUPLICATE_SCAN_PROGRESS',
+    DuplicateScanComplete: 'DUPLICATE_SCAN_COMPLETE',
+    DuplicateScanFailed: 'DUPLICATE_SCAN_FAILED',
+    DuplicateScanCancelled: 'DUPLICATE_SCAN_CANCELLED',
+    WebhookDeliveryFailed: 'WEBHOOK_DELIVERY_FAILED',
+    ApiQuotaWarning: 'API_QUOTA_WARNING',
+    ApiQuotaExceeded: 'API_QUOTA_EXCEEDED'
+} as const;
+
+export type NotificationType = typeof NotificationType[keyof typeof NotificationType];
+
+
 export interface PaginationResponseModel {
     'Search': string;
     'Skip': number;
@@ -1698,6 +1759,13 @@ export interface TwoFactorVerifyRequestModel {
      */
     'Code': string;
 }
+export interface UnreadCountResponseBaseModel {
+    'Result': UnreadCountResponseModel;
+    'Status': BaseStatusModel;
+}
+export interface UnreadCountResponseModel {
+    'Count': number;
+}
 export interface UserDateModel {
     'Created': string;
     'Updated': string;
@@ -1822,6 +1890,10 @@ export const UserPutBodyRequestModelStatusEnum = {
 
 export type UserPutBodyRequestModelStatusEnum = typeof UserPutBodyRequestModelStatusEnum[keyof typeof UserPutBodyRequestModelStatusEnum];
 
+export interface UserSubscriptionResponseBaseModel {
+    'Result': UserSubscriptionResponseModel;
+    'Status': BaseStatusModel;
+}
 export interface UserSubscriptionResponseModel {
     'Id': string;
     'StartAt': string;
@@ -12707,7 +12779,7 @@ export const NotificationApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async history(search?: string, skip?: number, take?: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+        async history(search?: string, skip?: number, take?: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<NotificationHistoryItemListBaseModel>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.history(search, skip, take, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['NotificationApi.history']?.[localVarOperationServerIndex]?.url;
@@ -12741,7 +12813,7 @@ export const NotificationApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async unreadCount(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+        async unreadCount(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UnreadCountResponseBaseModel>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.unreadCount(options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['NotificationApi.unreadCount']?.[localVarOperationServerIndex]?.url;
@@ -12762,7 +12834,7 @@ export const NotificationApiFactory = function (configuration?: Configuration, b
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        history(requestParameters: NotificationApiHistoryRequest = {}, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+        history(requestParameters: NotificationApiHistoryRequest = {}, options?: RawAxiosRequestConfig): AxiosPromise<NotificationHistoryItemListBaseModel> {
             return localVarFp.history(requestParameters.search, requestParameters.skip, requestParameters.take, options).then((request) => request(axios, basePath));
         },
         /**
@@ -12787,7 +12859,7 @@ export const NotificationApiFactory = function (configuration?: Configuration, b
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        unreadCount(options?: RawAxiosRequestConfig): AxiosPromise<void> {
+        unreadCount(options?: RawAxiosRequestConfig): AxiosPromise<UnreadCountResponseBaseModel> {
             return localVarFp.unreadCount(options).then((request) => request(axios, basePath));
         },
     };
@@ -13297,7 +13369,7 @@ export const SubscriptionApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async my(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+        async my(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UserSubscriptionResponseBaseModel>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.my(options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['SubscriptionApi.my']?.[localVarOperationServerIndex]?.url;
@@ -13405,7 +13477,7 @@ export const SubscriptionApiFactory = function (configuration?: Configuration, b
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        my(options?: RawAxiosRequestConfig): AxiosPromise<void> {
+        my(options?: RawAxiosRequestConfig): AxiosPromise<UserSubscriptionResponseBaseModel> {
             return localVarFp.my(options).then((request) => request(axios, basePath));
         },
         /**
