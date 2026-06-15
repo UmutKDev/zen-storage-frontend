@@ -44,7 +44,10 @@ export function useDuplicateScan(path: string) {
   const start = async (opts: ScanOptions): Promise<void> => {
     try {
       const res = await startDuplicateScan({
-        Path: path,
+        // At the root, `path` is "" — the backend DTO rejects an empty Path
+        // (@IsNotEmpty). Send "/" instead: KeyBuilder normalizes it to the
+        // whole-drive prefix, so the root scan covers everything.
+        Path: path || "/",
         Recursive: opts.recursive,
         SimilarityThreshold: opts.threshold,
       });
