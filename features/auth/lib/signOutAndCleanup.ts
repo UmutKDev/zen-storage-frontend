@@ -3,6 +3,7 @@ import { signOut } from "next-auth/react";
 import { disconnectSocket } from "@/lib/socket";
 import { teardownUploads } from "@/features/storage";
 import { clearAllSecureFolderTokens } from "@/features/secure-folders";
+import { useJobsStore } from "@/features/jobs";
 import { authenticationApiFactory } from "@/service/factories";
 import { useUiStore, useWorkspaceStore } from "@/stores";
 
@@ -32,6 +33,7 @@ export async function signOutAndCleanup(queryClient: QueryClient): Promise<void>
   queryClient.clear();
   useWorkspaceStore.getState().reset();
   useUiStore.getState().reset();
+  useJobsStore.getState().reset();
   // Secure-folder session tokens are in-memory only (rule #5) — drop them all.
   clearAllSecureFolderTokens();
 

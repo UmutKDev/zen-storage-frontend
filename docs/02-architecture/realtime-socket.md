@@ -53,8 +53,8 @@ DECISIONS entry first.
 
   export function getSocket(sessionId: string): Socket {
     if (socket) return socket;
-    socket = io(`${process.env.NEXT_PUBLIC_SOCKET_URL}/notifications`, {
-      auth: { sessionId },
+    socket = io(`${base}/notifications`, {
+      auth: { SessionId: sessionId },   // PascalCase — the gateway reads handshake.auth.SessionId (D-P6.2)
       autoConnect: false,
       withCredentials: true,
       transports: ["websocket"],
@@ -64,7 +64,12 @@ DECISIONS entry first.
     });
     return socket;
   }
+  // base = NEXT_PUBLIC_SOCKET_URL ?? NEXT_PUBLIC_API_URL (sans /Api) — the var is OPTIONAL.
   ```
+  > **Implemented (D-P6.2).** The handshake key is **PascalCase `SessionId`** (the lowercase sample originally
+  > here was wrong — the gateway authenticates off `handshake.auth.SessionId`, so lowercase silently fails to
+  > authenticate). `disconnectSocket()` sets `socket.io.opts.reconnection = false` then nulls the singleton, so the
+  > next `getSocket()` rebuilds with a fresh handshake (re-handshake on session/team change).
 - **Provider:** `NotificationProvider` in `features/notifications/index.tsx` is mounted in `app/providers.tsx`
   **after** the session has hydrated. It calls `socket.connect()` on mount **iff** the session is valid.
 - **`sessionId` source = same as REST `X-Session-Id`:** resolved through `lib/auth/client.ts` from the Auth.js
@@ -113,13 +118,21 @@ sequence runs (UI buttons / interceptors that fire mid-teardown are no-ops).
 
 ### 4.5 Reconciliation (missed events)
 
-- On every successful reconnect, the server emits a hello frame containing `last_event_id` and `now` (server
-  timestamp).
-- Client compares `last_event_id` against `lastSeenEventId` in `notifications.store`.
-- **Gap detected →** invalidate the list queries that depend on socket-emitted state (notifications inbox, active
-  jobs, quota banners).
-- **Polling fallback:** if the socket fails to connect **5+ times within 60 s**, switch to
-  `GET /Notifications/Recent` every **30 s** until the next successful socket connect, then drop polling.
+> **Implemented reality (D-P6.2).** The backend sends **no hello / `last_event_id` frame** (only `ping`/`pong`), and
+> there is **no `GET /Notifications/Recent`**. Reconciliation is therefore **invalidation-based**, not gap-detection;
+> the original last-event-id design below is retained only as the aspirational contract.
+
+- On every successful **re**connect (not the first connect), the client invalidates the queries that depend on
+  socket-emitted state — notifications inbox (`notificationKeys.list/unreadCount`), storage usage (quota), and the
+  active jobs (`reconcileActiveJobs`, which re-polls each running job's Status). There is no `lastSeenEventId` /
+  `notifications.store`.
+- **Polling fallback:** if the socket fails to connect **5+ times within 60 s**, a **30 s** interval runs the same
+  reconciliation (invalidate inbox + re-poll active jobs via their Status endpoints) until the next successful
+  connect, then drops polling. The per-job Status endpoints are `Cloud/Scan/Duplicate/Status` (scans) and the new
+  `Cloud/Archive/Status` (archives — added in D-P6.3); there is no `/Notifications/Recent`.
+- _Aspirational (not implemented):_ a server hello frame with `last_event_id` + a `now` timestamp, compared against a
+  client `lastSeenEventId`, would let the client detect a precise gap instead of invalidating broadly. Adopt it if/when
+  the gateway emits it.
 
 ### 4.6 `NotificationProvider` mount order
 
@@ -161,6 +174,14 @@ start job (REST)  → JobId
 
 This guarantees correctness even if the socket drops or misses an event. In a socket‑hostile environment the app can run
 **polling‑only** with the same correctness (slower updates). See [DECISIONS](../07-decisions/DECISIONS.md) D‑A3.
+
+> **Implemented (D-P6.2 / D-P6.3).** The `…/Status` poll is real for both job families: `Cloud/Scan/Duplicate/Status`
+> (scans — which is also the *only* progress source, since the backend emits no `DUPLICATE_SCAN_PROGRESS`… until
+> D-P6.3 added throttled progress events) and the **new `Cloud/Archive/Status`** (archives — added in D-P6.3 so the
+> archive kill-socket path can truly reconcile via poll, not just on the terminal listing refresh). Progress events are
+> emitted **transiently** (socket only, never written to notification history) so they don't spam the inbox; terminal
+> events (`*_COMPLETE/_FAILED/_CANCELLED`) are persisted. The §6.1 foundation (job store + `reconcileActiveJobs` +
+> `JobIndicator`) consumes these; the duplicate-scan / archive *panels* that `track()` jobs land in §6.2/§6.3.
 
 ## 6. Heartbeat
 `ping`/`pong` keep‑alive; if pongs stop, treat as a drop and reconnect.

@@ -25,6 +25,9 @@ vi.mock("@/stores", () => ({
   useWorkspaceStore: { getState: () => ({ reset: () => order.push("workspace.reset") }) },
   useUiStore: { getState: () => ({ reset: () => order.push("ui.reset") }) },
 }));
+vi.mock("@/features/jobs", () => ({
+  useJobsStore: { getState: () => ({ reset: () => order.push("jobs.reset") }) },
+}));
 
 const { signOutAndCleanup } = await import("@/features/auth");
 
@@ -58,6 +61,7 @@ describe("signOutAndCleanup teardown", () => {
       "clear",
       "workspace.reset",
       "ui.reset",
+      "jobs.reset",
       "signOut",
       "redirect",
     ]);

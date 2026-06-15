@@ -5,7 +5,7 @@
 >
 > Legend: ⏳ not started · 🚧 in progress · ✅ done · 🚫 blocked.
 
-**Updated:** 2026-06-15 · **Branch:** `v2` · **Round:** **Phase 6 in progress — notifications inbox landed (Zen real-data). Phases 4 + 5 complete; secure-folder token now `sessionStorage`-scoped (D-P5.7).**
+**Updated:** 2026-06-16 · **Branch:** `v2` · **Round:** **Phase 6 in progress — realtime/job-transport foundation landed (socket now live: `NotificationProvider` + `features/jobs` + toasts/quota; backend strengthened, D-P6.2/D-P6.3). Notifications inbox + Phases 4/5 complete.**
 
 ## Where we are
 **Phase 6 has started — the notifications inbox landed (real-data Zen).** The count-only bell stub is replaced by a full
@@ -20,8 +20,19 @@ auto-refresh + secure-folder TTL re-lock** (60s `refetchInterval` + `refetchOnWi
 re-prompts the passphrase when an encrypted token expires in-place and conceals + toasts when a hidden one does —
 **[D-P5.8]**) and the **office-iframe Escape fix** (the embedded viewer no longer swallows Escape, so the preview closes on
 one press). Green: `tsc`+`lint`+`build` + **~296 Vitest** + `size-limit` **~804.51/820 KB** (no new deps); reviewers clean.
-**Phase 4 + Phase 5 are complete.** **Next: the rest of Phase 6** — jobs socket/poll transport, archive create/extract,
-duplicate-scan UI, AV-status gating — plus the deferred Phase 4/5 live-backend walkthroughs (pending creds).
+**Phase 4 + Phase 5 are complete.**
+
+**Realtime/job-transport foundation landed (2026-06-16, D-P6.2/D-P6.3).** The `/notifications` socket is now **live** — a
+real `getSocket(sessionId)` singleton + `NotificationProvider` (mounted after the session) owning connect / storm-pause /
+reconnect-reconciliation / polling-fallback, an event **fan-out** (toasts — tone-mapped, progress silent — / inbox refresh /
+job store / quota), the §6.1 job-transport plumbing (new `features/jobs`: an **idempotent** `jobs.store` keyed by JobId/ScanId +
+`reconcileActiveJobs` poll + a shared Zen `JobIndicator` tray), and §6.5b (the `QuotaBanner` at 80/90/100%). The **backend was
+strengthened** so the resilience promise is real (rule D-S8): a new `Cloud/Archive/Status` poll endpoint + transient
+`DUPLICATE_SCAN_PROGRESS` socket events (progress = socket-only/never-persisted; terminal = persisted), then the client was
+regenerated (clean: 151 insertions, 0 deletions). Green: backend `build`; frontend `tsc` + `lint` + **319 Vitest** (66 files;
++6 suites incl. idempotent-store / fan-out / provider-lifecycle / reconcile / auth-dedupe). **Next: the job-starting surfaces**
+— §6.2 duplicate-scan panel, §6.3 archive create/extract UI, §6.4 AV-status gating — plus the deferred Phase 3/4/5 live-backend
+walkthroughs (pending creds).
 
 ## Earlier — Phase 5 (secure folders)
 **Phase 5 is complete — secure folders.** A new leaf feature `features/secure-folders/` owns a **`sessionStorage`-scoped,
@@ -168,7 +179,7 @@ live backend contract smoke passed. Authenticated end-to-end walkthrough pending
 | 3 | Storage Core | ✅ | **Staged in 4 parts, all done.** A (browse) ✅ · B1 (single-item ops) ✅ · B2 (multi-select + bulk + DnD) ✅ · C (upload pipeline) ✅ · D (search + filter + ⌘K palette + central shortcut dispatcher + help overlay + touch bottom-sheet + server-seam ESLint) ✅ 2026-06-14 |
 | 4 | Preview + Share | ✅ | Full: preview modal (image/video/PDF/audio/office) + share (presigned URL) + CDN resize + CodeMirror editor + object & document versions/diff/restore; Zen lightbox redesign + office-Escape fix. Done 2026-06-14/15 (D-P4.0–D-P4.9) |
 | 5 | Secure Folders | ✅ | Full: token spine + encrypted + hidden (unlock/reveal/hide/conceal, ⇧⇧) + auto-refresh/TTL re-lock; session token `sessionStorage`-scoped (D-P5.7 amends the never-persist guarantee). Done 2026-06-14/15 (D-P5.1–D-P5.8) |
-| 6 | Advanced | 🚧 | **In progress** — notifications inbox done (real-data Zen, D-P6.1). Jobs socket/poll transport, archive/extract, duplicate-scan UI, AV gating still pending |
+| 6 | Advanced | 🚧 | **In progress** — notifications inbox (D-P6.1) + **realtime/job-transport foundation** (D-P6.2/D-P6.3: socket live, `features/jobs` plumbing, toasts/quota, backend `Cloud/Archive/Status` + dup-scan progress) done. Still pending: duplicate-scan panel, archive create/extract UI, AV gating |
 | 7 | Public & Polish | ⏳ | **MVP completes here** (+ onboarding, observability finish) |
 | 8 | Teams (post‑MVP) | ⏳ | architect‑for now, build last |
 | 9 | Organization & Discovery (post‑MVP) | ⏳ | **backend‑gated**: favorites/recents/tags/global‑insights/real‑share |
@@ -188,15 +199,32 @@ live backend contract smoke passed. Authenticated end-to-end walkthrough pending
   shadcn init (`components.json`), motion/i18n/theme libs, providers, route groups.
 
 ## What's next
-1. **Finish Phase 6 (Advanced):** jobs socket/poll transport, archive create/extract (+ preview + selective extract),
-   duplicate-scan UI, and AV-status gating. The notifications inbox (the first §6.5 deliverable) is done; the §6.5 toast
-   fan-out by `NotificationType` + quota warnings (80/90/100%) still remain. See [Phase 6](./phases/phase-6-advanced.md).
+1. **Finish Phase 6 (Advanced):** the foundation is done (inbox §6.5; live socket + §6.1 job transport + §6.5b toasts/quota,
+   D-P6.2/D-P6.3). Remaining = the **job-starting surfaces** that drive the now-built plumbing: §6.2 duplicate-scan panel
+   (poll-progress group UI + resolve-by-delete), §6.3 archive create/extract UI (+ preview + selective extract + conflict),
+   and §6.4 AV-status gating. See [Phase 6](./phases/phase-6-advanced.md).
 2. **Deferred live-backend walkthroughs (need login creds):** the Phase 3 upload matrix (small + large multipart w/
    progress, pause/resume, cancel→server Abort, kill-tab-at-50%→resume without re-sending part 1, forced 409
    REPLACE/KEEP_BOTH/SKIP + apply-to-all, quota/max-size pre-flight, folder drop/picker, zero-byte) + the B1/B2 ops matrix;
    the Phase 4 viewers/share/AV/editor round-trip; the Phase 5 unlock/reveal/conceal + bfcache/cross-tab + TTL re-lock.
 
 ## Recent status entries
+- **2026-06-16 (Phase 6 — realtime / job-transport foundation, D-P6.2/D-P6.3)** — Made the `/notifications` socket
+  **actually connect** (it was REST-only until now) and laid the §6.1 plumbing + §6.5b. **Frontend:** real
+  `getSocket(sessionId)` singleton + typed `notification` envelope (`lib/socket`); `NotificationProvider` (mounted after
+  the session in `app/providers.tsx`) owning connect / **storm-pause** (3 disconnects/10s → 30s) / **invalidation-based
+  reconnect reconcile** / **polling fallback**; an event **fan-out** (`notificationFanout`) → toasts (tone-mapped,
+  **progress silent**), inbox refresh + optimistic unread bump, job store, quota; a new leaf feature **`features/jobs`**
+  (idempotent `jobs.store` keyed by JobId/ScanId — percentage-up-only / phase-by-rank / terminal-frozen = the kill-socket
+  dedup guarantee; `reconcileActiveJobs` poll; shared Zen **`JobIndicator`** tray); a **`QuotaBanner`** (80/90/100%); a
+  deduped **`handleAuthFailure`** funneling REST-401 + socket-`AUTH_INVALID` into one sign-out; `useJobsStore.reset()` in
+  the teardown; optional `NEXT_PUBLIC_SOCKET_URL`. **Backend (`nestjs-storage`, D-P6.3):** new `GET Cloud/Archive/Status`
+  (BullMQ job state → progress) + transient `DUPLICATE_SCAN_PROGRESS` emits + `NotificationService.EmitTransientToUser`
+  (socket-only, no history — so progress doesn't spam the inbox); client **regenerated** (clean: 151 insertions, 0
+  deletions). **Deviations from the "locked" `realtime-socket §4`** (backend reality): PascalCase `SessionId` handshake;
+  invalidation-based reconcile (no `last_event_id` frame); poll fallback reuses History + per-job Status (no
+  `/Notifications/Recent`). Green: backend `build`; frontend `tsc` + `lint` + **319 Vitest** (+6 suites). **D-P6.2 /
+  D-P6.3.** Out of scope (next): §6.2/§6.3/§6.4 panels.
 - **2026-06-15 (Phase 6 — real-data notifications inbox)** — Opens Phase 6. The count-only bell stub becomes a real-data
   **Zen inbox**: backend `Notification/History` + `UnreadCount` were **typed** (`NotificationHistoryItemModel`,
   `UnreadCountResponseModel`) and the committed client **regenerated** (rule #2 — no hand-rolled DTOs; the D-P4.8 idiom). New

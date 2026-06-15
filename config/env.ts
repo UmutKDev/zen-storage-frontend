@@ -16,10 +16,21 @@ const publicEnvSchema = z.object({
     .string()
     .min(1, "NEXT_PUBLIC_API_URL is required")
     .refine((v) => !v.endsWith("/"), "must not end with a trailing slash"),
+
+  // Origin of the realtime socket.io gateway (the `/notifications` namespace is
+  // appended). Optional: when unset, the socket falls back to the API origin
+  // (`NEXT_PUBLIC_API_URL` minus any `/Api`), which is correct for the common
+  // single-origin deploy. Set it only when the gateway lives on a different host.
+  NEXT_PUBLIC_SOCKET_URL: z
+    .string()
+    .min(1)
+    .refine((v) => !v.endsWith("/"), "must not end with a trailing slash")
+    .optional(),
 });
 
 const parsed = publicEnvSchema.safeParse({
   NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
+  NEXT_PUBLIC_SOCKET_URL: process.env.NEXT_PUBLIC_SOCKET_URL,
 });
 
 if (!parsed.success) {

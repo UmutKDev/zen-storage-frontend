@@ -123,6 +123,14 @@
       "nearLimit": "Almost full",
       "exceeded": "Storage full"
     },
+    "quota": {
+      "warningTitle": "Storage almost full",
+      "warningBody": "You’re running low on space. Free up files or upgrade to keep uploading.",
+      "exceededTitle": "Storage full",
+      "exceededBody": "You’ve reached your storage limit. Free up space or upgrade to upload more.",
+      "upgrade": "Upgrade plan",
+      "dismiss": "Dismiss"
+    },
     "list": { "label": "Files and folders" },
     "empty": {
       "title": "This folder is empty",
@@ -726,5 +734,32 @@
     "ttlNote": "This link is valid for a limited time.",
     "copyFailed": "Couldn’t copy the link.",
     "forbidden": "You don’t have permission to share this file."
+  },
+  "jobs": {
+    "progressLabel": "Task progress",
+    "tray": {
+      "title": "Background tasks",
+      "activeSuffix": "active",
+      "dismiss": "Dismiss",
+      "clearFinished": "Clear finished"
+    },
+    "kind": {
+      "archiveCreate": "Creating archive",
+      "archiveExtract": "Extracting archive",
+      "duplicateScan": "Scanning for duplicates"
+    },
+    "status": {
+      "running": "In progress",
+      "complete": "Completed",
+      "failed": "Failed",
+      "cancelled": "Cancelled"
+    },
+    "phase": {
+      "LISTING": "Listing files",
+      "SIZE_GROUPING": "Grouping by size",
+      "CONTENT_HASHING": "Comparing contents",
+      "PERCEPTUAL_HASHING": "Comparing images",
+      "FINALIZING": "Finalizing"
+    }
   }
 }

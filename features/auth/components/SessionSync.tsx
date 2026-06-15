@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { registerSessionSource, registerSignOut } from "@/service/token-sources";
 import { useWorkspaceStore } from "@/stores";
-import { signOutAndCleanup } from "../lib/signOutAndCleanup";
+import { handleAuthFailure } from "../lib/handleAuthFailure";
 
 /**
  * Bridges the Auth.js session into the data layer's token-source seam (the
@@ -35,7 +35,9 @@ export function SessionSync() {
 
   useEffect(() => {
     registerSessionSource(() => sessionIdRef.current);
-    registerSignOut(() => signOutAndCleanup(queryClient));
+    // Route the REST 401 path through the deduped handler so it can't race the
+    // socket's AUTH_INVALID into a double sign-out.
+    registerSignOut(() => handleAuthFailure(queryClient));
   }, [queryClient]);
 
   return null;

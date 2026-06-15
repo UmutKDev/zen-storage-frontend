@@ -8,6 +8,18 @@
 > **Update rule:** edit the relevant phase summary or its `phases/` file — **don't rewrite** — and add a Changelog line.
 
 ## Changelog
+- **2026-06-16 (Phase 6 — realtime / job-transport foundation — D-P6.2/D-P6.3)** — The `/notifications` socket now
+  **actually connects** (it was REST-only). Frontend: `getSocket(sessionId)` singleton + typed `notification` envelope
+  (`lib/socket`); `NotificationProvider` (storm-pause / invalidation-based reconnect reconcile / polling fallback / 401);
+  `notificationFanout` (toasts tone-mapped, **progress silent**; inbox refresh + optimistic unread; job store; quota); new
+  leaf `features/jobs` (idempotent `jobs.store` keyed by JobId/ScanId + `reconcileActiveJobs` poll + Zen `JobIndicator`
+  tray); `QuotaBanner` (80/90/100%); deduped `handleAuthFailure` (REST-401 + socket-`AUTH_INVALID` → one sign-out);
+  optional `NEXT_PUBLIC_SOCKET_URL`. Backend (`nestjs-storage`): new `GET Cloud/Archive/Status` + transient
+  `DUPLICATE_SCAN_PROGRESS` + `NotificationService.EmitTransientToUser` (socket-only, no history) → client regenerated
+  (clean: 151 ins/0 del). Deviations from the "locked" `realtime-socket §4` (backend reality): PascalCase `SessionId`,
+  invalidation-based reconcile, History-based poll (no `/Notifications/Recent`). Green: backend `build` + frontend
+  `tsc`/`lint` + **319 vitest** (+6 suites). **Remaining Phase 6:** the §6.2/§6.3/§6.4 job-starting panels (duplicate-scan,
+  archive create/extract, AV gating).
 - **2026-06-15 (Phase 6 — real-data notifications inbox)** — **Opens Phase 6.** The notification inbox goes real-data:
   backend `Notification/History` + unread-count **typed** (`NotificationHistoryItemModel`/`UnreadCountResponseModel`) +
   committed client **regenerated** (rule #2 — no hand-rolled DTOs; the D-P4.8 idiom). New `features/notifications`

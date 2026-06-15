@@ -339,6 +339,46 @@ export const CloudArchivePreviewResponseModelFormatEnum = {
 
 export type CloudArchivePreviewResponseModelFormatEnum = typeof CloudArchivePreviewResponseModelFormatEnum[keyof typeof CloudArchivePreviewResponseModelFormatEnum];
 
+export interface CloudArchiveStatusResponseBaseModel {
+    'Result': CloudArchiveStatusResponseModel;
+    'Status': BaseStatusModel;
+}
+export interface CloudArchiveStatusResponseModel {
+    'JobId': string;
+    'Kind': CloudArchiveStatusResponseModelKindEnum;
+    /**
+     * Current BullMQ job state
+     */
+    'Status': CloudArchiveStatusResponseModelStatusEnum;
+    'EntriesProcessed'?: number;
+    'TotalEntries'?: number;
+    /**
+     * Computed completion percentage (0-100)
+     */
+    'Percentage'?: number;
+    /**
+     * Output archive key (create jobs only)
+     */
+    'OutputKey'?: string;
+    'Error'?: string;
+}
+
+export const CloudArchiveStatusResponseModelKindEnum = {
+    Extract: 'extract',
+    Create: 'create'
+} as const;
+
+export type CloudArchiveStatusResponseModelKindEnum = typeof CloudArchiveStatusResponseModelKindEnum[keyof typeof CloudArchiveStatusResponseModelKindEnum];
+export const CloudArchiveStatusResponseModelStatusEnum = {
+    Waiting: 'waiting',
+    Delayed: 'delayed',
+    Active: 'active',
+    Completed: 'completed',
+    Failed: 'failed'
+} as const;
+
+export type CloudArchiveStatusResponseModelStatusEnum = typeof CloudArchiveStatusResponseModelStatusEnum[keyof typeof CloudArchiveStatusResponseModelStatusEnum];
+
 export interface CloudBreadCrumbListBaseModel {
     'Result': CloudBreadCrumbListModelResult;
     'Status': BaseStatusModel;
@@ -8761,6 +8801,56 @@ export const CloudArchiveApiAxiosParamCreator = function (configuration?: Config
                 options: localVarRequestOptions,
             };
         },
+        /**
+         * Returns the current state and progress of an archive create/extract job. Polling fallback for clients that missed socket progress events.
+         * @summary Get archive job status
+         * @param {string} jobId Job ID returned by archive create/extract start
+         * @param {ArchiveStatusKindEnum} kind Which archive job the JobId belongs to (create or extract)
+         * @param {string} [xTeamId] Optional team ID. When provided, archive operations target the team storage.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        archiveStatus: async (jobId: string, kind: ArchiveStatusKindEnum, xTeamId?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'jobId' is not null or undefined
+            assertParamExists('archiveStatus', 'jobId', jobId)
+            // verify required parameter 'kind' is not null or undefined
+            assertParamExists('archiveStatus', 'kind', kind)
+            const localVarPath = `/Api/Cloud/Archive/Status`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication cookie required
+
+            if (jobId !== undefined) {
+                localVarQueryParameter['JobId'] = jobId;
+            }
+
+            if (kind !== undefined) {
+                localVarQueryParameter['Kind'] = kind;
+            }
+
+
+    
+            if (xTeamId != null) {
+                localVarHeaderParameter['x-team-id'] = String(xTeamId);
+            }
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
     }
 };
 
@@ -8842,6 +8932,21 @@ export const CloudArchiveApiFp = function(configuration?: Configuration) {
             const localVarOperationServerBasePath = operationServerMap['CloudArchiveApi.archivePreview']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
+        /**
+         * Returns the current state and progress of an archive create/extract job. Polling fallback for clients that missed socket progress events.
+         * @summary Get archive job status
+         * @param {string} jobId Job ID returned by archive create/extract start
+         * @param {ArchiveStatusKindEnum} kind Which archive job the JobId belongs to (create or extract)
+         * @param {string} [xTeamId] Optional team ID. When provided, archive operations target the team storage.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async archiveStatus(jobId: string, kind: ArchiveStatusKindEnum, xTeamId?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CloudArchiveStatusResponseBaseModel>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.archiveStatus(jobId, kind, xTeamId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['CloudArchiveApi.archiveStatus']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
     }
 };
 
@@ -8900,6 +9005,16 @@ export const CloudArchiveApiFactory = function (configuration?: Configuration, b
          */
         archivePreview(requestParameters: CloudArchiveApiArchivePreviewRequest, options?: RawAxiosRequestConfig): AxiosPromise<CloudArchivePreviewResponseBaseModel> {
             return localVarFp.archivePreview(requestParameters.key, requestParameters.xTeamId, requestParameters.xFolderSession, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Returns the current state and progress of an archive create/extract job. Polling fallback for clients that missed socket progress events.
+         * @summary Get archive job status
+         * @param {CloudArchiveApiArchiveStatusRequest} requestParameters Request parameters.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        archiveStatus(requestParameters: CloudArchiveApiArchiveStatusRequest, options?: RawAxiosRequestConfig): AxiosPromise<CloudArchiveStatusResponseBaseModel> {
+            return localVarFp.archiveStatus(requestParameters.jobId, requestParameters.kind, requestParameters.xTeamId, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -8978,6 +9093,26 @@ export interface CloudArchiveApiArchivePreviewRequest {
 }
 
 /**
+ * Request parameters for archiveStatus operation in CloudArchiveApi.
+ */
+export interface CloudArchiveApiArchiveStatusRequest {
+    /**
+     * Job ID returned by archive create/extract start
+     */
+    readonly jobId: string
+
+    /**
+     * Which archive job the JobId belongs to (create or extract)
+     */
+    readonly kind: ArchiveStatusKindEnum
+
+    /**
+     * Optional team ID. When provided, archive operations target the team storage.
+     */
+    readonly xTeamId?: string
+}
+
+/**
  * CloudArchiveApi - object-oriented interface
  */
 export class CloudArchiveApi extends BaseAPI {
@@ -9035,8 +9170,24 @@ export class CloudArchiveApi extends BaseAPI {
     public archivePreview(requestParameters: CloudArchiveApiArchivePreviewRequest, options?: RawAxiosRequestConfig) {
         return CloudArchiveApiFp(this.configuration).archivePreview(requestParameters.key, requestParameters.xTeamId, requestParameters.xFolderSession, options).then((request) => request(this.axios, this.basePath));
     }
+
+    /**
+     * Returns the current state and progress of an archive create/extract job. Polling fallback for clients that missed socket progress events.
+     * @summary Get archive job status
+     * @param {CloudArchiveApiArchiveStatusRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public archiveStatus(requestParameters: CloudArchiveApiArchiveStatusRequest, options?: RawAxiosRequestConfig) {
+        return CloudArchiveApiFp(this.configuration).archiveStatus(requestParameters.jobId, requestParameters.kind, requestParameters.xTeamId, options).then((request) => request(this.axios, this.basePath));
+    }
 }
 
+export const ArchiveStatusKindEnum = {
+    Extract: 'extract',
+    Create: 'create'
+} as const;
+export type ArchiveStatusKindEnum = typeof ArchiveStatusKindEnum[keyof typeof ArchiveStatusKindEnum];
 
 
 /**

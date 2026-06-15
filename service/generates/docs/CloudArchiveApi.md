@@ -9,6 +9,7 @@ All URIs are relative to *http://localhost*
 |[**archiveExtractCancel**](#archiveextractcancel) | **POST** /Api/Cloud/Archive/Extract/Cancel | Cancel archive extraction|
 |[**archiveExtractStart**](#archiveextractstart) | **POST** /Api/Cloud/Archive/Extract/Start | Start archive extraction|
 |[**archivePreview**](#archivepreview) | **GET** /Api/Cloud/Archive/Preview | Preview archive contents|
+|[**archiveStatus**](#archivestatus) | **GET** /Api/Cloud/Archive/Status | Get archive job status|
 
 # **archiveCreateCancel**
 > CloudArchiveCreateCancelResponseBaseModel archiveCreateCancel(cloudArchiveCreateCancelRequestModel)
@@ -276,6 +277,64 @@ const { status, data } = await apiInstance.archivePreview(
 ### Return type
 
 **CloudArchivePreviewResponseBaseModel**
+
+### Authorization
+
+[cookie](../README.md#cookie)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+|**200** | Success |  -  |
+|**500** | Internal Server Error |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **archiveStatus**
+> CloudArchiveStatusResponseBaseModel archiveStatus()
+
+Returns the current state and progress of an archive create/extract job. Polling fallback for clients that missed socket progress events.
+
+### Example
+
+```typescript
+import {
+    CloudArchiveApi,
+    Configuration
+} from './api';
+
+const configuration = new Configuration();
+const apiInstance = new CloudArchiveApi(configuration);
+
+let jobId: string; //Job ID returned by archive create/extract start (default to undefined)
+let kind: 'extract' | 'create'; //Which archive job the JobId belongs to (create or extract) (default to undefined)
+let xTeamId: string; //Optional team ID. When provided, archive operations target the team storage. (optional) (default to undefined)
+
+const { status, data } = await apiInstance.archiveStatus(
+    jobId,
+    kind,
+    xTeamId
+);
+```
+
+### Parameters
+
+|Name | Type | Description  | Notes|
+|------------- | ------------- | ------------- | -------------|
+| **jobId** | [**string**] | Job ID returned by archive create/extract start | defaults to undefined|
+| **kind** | [**&#39;extract&#39; | &#39;create&#39;**]**Array<&#39;extract&#39; &#124; &#39;create&#39;>** | Which archive job the JobId belongs to (create or extract) | defaults to undefined|
+| **xTeamId** | [**string**] | Optional team ID. When provided, archive operations target the team storage. | (optional) defaults to undefined|
+
+
+### Return type
+
+**CloudArchiveStatusResponseBaseModel**
 
 ### Authorization
 

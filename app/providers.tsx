@@ -6,6 +6,7 @@ import { ThemeProvider } from "next-themes";
 import { MotionConfig } from "framer-motion";
 import { SessionProvider } from "@/lib/auth/client";
 import { SessionSync } from "@/features/auth";
+import { NotificationProvider } from "@/features/notifications";
 import { CookieConsentBanner } from "@/features/account";
 import { secureFolderTokenGetter } from "@/features/secure-folders";
 import { Toaster, TooltipProvider } from "@/components/ui";
@@ -66,7 +67,9 @@ export function Providers({ children }: { children: ReactNode }) {
           disableTransitionOnChange
         >
           <MotionConfig reducedMotion="user">
-            <TooltipProvider>{children}</TooltipProvider>
+            <NotificationProvider>
+              <TooltipProvider>{children}</TooltipProvider>
+            </NotificationProvider>
             <Toaster />
             <CookieConsentBanner />
           </MotionConfig>

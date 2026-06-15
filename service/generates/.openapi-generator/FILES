@@ -53,6 +53,8 @@ docs/CloudArchiveExtractStartResponseModel.md
 docs/CloudArchivePreviewEntryModel.md
 docs/CloudArchivePreviewResponseBaseModel.md
 docs/CloudArchivePreviewResponseModel.md
+docs/CloudArchiveStatusResponseBaseModel.md
+docs/CloudArchiveStatusResponseModel.md
 docs/CloudBreadCrumbListBaseModel.md
 docs/CloudBreadCrumbListModelResult.md
 docs/CloudBreadCrumbModel.md

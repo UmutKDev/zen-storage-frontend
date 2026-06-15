@@ -7,8 +7,13 @@
 > **In progress (2026-06-15):** the **notification inbox shipped** (commit 40039d8, [D-P6.1](../../07-decisions/DECISIONS.md))
 > — real-data Zen inbox: `Notification/History` (`useInfiniteQuery` + Load-more), `/UnreadCount` unread badge, `/:Id/Read`
 > **optimistic mark-read** decrementing the badge, `/ReadAll`, tone-tinted icon tiles, relative time, loading/empty/error
-> states. Backend endpoints typed (`NotificationHistoryItemModel`/`UnreadCountResponseModel`) + client regenerated. **Still
-> open:** the §6.5 toast fan-out + quota warnings, plus §6.1–6.4 (job transport, duplicate scan, archive, AV gating).
+> states. Backend endpoints typed (`NotificationHistoryItemModel`/`UnreadCountResponseModel`) + client regenerated.
+>
+> **Foundation landed (2026-06-16, [D-P6.2](../../07-decisions/DECISIONS.md)/D-P6.3):** the `/notifications` socket is
+> now **live** (`NotificationProvider`) with §6.1 job-transport plumbing (`features/jobs`: idempotent store +
+> `reconcileActiveJobs` + `JobIndicator`) and §6.5b (toast fan-out + quota banner). Backend strengthened: `Cloud/Archive/Status`
+> + transient `DUPLICATE_SCAN_PROGRESS`. **Still open:** §6.2 duplicate-scan panel, §6.3 archive create/extract UI,
+> §6.4 AV gating — the job-starting surfaces that drive the now-built plumbing.
 
 ## Objective
 The advanced storage features that ride on **async jobs + realtime**: duplicate scan, archive (zip/extract), AV scan
@@ -23,8 +28,8 @@ read‑all) + toasts + quota warnings (80/90/100%).
 ## Task breakdown
 
 ### 6.1 — Job transport plumbing → see [realtime-socket](../../02-architecture/realtime-socket.md)
-- [ ] Job stores fed by socket events with a **low‑frequency polling fallback** that reconciles missed events.
-- [ ] Shared job‑progress UI (tray/toast) pattern for archive + duplicate.
+- [x] Job stores fed by socket events with a **low‑frequency polling fallback** that reconciles missed events. *(D-P6.2 — `features/jobs` idempotent `jobs.store` + `reconcileActiveJobs`; `NotificationProvider` owns connect/storm-pause/reconnect-reconcile/poll-fallback; backend `Cloud/Archive/Status` added (D-P6.3) so archive poll is real.)*
+- [x] Shared job‑progress UI (tray/toast) pattern for archive + duplicate. *(D-P6.2 — Zen `JobIndicator` tray driven by `useJobsStore`; the §6.2/§6.3 panels only `track()` a job.)*
 
 ### 6.2 — Duplicate scan
 - [ ] Start/status/result/cancel (`Cloud/Scan/Duplicate/*`); progress (socket‑first + poll).
@@ -44,7 +49,7 @@ read‑all) + toasts + quota warnings (80/90/100%).
       read/all, pagination (Load-more), empty/loading/error states. *(commit 40039d8 — `NotificationPanel`/`NotificationItem`,
       `useNotifications`/`useNotificationActions`/`useUnreadCount`, `notificationMeta`; backend typed + client regenerated;
       [D-P6.1](../../07-decisions/DECISIONS.md).)*
-- [ ] Toast fan‑out by `NotificationType` (progress types stay silent); quota warnings → banner/toast (80/90/100%).
+- [x] Toast fan‑out by `NotificationType` (progress types stay silent); quota warnings → banner/toast (80/90/100%). *(D-P6.2 — `notificationFanout.routeNotification`: tone-mapped sonner toasts, transient progress stays silent; `QuotaBanner` reads `ui.store.quotaLevel` (pushed by `QUOTA_WARNING/EXCEEDED`) + `useStorageUsage`.)*
 
 ## Endpoints used
 `Cloud/Scan/Duplicate/Start`/`Status`/`Result`/`Cancel`; `Cloud/Archive/Create/*`, `/Extract/*`, `/Preview`;
@@ -65,13 +70,13 @@ Contracts: [cloud-core](../../05-api/modules/cloud-core.md) (scan), [cloud-archi
 
 Locked socket lifecycle obligations layered on top of the §6.1 plumbing — see [realtime-socket §4](../../02-architecture/realtime-socket.md) for the canonical spec.
 
-- [ ] **Socket lifecycle locked.** Singleton `io(NEXT_PUBLIC_SOCKET_URL + "/notifications", { auth, autoConnect: false })` in `lib/socket/client.ts`. `NotificationProvider` mounts in `app/providers.tsx` **after** session hydrated; `socket.connect()` only when session valid.
-- [ ] **Reconnect with exp backoff + jitter.** `reconnectionDelay: 1000`, `reconnectionDelayMax: 30000`, `randomizationFactor: 0.5`. Storm-pause: 3 disconnects in 10s → 30s pause before resuming.
-- [ ] **401 handling.** Server `connect_error` with `data.code === "AUTH_INVALID"` → `socket.disconnect()` + `socket.io.opts.reconnection = false` → trigger `lib/auth/client.ts::handleAuthFailure()` (deduped with REST 401).
-- [ ] **Sign-out teardown sequence (order asserted by spy).** `socket.disconnect()` → `queryClient.cancelMutations()` + `cancelQueries()` → `queryClient.clear()` + reset all stores → `signOut({redirect:false})` → `window.location.assign("/auth/login")`. Wrapped in `signOutAndCleanup()` with `signOutInFlight` boolean dedupe.
-- [ ] **Reconciliation on reconnect.** Server sends `{ last_event_id, now }` on `connect`; client compares with `notifications.store.lastSeenEventId`; gap → invalidate list queries depending on socket-emitted state (jobs, notifications inbox).
-- [ ] **Polling fallback.** If socket fails ≥ 5 times in 60s → `GET /Notifications/Recent` every 30s until socket recovers.
-- [ ] **Kill-socket acceptance test.** Given: archive job started via UI. When: at t=2s, DevTools Network → WS → close socket. Then: within 30s, polling fallback fires; job progress continues via poll; job reaches terminal state without UI hang; on socket reconnect, no duplicate progress notifications (deduped by `jobId` + monotonic key).
+- [x] **Socket lifecycle locked.** Singleton `getSocket(sessionId)` → `io(base + "/notifications", { auth: { SessionId }, autoConnect: false })` in `lib/socket/client.ts` (PascalCase handshake — D-P6.2). `NotificationProvider` mounts in `app/providers.tsx` **after** session hydrated; `socket.connect()` only when session valid.
+- [x] **Reconnect with exp backoff + jitter.** `reconnectionDelay: 1000`, `reconnectionDelayMax: 30000`, `randomizationFactor: 0.5`. Storm-pause: 3 disconnects in 10s → 30s pause before resuming. *(tested: `tests/notifications/provider-lifecycle`)*
+- [x] **401 handling.** Server `connect_error` with `data.code === "AUTH_INVALID"` → `socket.disconnect()` + `socket.io.opts.reconnection = false` → `handleAuthFailure()` (module-boolean deduped with the REST 401 via the `registerSignOut` seam). *(tested)*
+- [x] **Sign-out teardown sequence (order asserted by spy).** `socket.disconnect()` (reconnect killed) → `cancelQueries()` → `clear()` → reset all stores (incl. `useJobsStore.reset()`) → `signOut({redirect:false})` → `window.location.assign("/login")`. *(`signOutAndCleanup`; no v5 `cancelMutations`; order spy-tested in `tests/smoke/signout`.)*
+- [x] **Reconciliation on reconnect.** _Amended (D-P6.2):_ backend sends no `last_event_id` frame → reconciliation is **invalidation-based** — every re-connect invalidates inbox/unread/usage + `reconcileActiveJobs`. *(tested: reconcile only on the 2nd connect)*
+- [x] **Polling fallback.** _Amended (D-P6.2):_ no `/Notifications/Recent` → 5 connect failures in 60s starts a 30s interval that re-invalidates the inbox + re-polls active jobs via `Cloud/Scan/Duplicate/Status` + `Cloud/Archive/Status`.
+- [~] **Kill-socket acceptance test.** Transport behavior **unit-tested** (`tests/jobs/{jobs-store,reconcile}` — poll drives a job to terminal; replayed/late progress is deduped via the terminal-frozen, monotonic store). Full end-to-end (start a real job in the UI, close the WS in DevTools) lands with the §6.3 archive panel that `track()`s a job.
 
 ## Risks & mitigations
 | Risk | Mitigation |
