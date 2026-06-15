@@ -188,10 +188,13 @@
   background: var(--glass-chrome-bg);
   -webkit-backdrop-filter: blur(var(--glass-blur-chrome))
     saturate(var(--glass-saturate));
-  backdrop-filter: blur(var(--glass-blur-chrome)) saturate(var(--glass-saturate));
+  backdrop-filter: blur(var(--glass-blur-chrome))
+    saturate(var(--glass-saturate));
   border: 1px solid var(--glass-border);
   /* 1px top highlight rim + soft elevation (e2). */
-  box-shadow: 0 1px 0 0 var(--glass-border) inset, var(--shadow-e2);
+  box-shadow:
+    0 1px 0 0 var(--glass-border) inset,
+    var(--shadow-e2);
 }
 
 @utility glass-overlay {
@@ -202,7 +205,9 @@
     saturate(var(--glass-saturate));
   border: 1px solid var(--glass-border);
   /* 1px top highlight rim + larger soft elevation (e3). */
-  box-shadow: 0 1px 0 0 var(--glass-border) inset, var(--shadow-e3);
+  box-shadow:
+    0 1px 0 0 var(--glass-border) inset,
+    var(--shadow-e3);
 }
 
 /*
@@ -228,7 +233,11 @@
   body {
     background-color: var(--background);
     color: var(--foreground);
-    font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+    font-family:
+      var(--font-sans),
+      system-ui,
+      -apple-system,
+      sans-serif;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
@@ -272,16 +281,6 @@
  * are unlayered below so they reliably win.
  * ===================================================================== */
 @layer components {
-  /* ---------- Content-rich overlay: less translucent than default glass ----------
-   * For overlays that sit over busy content (e.g. the notification inbox) where the
-   * default `glass-overlay` translucency lets too much show through. Keeps the blur +
-   * rim + elevation; only the fill gets more opaque. Theme-aware via the solid
-   * elevated-surface token (no raw color); the reduced-transparency fallback still
-   * flips both to a fully solid surface. */
-  .zs-overlay-solid {
-    --glass-overlay-bg: color-mix(in srgb, var(--surface-elevated) 95%, transparent);
-  }
-
   /* ---------- Buttons: gradient + inset rim fills ---------- */
   .zs-btn-grad-primary {
     border: 1px solid color-mix(in srgb, var(--primary) 82%, #000000);
@@ -333,9 +332,13 @@
   .zs-btn-micro {
     border: 1px solid color-mix(in srgb, var(--input) 85%, transparent);
     background: var(--glass-micro-bg);
-    -webkit-backdrop-filter: blur(var(--glass-blur-micro)) saturate(var(--glass-saturate));
-    backdrop-filter: blur(var(--glass-blur-micro)) saturate(var(--glass-saturate));
-    box-shadow: inset 0 1px 0 0 var(--glass-highlight), var(--shadow-e1);
+    -webkit-backdrop-filter: blur(var(--glass-blur-micro))
+      saturate(var(--glass-saturate));
+    backdrop-filter: blur(var(--glass-blur-micro))
+      saturate(var(--glass-saturate));
+    box-shadow:
+      inset 0 1px 0 0 var(--glass-highlight),
+      var(--shadow-e1);
   }
   .zs-btn-micro:hover {
     background: color-mix(in srgb, var(--accent) 70%, transparent);
@@ -470,7 +473,9 @@
       color-mix(in srgb, var(--primary) 84%, #ffffff) 0%,
       var(--primary) 100%
     );
-    box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.25), 0 1px 2px 0 rgb(0 0 0 / 0.08);
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.25),
+      0 1px 2px 0 rgb(0 0 0 / 0.08);
   }
   .zs-badge-grad-destructive {
     border-color: color-mix(in srgb, var(--destructive) 84%, #000000);
@@ -479,7 +484,9 @@
       color-mix(in srgb, var(--destructive) 84%, #ffffff) 0%,
       var(--destructive) 100%
     );
-    box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.2), 0 1px 2px 0 rgb(0 0 0 / 0.08);
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.2),
+      0 1px 2px 0 rgb(0 0 0 / 0.08);
   }
 
   /* ---------- Switch / Checkbox: gradient when checked ---------- */
@@ -499,7 +506,9 @@
       color-mix(in srgb, var(--primary) 84%, #ffffff) 0%,
       var(--primary) 100%
     );
-    box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.25), 0 1px 2px 0 rgb(0 0 0 / 0.08);
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.25),
+      0 1px 2px 0 rgb(0 0 0 / 0.08);
   }
 
   /* ---------- Avatar: glass rim ---------- */
@@ -564,7 +573,8 @@
     line-height: 1.6;
     color: var(--muted-foreground);
     background: color-mix(in srgb, var(--foreground) 5%, transparent);
-    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--foreground) 10%, transparent);
+    box-shadow: inset 0 0 0 1px
+      color-mix(in srgb, var(--foreground) 10%, transparent);
   }
 
   /* ---------- Tinted type tiles (file/folder icon socket) ----------
@@ -583,7 +593,8 @@
       color-mix(in srgb, var(--tile, var(--brand)) 8%, transparent)
     );
     box-shadow:
-      inset 0 0 0 1px color-mix(in srgb, var(--tile, var(--brand)) 18%, transparent),
+      inset 0 0 0 1px
+        color-mix(in srgb, var(--tile, var(--brand)) 18%, transparent),
       inset 0 1px 0 0 var(--glass-highlight);
   }
   .zs-tile-icon--folder > svg {
@@ -593,17 +604,34 @@
   .zs-tile-icon--ghost {
     background: color-mix(in srgb, var(--tile, var(--brand)) 6%, transparent);
     box-shadow: none;
-    outline: 1.5px dashed color-mix(in srgb, var(--tile, var(--brand)) 50%, transparent);
+    outline: 1.5px dashed
+      color-mix(in srgb, var(--tile, var(--brand)) 50%, transparent);
     outline-offset: -1.5px;
   }
-  .zs-tone-brand { --tile: var(--brand); }
-  .zs-tone-red { --tile: oklch(0.6 0.19 25); }
-  .zs-tone-blue { --tile: oklch(0.58 0.14 250); }
-  .zs-tone-green { --tile: oklch(0.58 0.14 155); }
-  .zs-tone-amber { --tile: oklch(0.68 0.14 75); }
-  .zs-tone-teal { --tile: oklch(0.6 0.12 195); }
-  .zs-tone-violet { --tile: oklch(0.58 0.16 295); }
-  .zs-tone-slate { --tile: var(--muted-foreground); }
+  .zs-tone-brand {
+    --tile: var(--brand);
+  }
+  .zs-tone-red {
+    --tile: oklch(0.6 0.19 25);
+  }
+  .zs-tone-blue {
+    --tile: oklch(0.58 0.14 250);
+  }
+  .zs-tone-green {
+    --tile: oklch(0.58 0.14 155);
+  }
+  .zs-tone-amber {
+    --tile: oklch(0.68 0.14 75);
+  }
+  .zs-tone-teal {
+    --tile: oklch(0.6 0.12 195);
+  }
+  .zs-tone-violet {
+    --tile: oklch(0.58 0.16 295);
+  }
+  .zs-tone-slate {
+    --tile: var(--muted-foreground);
+  }
 
   /* ---------- Protected-state corner chip (on the tile) ---------- */
   .zs-status-chip {
@@ -656,7 +684,9 @@
     border: 1px solid color-mix(in srgb, var(--foreground) 8%, transparent);
     border-radius: var(--radius-lg);
     background: var(--surface);
-    box-shadow: inset 0 1px 0 0 var(--glass-highlight), var(--shadow-e1);
+    box-shadow:
+      inset 0 1px 0 0 var(--glass-highlight),
+      var(--shadow-e1);
     overflow: hidden;
   }
   .zs-file-panel__head {
@@ -667,7 +697,8 @@
     align-items: center;
     gap: 4px;
     padding: 8px 8px 8px 12px;
-    border-bottom: 1px solid color-mix(in srgb, var(--foreground) 6%, transparent);
+    border-bottom: 1px solid
+      color-mix(in srgb, var(--foreground) 6%, transparent);
     background: color-mix(in srgb, var(--muted) 35%, var(--surface));
     font-size: 11px;
     font-weight: 600;
@@ -711,7 +742,9 @@
     border: 1px solid color-mix(in srgb, var(--foreground) 7%, transparent);
     border-radius: var(--radius-md);
     background: var(--surface);
-    box-shadow: inset 0 1px 0 0 var(--glass-highlight), var(--shadow-e1);
+    box-shadow:
+      inset 0 1px 0 0 var(--glass-highlight),
+      var(--shadow-e1);
   }
   .zs-usage-card[data-collapsed="true"] {
     padding: 10px 8px;
@@ -814,7 +847,8 @@
     align-items: center;
     gap: 12px;
     padding: 16px 16px 16px 20px;
-    border-bottom: 1px solid color-mix(in srgb, var(--foreground) 6%, transparent);
+    border-bottom: 1px solid
+      color-mix(in srgb, var(--foreground) 6%, transparent);
   }
   .zs-section-emblem {
     display: flex;
@@ -914,7 +948,8 @@
         transparent 75%
       ),
       color-mix(in srgb, var(--brand) 5%, transparent);
-    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brand) 30%, transparent);
+    box-shadow: inset 0 0 0 1px
+      color-mix(in srgb, var(--brand) 30%, transparent);
   }
   .zs-dropzone__disc {
     display: flex;
@@ -1015,7 +1050,9 @@
   .zs-format-chip--on {
     border-color: var(--ring);
     background: color-mix(in srgb, var(--accent) 80%, var(--surface));
-    box-shadow: 0 0 0 1px var(--ring), inset 0 1px 0 0 var(--glass-highlight);
+    box-shadow:
+      0 0 0 1px var(--ring),
+      inset 0 1px 0 0 var(--glass-highlight);
   }
 
   /* ── File preview lightbox (Zen) ─────────────────────────────────────────
@@ -1042,8 +1079,8 @@
       border-radius var(--duration-base) var(--ease-standard);
   }
   .zs-preview-shell[data-state="open"] {
-    animation: zs-preview-shell-in var(--duration-slow) var(--ease-decelerate) both
-      !important;
+    animation: zs-preview-shell-in var(--duration-slow) var(--ease-decelerate)
+      both !important;
   }
 
   /* Dark media stage — media floats on a true dark backdrop with a soft wash. */
@@ -1309,7 +1346,9 @@
     border-radius: inherit;
     background: var(--surface);
     cursor: pointer;
-    box-shadow: inset 0 1px 0 0 var(--glass-highlight), var(--shadow-e1);
+    box-shadow:
+      inset 0 1px 0 0 var(--glass-highlight),
+      var(--shadow-e1);
     transition:
       border-color 120ms var(--ease-standard),
       box-shadow 120ms var(--ease-standard),
@@ -1317,7 +1356,9 @@
   }
   .zs-tile__inner:hover {
     border-color: color-mix(in srgb, var(--foreground) 14%, transparent);
-    box-shadow: inset 0 1px 0 0 var(--glass-highlight), var(--shadow-e2);
+    box-shadow:
+      inset 0 1px 0 0 var(--glass-highlight),
+      var(--shadow-e2);
   }
   .zs-tile__inner:focus-visible {
     outline: none;
@@ -1326,7 +1367,9 @@
   .zs-tile--selected .zs-tile__inner {
     border-color: var(--ring);
     background: color-mix(in srgb, var(--accent) 80%, var(--surface));
-    box-shadow: 0 0 0 1px var(--ring), var(--shadow-e1);
+    box-shadow:
+      0 0 0 1px var(--ring),
+      var(--shadow-e1);
   }
   /* Media tiles: full-bleed thumbnail + bottom name scrim + play chip */
   .zs-tile__img {
@@ -1353,7 +1396,11 @@
     bottom: 0;
     height: 56px;
     border-radius: 0 0 var(--radius-lg) var(--radius-lg);
-    background: linear-gradient(180deg, transparent, color-mix(in srgb, #000 58%, transparent));
+    background: linear-gradient(
+      180deg,
+      transparent,
+      color-mix(in srgb, #000 58%, transparent)
+    );
     pointer-events: none;
     transition: opacity 120ms var(--ease-standard);
   }
@@ -1429,7 +1476,8 @@
       color-mix(in srgb, var(--tile, var(--brand)) 8%, transparent)
     );
     box-shadow:
-      inset 0 0 0 1px color-mix(in srgb, var(--tile, var(--brand)) 18%, transparent),
+      inset 0 0 0 1px
+        color-mix(in srgb, var(--tile, var(--brand)) 18%, transparent),
       inset 0 1px 0 0 var(--glass-highlight);
   }
   .zs-tile__icon--folder > svg {
@@ -1457,7 +1505,8 @@
   .zs-tile--hidden .zs-tile__icon {
     background: color-mix(in srgb, var(--tile, var(--brand)) 6%, transparent);
     box-shadow: none;
-    outline: 1.5px dashed color-mix(in srgb, var(--tile, var(--brand)) 50%, transparent);
+    outline: 1.5px dashed
+      color-mix(in srgb, var(--tile, var(--brand)) 50%, transparent);
     outline-offset: -1.5px;
   }
   .zs-tile--hidden .zs-tile__inner {
