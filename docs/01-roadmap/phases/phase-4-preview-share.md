@@ -66,13 +66,15 @@ documents with diff); Share (presigned URL).
       lock on close/unmount**; `pagehide`/`visibilitychange` best-effort draft (never `beforeunload`).
 
 ### 4.5 — Version history + restore — ✅ object versions (Stage B) · document versions + diff (Stage C2)
-- [x] `VersionHistoryPanel` at the bottom of the preview: `Cloud/Versions`, `/Versions/Restore`, `DELETE /Versions`.
-      *(collapsible footer, lazy-fetch on expand; latest = "current" badge, no actions; restore/delete behind confirm;
-      `invalidateScope` refetches object+versions+folder+usage — [D-P4.4](../../07-decisions/DECISIONS.md).)*
-- [x] Documents `/Documents/Versions(/Diff/Restore)` with a diff view. *(Stage C2 — `DocumentVersionsPanel` in the
-      editor footer; per-row backend-computed diff (`DiffView` hunk renderer, no diff lib); restore reloads the open
+- [x] `VersionHistoryRail` in the lightbox details rail: `Cloud/Versions`, `/Versions/Restore`, `DELETE /Versions`.
+      *(lives in `PreviewDetailsRail`, lazy-fetch on expand; latest = "current" badge, no actions; restore/delete behind
+      confirm; `invalidateScope` refetches object+versions+folder+usage — [D-P4.4](../../07-decisions/DECISIONS.md). Was a
+      collapsible footer `VersionHistoryPanel` until the Zen-lightbox redesign — 9e6040e.)*
+- [x] Documents `/Documents/Versions(/Diff/Restore)` with a diff view. *(Stage C2 — `DocumentVersionsRail` in the
+      details rail; per-row backend-computed diff (`DiffView` hunk renderer, no diff lib); restore reloads the open
       editor in place; backend `ListVersions` was untyped (`void`) and got the `@ApiSuccessResponse` fix +
-      regenerate — [D-P4.8](../../07-decisions/DECISIONS.md).)*
+      regenerate — [D-P4.8](../../07-decisions/DECISIONS.md). Was `DocumentVersionsPanel` in the editor footer until the
+      Zen-lightbox redesign — 9e6040e.)*
 
 ### 4.6 — Share (MVP) — ✅ Stage A
 - [x] Share button → `Cloud/PresignedUrl` → Web Share API / copy link; note the TTL; no permission/expiry config yet.
@@ -175,6 +177,20 @@ Document version history + diff + restore — **green**: `bunx tsc --noEmit`, `b
   Retry affordance on the diff error to match the state-matrix).
 - **Live walkthrough pending creds** (real version list/diff/restore against the backend; restore-reloads-editor with a
   live lock; same open question as C1 on arbitrary uploaded text files).
+
+## Zen-lightbox redesign (2026-06-14, commit 9e6040e) + office-Escape fix (2026-06-15, commit 880a1dd)
+Post-C2 design refinement (no contract change) — **green**: `bunx tsc --noEmit`, `bun run lint`, `bun run build`, full
+Vitest suite (~296 after the redesign + office-viewer tests), `size-limit` ~804.51 / 820 KB.
+- **Restructured:** `FilePreviewModal` split into a dark `PreviewStage` (zoom + diff overlay) + a persistent
+  `PreviewDetailsRail` (tabbed metadata + versions). `VersionHistoryPanel` → **`VersionHistoryRail`** and
+  `DocumentVersionsPanel` → **`DocumentVersionsRail`** — both moved out of the collapsible/editor footer into the rail
+  (`features/preview/components/{VersionHistoryPanel,DocumentVersionsPanel}.tsx` no longer exist). `ImageViewer` gained
+  zoom; a `.zs-*` lightbox layer was added to `app/globals.css`; +preview i18n keys.
+- **Office Escape fix (880a1dd):** the cross-origin `view.officeapps.live.com` embed stole keyboard focus, so Radix's
+  Escape-to-close silently failed until focus left the frame (the "press Escape a few times" bug). `OfficeViewer` now uses
+  a `useReleaseIframeFocus` hook that hands focus back to the document the instant the embed steals it; the embed is
+  read-only so mouse scroll/click still work and the modal stays reliably closable (`tests/preview/office-viewer.test.tsx`).
+- **Reviewer sweep:** design-system + a11y-state clean (visible focus, reduced-motion, `role` live regions retained).
 
 ## Risks & mitigations
 | Risk | Mitigation |

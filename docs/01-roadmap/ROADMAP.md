@@ -8,18 +8,40 @@
 > **Update rule:** edit the relevant phase summary or its `phases/` file — **don't rewrite** — and add a Changelog line.
 
 ## Changelog
-- **2026-06-14 (Phase 5 — Secure Folders, A+B+C)** — Encrypted + hidden folders on an **in-memory, never-persisted**
-  session-token lifecycle (rule #5). New leaf feature `features/secure-folders/` (one-way `storage → secure-folders`):
-  the 2-namespace token store (`isAncestor`/`resolveToken`; ESLint-banned persistence), the `registerSecureFolderTokenSource`
-  getter + the `/Cloud/*` interceptor (extracts the path from the query + JSON-stringified body → `X-Folder-Session`/
-  `X-Hidden-Session`), clear-all on sign-out + `pagehide` (never `beforeunload`). **Encrypted:** create/convert/decrypt +
-  unlock/lock (passphrase via `xFolderPassphrase`; `SecureFolderDialogs` controller; locked-row→unlock; `FolderLocked` 403
-  state; query-key token fold). **Hidden:** hide/unhide + **`⇧⇧` reveal** (double-tap-Shift in `useShortcutDispatcher` + an
-  accessible ⌘K command) + conceal; the hidden token is keyed by the **reveal-request path** (backend-verified); conceal is
-  **A4-atomic**. **D-P5.1–D-P5.6.** Green: tsc/lint/build + **246 vitest** + size-limit 795/820 KB; reviewers clean
-  (data-layer/a11y/design/silent-failure — added a `genericMessage` so non-403 unlock/reveal isn't silent). Remaining: live
-  backend walkthrough + the A5 socket contract (pending creds); two acknowledged deviations (no separate marks store; A8
-  comment not lint-enforced). **Next: Phase 6.**
+- **2026-06-15 (Phase 6 — real-data notifications inbox)** — **Opens Phase 6.** The notification inbox goes real-data:
+  backend `Notification/History` + unread-count **typed** (`NotificationHistoryItemModel`/`UnreadCountResponseModel`) +
+  committed client **regenerated** (rule #2 — no hand-rolled DTOs; the D-P4.8 idiom). New `features/notifications`
+  `NotificationPanel`/`NotificationItem`, `useNotifications` (`useInfiniteQuery` + Load-more) / `useNotificationActions`
+  (optimistic mark-read decrementing the unread badge + mark-all, invalidate on settle), `notificationMeta` tone map,
+  `notifications.keys`, `lib/utils/format-relative-time.ts`, `account.shell.notifications.*` i18n. Zen design: tone-tinted
+  icon tiles, relative time, unread dot, loading/empty/error states + a persistent `sr-only` `aria-live` region. Green:
+  tsc/lint/build + **~296 vitest** + size-limit ~804.51/820 KB. **D-P6.1. Remaining Phase 6:** toast fan-out + quota
+  warnings, duplicate-scan UI, archive create/extract, AV-status gating, socket-first job transport. (commit 40039d8)
+- **2026-06-15 (Storage auto-refresh + secure-folder TTL re-lock — D-P5.8)** — Browse listings refetch on a 60s interval
+  (`BROWSE_REFETCH_INTERVAL_MS`) + `refetchOnWindowFocus`, so a folder reflects out-of-band changes without a manual reload.
+  New `features/secure-folders/hooks/useSecureFolderExpiry.ts` re-prompts for the passphrase (unlock dialog) when an
+  encrypted-folder session token TTL expires while you're inside it, and toasts + conceals when a hidden token expires.
+  Complements D-P5.7 (the token is now `sessionStorage`-persisted but still TTL-bounded). Touches `secure-folder-lifecycle`
+  §5/§15 + `resolveTokenEntry` in `secureFolders.store.ts`. (commit 0761af6)
+- **2026-06-15 (Phase 4 polish — Zen preview lightbox + office Escape)** — Rebuilt `FilePreviewModal` as a **Zen lightbox** —
+  a dark `PreviewStage` (zoom + diff overlay) + a persistent `PreviewDetailsRail`; `VersionHistoryPanel`→`VersionHistoryRail`
+  and `DocumentVersionsPanel`→`DocumentVersionsRail` (collapsible/editor footer → details rail) (9e6040e). Fixed the office
+  viewer so it **releases iframe focus on Escape**, letting the key close the modal (880a1dd). No new deps; tsc/lint/build green.
+- **2026-06-15 (Phase 3 polish)** — Decode catch-all route segments so spaced folder names load (abaad85); handle the
+  empty-path case in `createFile`/`useCreateFile.ts` (110fce5).
+- **2026-06-14 (Phase 5 — Secure Folders, A+B+C → Phase 5 ✅)** — Encrypted + hidden folders on a **`sessionStorage`-scoped,
+  TTL-pruned** session-token lifecycle (rule #5, later amended by D-P5.7). New leaf feature `features/secure-folders/`
+  (one-way `storage → secure-folders`): the 2-namespace token store (`isAncestor`/`resolveToken`; persists to
+  `sessionStorage` only — passphrase never stored, no `localStorage`/cookie/cross-tab; ESLint hard-bans `localStorage`/cookie
+  on the file), the `registerSecureFolderTokenSource` getter + the `/Cloud/*` interceptor (extracts the path from the query +
+  JSON-stringified body → `X-Folder-Session`/`X-Hidden-Session`), clear-all on sign-out (tab close native to `sessionStorage`
+  — no `pagehide`/`beforeunload` handler). **Encrypted:** create/convert/decrypt + unlock/lock (passphrase via
+  `xFolderPassphrase`; `SecureFolderDialogs` controller; locked-row→unlock; `FolderLocked` 403 state; query-key token fold).
+  **Hidden:** hide/unhide + **`⇧⇧` reveal** (double-tap-Shift in `useShortcutDispatcher` + an accessible ⌘K command) +
+  conceal; the hidden token is keyed by the **reveal-request path** (backend-verified); conceal is **A4-atomic**.
+  **D-P5.1–D-P5.6.** Reviewers clean (data-layer/a11y/design/silent-failure — added a `genericMessage` so non-403
+  unlock/reveal isn't silent). Two acknowledged deviations (no separate marks store; A8 comment not lint-enforced).
+  (commit 9dea78c; token-persistence amendment D-P5.7 + TTL re-lock D-P5.8 followed on 2026-06-15.)
 - **2026-06-14 (Phase 4 Stage C2 — document version history + diff + restore)** — Closes Phase 4. Editor files get a
   **document version panel** in the preview footer (sibling of the Stage-B object panel): lazy on expand, per-row
   **backend-computed diff** vs current (`DiffView` styles the server's unified-diff hunks — add/remove/context tokens +
@@ -173,9 +195,9 @@
 | 1 | Auth | [phase-1](./phases/phase-1-auth.md) | ✅ done (incl. passkey + legal/consent) |
 | 2 | App Shell + Account | [phase-2](./phases/phase-2-shell-account.md) | ✅ done (shell + profile + security + subscription) |
 | 3 | Storage Core | [phase-3](./phases/phase-3-storage-core.md) | ✅ done (browse + ops + bulk/DnD + upload + search/filter/⌘K/touch) |
-| 4 | Preview + Share | [phase-4](./phases/phase-4-preview-share.md) | 🚧 Stage A (preview core + share) + B (office via MS embed + object versions) + C1 (CodeMirror doc editor) done; C2 (doc versions/diff) pending |
-| 5 | Secure Folders | [phase-5](./phases/phase-5-secure-folders.md) | ⏳ |
-| 6 | Advanced | [phase-6](./phases/phase-6-advanced.md) | ⏳ |
+| 4 | Preview + Share | [phase-4](./phases/phase-4-preview-share.md) | ✅ done (preview core + share + office + CodeMirror editor + object & document versions/diff/restore; Zen lightbox + office-Escape fix) |
+| 5 | Secure Folders | [phase-5](./phases/phase-5-secure-folders.md) | ✅ done (encrypted + hidden folders; `sessionStorage`-scoped token lifecycle + TTL re-lock — D-P5.7/5.8) |
+| 6 | Advanced | [phase-6](./phases/phase-6-advanced.md) | 🚧 notification inbox done (real-data Zen, D-P6.1); duplicate-scan / archive-extract / AV gating / socket-first job transport pending |
 | 7 | Public & Polish (**MVP done**) | [phase-7](./phases/phase-7-public-polish.md) | ⏳ |
 | 8 | Teams (post‑MVP) | [phase-8](./phases/phase-8-teams.md) | ⏳ |
 | 9 | Organization & Discovery (post‑MVP, **backend‑gated**) | [phase-9](./phases/phase-9-organization.md) | ⏳ |
@@ -331,7 +353,7 @@ MVP does not depend on this phase.
 | Next 16.2 + React 19 + **Auth.js v5** compatibility | Could block auth/providers | Validate in Phase 0 spike; thin custom cookie‑session fallback | 0 / 1 |
 | **OpenAPI spec reachability** at generation time (`localhost:8080/swagger-json`) | Can't regenerate client | Document regen workflow; commit generated output | 0 |
 | **Multipart upload** edge cases (abort/retry/idempotency) | Data integrity, stuck uploads | Idempotency keys; explicit abort; resumable queue | 3 |
-| **Secure‑folder token** never‑persist + ancestor lookup | Security + UX loops | In‑memory store; `beforeunload`/sign‑out clear; ancestor resolver tests | 5 |
+| **Secure‑folder token** persistence bound + ancestor lookup | Security + UX loops | ✅ **Done (P5)** — `sessionStorage`-only token (tab-scoped, TTL-pruned, passphrase never stored, no localStorage/cookie); cleared on sign-out + native tab close; TTL re-lock hook + ancestor resolver tests (D-P5.7/5.8) | 5 |
 | **Realtime job** missed events / reconnect | Stuck progress UI | Socket‑first + polling fallback reconciliation | 6 |
 | ~~CDN `?w=&h=` resizing~~ | Image scaling + scaled download | ✅ **Resolved** — supported via `cdn.storage.umutk.me` → wsrv.nl (HMAC‑signed base URL) | 4 |
 | **No backend Share / Trash** | Feature gaps vs. expectations | Presigned‑URL share; delete UX leaves room for trash | 4 / 3 |

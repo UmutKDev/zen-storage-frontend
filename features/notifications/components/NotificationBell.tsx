@@ -48,7 +48,10 @@ export function NotificationBell() {
           )}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-[348px] p-0">
+      <DropdownMenuContent
+        align="end"
+        className="w-[348px] p-0 zs-overlay-solid"
+      >
         <NotificationPanel open={open} />
       </DropdownMenuContent>
     </DropdownMenu>

@@ -272,6 +272,16 @@
  * are unlayered below so they reliably win.
  * ===================================================================== */
 @layer components {
+  /* ---------- Content-rich overlay: less translucent than default glass ----------
+   * For overlays that sit over busy content (e.g. the notification inbox) where the
+   * default `glass-overlay` translucency lets too much show through. Keeps the blur +
+   * rim + elevation; only the fill gets more opaque. Theme-aware via the solid
+   * elevated-surface token (no raw color); the reduced-transparency fallback still
+   * flips both to a fully solid surface. */
+  .zs-overlay-solid {
+    --glass-overlay-bg: color-mix(in srgb, var(--surface-elevated) 95%, transparent);
+  }
+
   /* ---------- Buttons: gradient + inset rim fills ---------- */
   .zs-btn-grad-primary {
     border: 1px solid color-mix(in srgb, var(--primary) 82%, #000000);

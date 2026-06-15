@@ -1,8 +1,14 @@
 # Phase 6 — Advanced
 
-> **Status:** ⏳ not started · **Depends on:** [Phase 3](./phase-3-storage-core.md) (+ [4](./phase-4-preview-share.md) for gating).
+> **Status:** 🚧 in progress · **Depends on:** [Phase 3](./phase-3-storage-core.md) (+ [4](./phase-4-preview-share.md) for gating).
 > **Feature spec:** [advanced](../../04-features/advanced.md) · **Architecture:** [realtime-socket](../../02-architecture/realtime-socket.md)
 > · **API:** [cloud-archive](../../05-api/modules/cloud-archive.md) · [notifications](../../05-api/modules/notifications.md)
+>
+> **In progress (2026-06-15):** the **notification inbox shipped** (commit 40039d8, [D-P6.1](../../07-decisions/DECISIONS.md))
+> — real-data Zen inbox: `Notification/History` (`useInfiniteQuery` + Load-more), `/UnreadCount` unread badge, `/:Id/Read`
+> **optimistic mark-read** decrementing the badge, `/ReadAll`, tone-tinted icon tiles, relative time, loading/empty/error
+> states. Backend endpoints typed (`NotificationHistoryItemModel`/`UnreadCountResponseModel`) + client regenerated. **Still
+> open:** the §6.5 toast fan-out + quota warnings, plus §6.1–6.4 (job transport, duplicate scan, archive, AV gating).
 
 ## Objective
 The advanced storage features that ride on **async jobs + realtime**: duplicate scan, archive (zip/extract), AV scan
@@ -34,8 +40,10 @@ read‑all) + toasts + quota warnings (80/90/100%).
 - [ ] Badge on items + preview/download gate (`Cloud/Scan/Status`): pending (gated/warn), infected (block/warn), clean.
 
 ### 6.5 — Notifications inbox & quota
-- [ ] `NotificationInbox` (`Notification/History`, `/UnreadCount`, `/:Id/Read`, `/ReadAll`): unread badge, mark
-      read/all, pagination, empty state.
+- [x] `NotificationInbox` (`Notification/History`, `/UnreadCount`, `/:Id/Read`, `/ReadAll`): unread badge, mark
+      read/all, pagination (Load-more), empty/loading/error states. *(commit 40039d8 — `NotificationPanel`/`NotificationItem`,
+      `useNotifications`/`useNotificationActions`/`useUnreadCount`, `notificationMeta`; backend typed + client regenerated;
+      [D-P6.1](../../07-decisions/DECISIONS.md).)*
 - [ ] Toast fan‑out by `NotificationType` (progress types stay silent); quota warnings → banner/toast (80/90/100%).
 
 ## Endpoints used
