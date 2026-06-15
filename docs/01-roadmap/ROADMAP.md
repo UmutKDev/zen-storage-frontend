@@ -8,6 +8,14 @@
 > **Update rule:** edit the relevant phase summary or its `phases/` file — **don't rewrite** — and add a Changelog line.
 
 ## Changelog
+- **2026-06-16 (Phase 6 — §6.2 duplicate-scan panel — D-P6.4)** — The first consumer of the job plumbing.
+  `features/storage/duplicates/`: `useDuplicateScan` (start → `useJobsStore.track(ScanId)` → socket fan-out + poll drive
+  progress; result `useQuery` gated on completion); a wide-Dialog `DuplicateScanPanel` (options/scanning/results/empty/error;
+  `Switch` recursive + `Tabs` similarity preset; virtualized `DuplicateGroupCard`s — exact/similar badges, lazy thumbnails,
+  keep-largest default; `AlertDialog` confirm). Resolve-by-delete is **cross-folder** (`deleteEntries` + whole-scope
+  invalidate + local prune; path-scoped `useDelete` deliberately avoided). Launched via a toolbar `ScanButton` + a
+  `"storage:scan-duplicates"` ⌘K command + a `DuplicateScanDialogs` controller. Reviewers clean (data-layer + a11y findings
+  fixed). Green: tsc/lint/build + **323 vitest**. **Remaining Phase 6:** §6.3 archive create/extract UI, §6.4 AV gating.
 - **2026-06-16 (Phase 6 — realtime / job-transport foundation — D-P6.2/D-P6.3)** — The `/notifications` socket now
   **actually connects** (it was REST-only). Frontend: `getSocket(sessionId)` singleton + typed `notification` envelope
   (`lib/socket`); `NotificationProvider` (storm-pause / invalidation-based reconnect reconcile / polling fallback / 401);

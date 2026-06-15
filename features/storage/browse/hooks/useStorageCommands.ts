@@ -8,6 +8,7 @@ import {
   FolderInput,
   FolderPlus,
   Globe,
+  ScanSearch,
   Search,
   Trash2,
   Upload,
@@ -38,6 +39,7 @@ export function useStorageCommands(opts: {
 
   const openCreate = useStorageUiStore((s) => s.openCreateDialog);
   const openBulk = useStorageUiStore((s) => s.openBulkDialog);
+  const openScan = useStorageUiStore((s) => s.openScanDialog);
   const openUpload = useUploadsStore((s) => s.setDialogOpen);
 
   // ⇧⇧ reveals hidden folders in the current folder (+ a palette command as the
@@ -104,6 +106,14 @@ export function useStorageCommands(opts: {
     shortcutHint: "⇧⇧",
     keywords: ["hidden", "show", "secret"],
     run: openReveal,
+  });
+  useCommand({
+    id: "storage:scan-duplicates",
+    group: "actions",
+    label: t("command.actions.scanDuplicates"),
+    icon: ScanSearch,
+    keywords: ["duplicate", "duplicates", "find", "clean", "space"],
+    run: () => openScan(),
   });
 
   useCommand(

@@ -17,6 +17,7 @@ import {
   SecureFolderDialogs,
   useItemSelection,
 } from "../../operations";
+import { DuplicateScanDialogs } from "../../duplicates/components/DuplicateScanDialogs";
 import { FileDropZone } from "../../upload/components/FileDropZone";
 import { UploadButton } from "../../upload/components/UploadButton";
 import { useFolderEntries } from "../hooks/useFolderEntries";
@@ -37,6 +38,7 @@ import { CommandSearch } from "./CommandSearch";
 import { FilterMenu } from "./FilterMenu";
 import { GridView } from "./GridView";
 import { ListView } from "./ListView";
+import { ScanButton } from "./ScanButton";
 import { SortMenu } from "./SortMenu";
 import { ViewToggle } from "./ViewToggle";
 
@@ -163,6 +165,7 @@ export function StorageBrowser({ path }: { path: string }) {
             <BreadcrumbBar path={path} />
             <div className="flex items-center gap-2">
               <UploadButton path={path} />
+              <ScanButton />
               <CreateMenu path={path} />
             </div>
           </div>
@@ -188,6 +191,7 @@ export function StorageBrowser({ path }: { path: string }) {
       <BulkActionBar path={path} selection={selection} />
       <EntryActionsSheet path={path} />
       <SecureFolderDialogs />
+      <DuplicateScanDialogs path={path} />
       {/* Permanently mounted so the announcement isn't missed on first mount. */}
       <span aria-live="polite" className="sr-only">
         {liveMessage}

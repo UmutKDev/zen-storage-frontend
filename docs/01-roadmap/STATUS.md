@@ -5,7 +5,7 @@
 >
 > Legend: ⏳ not started · 🚧 in progress · ✅ done · 🚫 blocked.
 
-**Updated:** 2026-06-16 · **Branch:** `v2` · **Round:** **Phase 6 in progress — realtime/job-transport foundation landed (socket now live: `NotificationProvider` + `features/jobs` + toasts/quota; backend strengthened, D-P6.2/D-P6.3). Notifications inbox + Phases 4/5 complete.**
+**Updated:** 2026-06-16 · **Branch:** `v2` · **Round:** **Phase 6 in progress — realtime/job-transport foundation + the §6.2 duplicate-scan panel (its first consumer) landed (D-P6.2/D-P6.3/D-P6.4). Notifications inbox + Phases 4/5 complete. Remaining: §6.3 archive UI, §6.4 AV gating.**
 
 ## Where we are
 **Phase 6 has started — the notifications inbox landed (real-data Zen).** The count-only bell stub is replaced by a full
@@ -179,7 +179,7 @@ live backend contract smoke passed. Authenticated end-to-end walkthrough pending
 | 3 | Storage Core | ✅ | **Staged in 4 parts, all done.** A (browse) ✅ · B1 (single-item ops) ✅ · B2 (multi-select + bulk + DnD) ✅ · C (upload pipeline) ✅ · D (search + filter + ⌘K palette + central shortcut dispatcher + help overlay + touch bottom-sheet + server-seam ESLint) ✅ 2026-06-14 |
 | 4 | Preview + Share | ✅ | Full: preview modal (image/video/PDF/audio/office) + share (presigned URL) + CDN resize + CodeMirror editor + object & document versions/diff/restore; Zen lightbox redesign + office-Escape fix. Done 2026-06-14/15 (D-P4.0–D-P4.9) |
 | 5 | Secure Folders | ✅ | Full: token spine + encrypted + hidden (unlock/reveal/hide/conceal, ⇧⇧) + auto-refresh/TTL re-lock; session token `sessionStorage`-scoped (D-P5.7 amends the never-persist guarantee). Done 2026-06-14/15 (D-P5.1–D-P5.8) |
-| 6 | Advanced | 🚧 | **In progress** — notifications inbox (D-P6.1) + **realtime/job-transport foundation** (D-P6.2/D-P6.3: socket live, `features/jobs` plumbing, toasts/quota, backend `Cloud/Archive/Status` + dup-scan progress) done. Still pending: duplicate-scan panel, archive create/extract UI, AV gating |
+| 6 | Advanced | 🚧 | **In progress** — notifications inbox (D-P6.1) + **realtime/job-transport foundation** (D-P6.2/D-P6.3) + **§6.2 duplicate-scan panel** (D-P6.4 — first consumer) done. Still pending: §6.3 archive create/extract UI, §6.4 AV gating |
 | 7 | Public & Polish | ⏳ | **MVP completes here** (+ onboarding, observability finish) |
 | 8 | Teams (post‑MVP) | ⏳ | architect‑for now, build last |
 | 9 | Organization & Discovery (post‑MVP) | ⏳ | **backend‑gated**: favorites/recents/tags/global‑insights/real‑share |
@@ -199,16 +199,25 @@ live backend contract smoke passed. Authenticated end-to-end walkthrough pending
   shadcn init (`components.json`), motion/i18n/theme libs, providers, route groups.
 
 ## What's next
-1. **Finish Phase 6 (Advanced):** the foundation is done (inbox §6.5; live socket + §6.1 job transport + §6.5b toasts/quota,
-   D-P6.2/D-P6.3). Remaining = the **job-starting surfaces** that drive the now-built plumbing: §6.2 duplicate-scan panel
-   (poll-progress group UI + resolve-by-delete), §6.3 archive create/extract UI (+ preview + selective extract + conflict),
-   and §6.4 AV-status gating. See [Phase 6](./phases/phase-6-advanced.md).
+1. **Finish Phase 6 (Advanced):** the foundation + the §6.2 duplicate-scan panel are done (D-P6.2/D-P6.3/D-P6.4).
+   Remaining = the other two **job-starting surfaces**: §6.3 archive create/extract UI (+ preview + selective extract +
+   conflict) and §6.4 AV-status gating. See [Phase 6](./phases/phase-6-advanced.md).
 2. **Deferred live-backend walkthroughs (need login creds):** the Phase 3 upload matrix (small + large multipart w/
    progress, pause/resume, cancel→server Abort, kill-tab-at-50%→resume without re-sending part 1, forced 409
    REPLACE/KEEP_BOTH/SKIP + apply-to-all, quota/max-size pre-flight, folder drop/picker, zero-byte) + the B1/B2 ops matrix;
    the Phase 4 viewers/share/AV/editor round-trip; the Phase 5 unlock/reveal/conceal + bfcache/cross-tab + TTL re-lock.
 
 ## Recent status entries
+- **2026-06-16 (Phase 6 — §6.2 duplicate-scan panel, D-P6.4)** — The first consumer of the job plumbing. New
+  `features/storage/duplicates/` (kept inside storage; consumes `@/features/jobs` one-way): `useDuplicateScan` (start →
+  `useJobsStore.track(ScanId)` so the socket fan-out + `reconcileActiveJobs` drive progress; result via `useQuery` gated on
+  completion; resolve-by-delete via `deleteEntries` + whole-scope invalidate + **local prune**, cross-folder safe — the
+  path-scoped `useDelete` was deliberately avoided), a wide-Dialog `DuplicateScanPanel` (options/scanning/results/empty/error
+  states; `Switch` recursive + `Tabs` similarity preset; virtualized `DuplicateGroupCard`s with exact/similar badges, lazy
+  thumbnails, **keep-largest default**; `AlertDialog` confirm + freed-bytes), launched via a toolbar `ScanButton` + a
+  `"storage:scan-duplicates"` ⌘K command + a `DuplicateScanDialogs` controller. Pure `lib/resolve.ts` unit-tested. Reviewers:
+  design-system clean; data-layer + a11y findings fixed (delete→`surfacePassthroughError`; live regions hoisted out of
+  `DialogContent` + assertive failed/cancelled). Green: tsc/lint/build + **323 vitest** (+4). **D-P6.4.**
 - **2026-06-16 (Phase 6 — realtime / job-transport foundation, D-P6.2/D-P6.3)** — Made the `/notifications` socket
   **actually connect** (it was REST-only until now) and laid the §6.1 plumbing + §6.5b. **Frontend:** real
   `getSocket(sessionId)` singleton + typed `notification` envelope (`lib/socket`); `NotificationProvider` (mounted after

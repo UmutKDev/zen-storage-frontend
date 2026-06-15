@@ -12,8 +12,8 @@
 > **Foundation landed (2026-06-16, [D-P6.2](../../07-decisions/DECISIONS.md)/D-P6.3):** the `/notifications` socket is
 > now **live** (`NotificationProvider`) with §6.1 job-transport plumbing (`features/jobs`: idempotent store +
 > `reconcileActiveJobs` + `JobIndicator`) and §6.5b (toast fan-out + quota banner). Backend strengthened: `Cloud/Archive/Status`
-> + transient `DUPLICATE_SCAN_PROGRESS`. **Still open:** §6.2 duplicate-scan panel, §6.3 archive create/extract UI,
-> §6.4 AV gating — the job-starting surfaces that drive the now-built plumbing.
+> + transient `DUPLICATE_SCAN_PROGRESS`. The **§6.2 duplicate-scan panel** then landed as the first consumer of the
+> plumbing (2026-06-16, D-P6.4). **Still open:** §6.3 archive create/extract UI, §6.4 AV gating.
 
 ## Objective
 The advanced storage features that ride on **async jobs + realtime**: duplicate scan, archive (zip/extract), AV scan
@@ -32,8 +32,8 @@ read‑all) + toasts + quota warnings (80/90/100%).
 - [x] Shared job‑progress UI (tray/toast) pattern for archive + duplicate. *(D-P6.2 — Zen `JobIndicator` tray driven by `useJobsStore`; the §6.2/§6.3 panels only `track()` a job.)*
 
 ### 6.2 — Duplicate scan
-- [ ] Start/status/result/cancel (`Cloud/Scan/Duplicate/*`); progress (socket‑first + poll).
-- [ ] Group UI: exact (SHA‑256) vs perceptual (dHash) + similarity + potential savings; resolve via delete.
+- [x] Start/status/result/cancel (`Cloud/Scan/Duplicate/*`); progress (socket‑first + poll). *(D-P6.4 — `features/storage/duplicates`: `useDuplicateScan` start→`track` the ScanId in the job store; progress reads from `useJobsStore` + the foundation's poll; cancel.)*
+- [x] Group UI: exact (SHA‑256) vs perceptual (dHash) + similarity + potential savings; resolve via delete. *(D-P6.4 — wide-Dialog `DuplicateScanPanel` + virtualized `DuplicateGroupCard`s, default "keep largest / delete the rest", cross-folder `deleteEntries` + whole-scope invalidate + local prune; launched from the toolbar `ScanButton` + ⌘K command.)*
 
 ### 6.3 — Archive (zip / extract)
 - [ ] Create (zip) from bulk selection (`Archive/Create/Start`/`Cancel`); output appears in the folder.
@@ -58,7 +58,7 @@ Contracts: [cloud-core](../../05-api/modules/cloud-core.md) (scan), [cloud-archi
 [notifications](../../05-api/modules/notifications.md).
 
 ## Acceptance‑test checklist
-- [ ] Duplicate scan runs with live progress; groups render with similarity + savings; cancel works; resolve deletes.
+- [x] Duplicate scan runs with live progress; groups render with similarity + savings; cancel works; resolve deletes. *(D-P6.4 — built + unit-tested (`tests/storage/duplicate-resolve`); live-backend walkthrough pending creds like the rest.)*
 - [ ] Archive create produces a file with live progress; cancel works.
 - [ ] Archive extract previews entries; selective extract works; output conflicts are handled.
 - [ ] **Killing the socket mid‑job** still completes via polling reconciliation.

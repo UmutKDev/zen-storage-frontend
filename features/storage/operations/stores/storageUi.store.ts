@@ -18,22 +18,29 @@ interface StorageUiState {
   createDialog: CreateDialogKind | null;
   /** The entry whose touch action sheet is open (null = closed). */
   sheetEntry: FolderEntry | null;
+  /** Whether the duplicate-scan dialog is open. */
+  scanDialog: boolean;
   openBulkDialog: (kind: BulkDialogKind) => void;
   closeBulkDialog: () => void;
   openCreateDialog: (kind: CreateDialogKind) => void;
   closeCreateDialog: () => void;
   openSheet: (entry: FolderEntry) => void;
   closeSheet: () => void;
+  openScanDialog: () => void;
+  closeScanDialog: () => void;
 }
 
 export const useStorageUiStore = create<StorageUiState>()((set) => ({
   bulkDialog: null,
   createDialog: null,
   sheetEntry: null,
+  scanDialog: false,
   openBulkDialog: (bulkDialog) => set({ bulkDialog }),
   closeBulkDialog: () => set({ bulkDialog: null }),
   openCreateDialog: (createDialog) => set({ createDialog }),
   closeCreateDialog: () => set({ createDialog: null }),
   openSheet: (sheetEntry) => set({ sheetEntry }),
   closeSheet: () => set({ sheetEntry: null }),
+  openScanDialog: () => set({ scanDialog: true }),
+  closeScanDialog: () => set({ scanDialog: false }),
 }));
