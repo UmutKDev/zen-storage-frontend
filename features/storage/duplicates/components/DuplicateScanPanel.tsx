@@ -46,7 +46,7 @@ type Preset = keyof typeof PRESETS;
  * Duplicate-scan panel (§6.2): a wide Dialog whose body swaps by the tracked
  * job's state — options → scanning (progress from the job store) → results
  * (exact/perceptual groups, resolve by selecting which copies to delete). The
- * global `JobIndicator` also surfaces the scan; this is the review/resolve UI.
+ * topbar `JobsMenu` also surfaces the scan; this is the review/resolve UI.
  */
 export function DuplicateScanPanel({
   path,

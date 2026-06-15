@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { t } from "@/lib/i18n";
 import { Button } from "@/components/ui";
 import { NotificationBell } from "@/features/notifications";
+import { JobsMenu } from "@/features/jobs";
 import { useShellStore } from "../stores/shell.store";
 import { ProfileMenu } from "./ProfileMenu";
 import { ThemeToggle } from "./ThemeToggle";
@@ -43,6 +44,7 @@ export function Topbar() {
 
       <div className="flex-1" />
 
+      <JobsMenu />
       <NotificationBell />
       <ThemeToggle />
       <ProfileMenu />

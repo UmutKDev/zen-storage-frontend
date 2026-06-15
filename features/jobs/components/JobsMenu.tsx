@@ -1,13 +1,28 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import { Archive, ArchiveRestore, ScanSearch, X, type LucideIcon } from "lucide-react";
+import { useState } from "react";
+import {
+  Archive,
+  ArchiveRestore,
+  Ban,
+  ListChecks,
+  Loader2,
+  ScanSearch,
+  X,
+  type LucideIcon,
+} from "lucide-react";
 import { cn, toneClass, type FileTone } from "@/lib/utils";
 import { t } from "@/lib/i18n";
-import { toast as toastVariant } from "@/lib/motion";
-import { Button, Progress } from "@/components/ui";
+import {
+  Badge,
+  Button,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+  Progress,
+} from "@/components/ui";
 import { useJobsStore, type Job, type JobKind, type JobStatus } from "../stores/jobs.store";
+import { cancelJob } from "../api/jobs.mutations";
 
 const KIND_META: Record<JobKind, { icon: LucideIcon; tone: FileTone; labelKey: string }> = {
   "archive-create": { icon: Archive, tone: "amber", labelKey: "jobs.kind.archiveCreate" },
@@ -53,7 +68,15 @@ function detailLine(job: Job): string {
   return phase ?? t(STATUS_KEY.running);
 }
 
-function JobRow({ job, onDismiss }: { job: Job; onDismiss: (id: string) => void }) {
+function JobRow({
+  job,
+  onDismiss,
+  onCancel,
+}: {
+  job: Job;
+  onDismiss: (id: string) => void;
+  onCancel: (job: Job) => void;
+}) {
   const meta = KIND_META[job.kind];
   const KindIcon = meta.icon;
   const finished = job.status !== "running";
@@ -83,7 +106,17 @@ function JobRow({ job, onDismiss }: { job: Job; onDismiss: (id: string) => void 
           >
             <X />
           </Button>
-        ) : null}
+        ) : (
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            className="relative after:absolute after:-inset-1 after:content-['']"
+            aria-label={t("jobs.tray.cancel")}
+            onClick={() => onCancel(job)}
+          >
+            <Ban />
+          </Button>
+        )}
       </div>
       {job.status === "running" ? (
         <Progress value={job.percentage} aria-label={t("jobs.progressLabel")} />
@@ -101,20 +134,24 @@ function JobRow({ job, onDismiss }: { job: Job; onDismiss: (id: string) => void 
 }
 
 /**
- * Shared background-job tray (the §6.1 indicator). Driven entirely by
- * `useJobsStore`; the duplicate-scan / archive panels (§6.2/§6.3) only `track()`
- * a job and this renders its live progress + terminal state. Bottom-right,
- * survives navigation (mounted in the app layout); stacks below the upload tray
- * (unifying the two is a follow-up when the job-starting panels land). Polite +
- * assertive live regions announce completions / failures.
+ * Topbar background-tasks menu (the discoverable §6.1 indicator — replaces the
+ * floating tray). Mirrors the notification bell: an icon that appears whenever a
+ * task exists (a spinner + active-count badge while running) and opens a dropdown
+ * listing each task's live progress with **Cancel** (running) / dismiss (finished).
+ * Driven entirely by `useJobsStore`; the duplicate-scan / archive panels only
+ * `track()` a job. The live regions stay mounted (announcements fire even with the
+ * menu closed).
  */
-export function JobIndicator() {
+export function JobsMenu() {
   const jobs = useJobsStore((s) => s.jobs);
   const remove = useJobsStore((s) => s.remove);
   const list = Object.values(jobs).sort((a, b) => b.createdAt - a.createdAt);
   const activeCount = list.filter((j) => j.status === "running").length;
+  const finishedCount = list.length - activeCount;
+  const [open, setOpen] = useState(false);
 
-  // Live-region copy, derived on status change (mirrors the upload tray).
+  // Live-region copy, derived on status change (the sanctioned derive-on-change
+  // pattern). Polite for completions/cancellations, assertive for failures.
   const [prev, setPrev] = useState<ReadonlyMap<string, JobStatus>>(new Map());
   const [polite, setPolite] = useState("");
   const [alert, setAlert] = useState("");
@@ -133,34 +170,46 @@ export function JobIndicator() {
     setPrev(new Map(list.map((j) => [j.id, j.status])));
   }
 
-  // Focus handoff: when a dismissed/cleared button leaves the DOM, move focus to
-  // the still-present tray region so it doesn't fall to <body> (mirrors UploadTray).
-  const trayRef = useRef<HTMLElement>(null);
-  const handleDismiss = (id: string) => {
-    const others = list.length > 1;
-    remove(id);
-    if (others) trayRef.current?.focus();
+  const handleCancel = (job: Job) => {
+    void cancelJob(job).then((ok) => {
+      if (ok) useJobsStore.getState().settle(job.id, "cancelled");
+    });
   };
-  const handleClearFinished = () => {
-    useJobsStore.getState().clearFinished();
-    if (activeCount > 0) trayRef.current?.focus();
-  };
+  const handleClearFinished = () => useJobsStore.getState().clearFinished();
+
+  const TriggerIcon = activeCount > 0 ? Loader2 : ListChecks;
+  const triggerLabel =
+    activeCount > 0
+      ? `${t("jobs.tray.title")}, ${activeCount} ${t("jobs.tray.activeSuffix")}`
+      : t("jobs.tray.title");
 
   return (
     <>
-      <AnimatePresence>
-        {list.length > 0 ? (
-          <motion.section
-            ref={trayRef}
-            tabIndex={-1}
-            variants={toastVariant}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            aria-label={t("jobs.tray.title")}
-            className="glass-overlay fixed bottom-4 right-4 z-40 w-80 max-w-[calc(100vw-2rem)] rounded-lg outline-none"
-          >
-            <header className="flex items-center gap-2 border-b border-border px-3 py-2">
+      {list.length > 0 ? (
+        <DropdownMenu open={open} onOpenChange={setOpen}>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="relative"
+              aria-label={triggerLabel}
+            >
+              <TriggerIcon
+                className={cn("size-4", activeCount > 0 && "animate-spin")}
+              />
+              {activeCount > 0 ? (
+                <Badge
+                  variant="default"
+                  className="absolute -top-0.5 -right-0.5 size-4 min-w-4 justify-center rounded-full px-1 text-[10px] leading-none shadow-[0_0_0_2px_var(--surface)]"
+                  aria-hidden
+                >
+                  {activeCount > 99 ? "99+" : activeCount}
+                </Badge>
+              ) : null}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-[348px] p-0 zs-overlay-solid">
+            <div className="flex items-center gap-2 border-b border-border px-3 py-2">
               <h2 className="flex-1 text-sm font-medium text-foreground">
                 {t("jobs.tray.title")}
                 {activeCount > 0 ? (
@@ -170,24 +219,29 @@ export function JobIndicator() {
                   </span>
                 ) : null}
               </h2>
-              {activeCount < list.length ? (
+              {finishedCount > 0 ? (
                 <Button variant="ghost" size="sm" onClick={handleClearFinished}>
                   {t("jobs.tray.clearFinished")}
                 </Button>
               ) : null}
-            </header>
-            <ul className="max-h-72 divide-y divide-border overflow-y-auto">
+            </div>
+            <ul className="max-h-80 divide-y divide-border overflow-y-auto">
               {list.map((job) => (
-                <JobRow key={job.id} job={job} onDismiss={handleDismiss} />
+                <JobRow
+                  key={job.id}
+                  job={job}
+                  onDismiss={remove}
+                  onCancel={handleCancel}
+                />
               ))}
             </ul>
-          </motion.section>
-        ) : null}
-      </AnimatePresence>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      ) : null}
       <span aria-live="polite" className="sr-only">
         {polite}
       </span>
-      <span role="alert" className="sr-only">
+      <span aria-live="assertive" className="sr-only">
         {alert}
       </span>
     </>

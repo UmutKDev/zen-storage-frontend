@@ -780,6 +780,7 @@
     "tray": {
       "title": "Background tasks",
       "activeSuffix": "active",
+      "cancel": "Cancel task",
       "dismiss": "Dismiss",
       "clearFinished": "Clear finished"
     },
