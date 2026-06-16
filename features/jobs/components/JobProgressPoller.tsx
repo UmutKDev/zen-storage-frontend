@@ -27,6 +27,14 @@ export function JobProgressPoller() {
     Object.values(s.jobs).some((j) => j.status === "running"),
   );
 
+  // Restore running jobs persisted (tab-scoped) before a refresh, so reloading
+  // mid-extract doesn't drop the background-task indicator. Runs once on the
+  // client after mount (the store uses skipHydration to avoid an SSR mismatch);
+  // the poll effect below then reconciles their real status.
+  useEffect(() => {
+    void useJobsStore.persist.rehydrate();
+  }, []);
+
   useEffect(() => {
     if (!hasRunning) return;
     // Poll once immediately so the bar moves without waiting a full interval.

@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { createJSONStorage, persist } from "zustand/middleware";
 
 /** Long-running async jobs (archive create/extract, duplicate scan). */
 export type JobKind = "archive-create" | "archive-extract" | "duplicate-scan";
@@ -64,7 +65,9 @@ interface JobsState {
   reset: () => void;
 }
 
-export const useJobsStore = create<JobsState>((set) => ({
+export const useJobsStore = create<JobsState>()(
+  persist(
+    (set) => ({
   jobs: {},
 
   track: ({ id, kind, title, path }) =>
@@ -183,4 +186,21 @@ export const useJobsStore = create<JobsState>((set) => ({
     })),
 
   reset: () => set({ jobs: {} }),
-}));
+    }),
+    {
+      name: "zen-jobs",
+      storage: createJSONStorage(() => sessionStorage),
+      // Tab-scoped, RUNNING-only: a refresh mid-job keeps the background-task
+      // indicator alive (the poller reconciles status on rehydrate); terminal
+      // jobs aren't restored (they were already surfaced/toasted).
+      partialize: (state) => ({
+        jobs: Object.fromEntries(
+          Object.entries(state.jobs).filter(([, j]) => j.status === "running"),
+        ),
+      }),
+      // Rehydrate explicitly after mount (JobProgressPoller) so the SSR'd empty
+      // state matches first paint — no hydration mismatch on the topbar badge.
+      skipHydration: true,
+    },
+  ),
+);
