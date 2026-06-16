@@ -737,27 +737,6 @@ export interface CloudRestoreVersionRequestModel {
      */
     'VersionId': string;
 }
-export interface CloudScanStatusResponseBaseModel {
-    'Result': CloudScanStatusResponseModel;
-    'Status': BaseStatusModel;
-}
-export interface CloudScanStatusResponseModel {
-    'Status': CloudScanStatusResponseModelStatusEnum;
-    'Reason'?: string;
-    'Signature'?: string;
-    'ScannedAt'?: string;
-}
-
-export const CloudScanStatusResponseModelStatusEnum = {
-    Pending: 'pending',
-    Clean: 'clean',
-    Infected: 'infected',
-    Error: 'error',
-    Skipped: 'skipped'
-} as const;
-
-export type CloudScanStatusResponseModelStatusEnum = typeof CloudScanStatusResponseModelStatusEnum[keyof typeof CloudScanStatusResponseModelStatusEnum];
-
 export interface CloudSearchResponseBaseModel {
     'Result': CloudSearchResponseModel;
     'Status': BaseStatusModel;
@@ -7292,49 +7271,6 @@ export const CloudApiAxiosParamCreator = function (configuration?: Configuration
             };
         },
         /**
-         * Returns the latest antivirus scan status for the given object key.
-         * @summary Get antivirus scan status for a file
-         * @param {string} key 
-         * @param {string} [xTeamId] Optional team ID. When provided, all cloud operations target the team storage instead of personal storage.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        scanStatus: async (key: string, xTeamId?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'key' is not null or undefined
-            assertParamExists('scanStatus', 'key', key)
-            const localVarPath = `/Api/Cloud/Scan/Status`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication cookie required
-
-            if (key !== undefined) {
-                localVarQueryParameter['Key'] = key;
-            }
-
-
-    
-            if (xTeamId != null) {
-                localVarHeaderParameter['x-team-id'] = String(xTeamId);
-            }
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
          * Recursively searches the user\'s files by partial filename match (case-insensitive). Optionally restrict to a specific path or filter by extension. Encrypted folder contents are excluded unless a valid session token is provided via X-Folder-Session header.
          * @summary Search files by name
          * @param {string} query Search query - partial filename match (case-insensitive, min 2 chars)
@@ -7754,20 +7690,6 @@ export const CloudApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Returns the latest antivirus scan status for the given object key.
-         * @summary Get antivirus scan status for a file
-         * @param {string} key 
-         * @param {string} [xTeamId] Optional team ID. When provided, all cloud operations target the team storage instead of personal storage.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async scanStatus(key: string, xTeamId?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CloudScanStatusResponseBaseModel>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.scanStatus(key, xTeamId, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['CloudApi.scanStatus']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
          * Recursively searches the user\'s files by partial filename match (case-insensitive). Optionally restrict to a specific path or filter by extension. Encrypted folder contents are excluded unless a valid session token is provided via X-Folder-Session header.
          * @summary Search files by name
          * @param {string} query Search query - partial filename match (case-insensitive, min 2 chars)
@@ -7984,16 +7906,6 @@ export const CloudApiFactory = function (configuration?: Configuration, basePath
          */
         restoreVersion(requestParameters: CloudApiRestoreVersionRequest, options?: RawAxiosRequestConfig): AxiosPromise<void> {
             return localVarFp.restoreVersion(requestParameters.cloudRestoreVersionRequestModel, requestParameters.xTeamId, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * Returns the latest antivirus scan status for the given object key.
-         * @summary Get antivirus scan status for a file
-         * @param {CloudApiScanStatusRequest} requestParameters Request parameters.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        scanStatus(requestParameters: CloudApiScanStatusRequest, options?: RawAxiosRequestConfig): AxiosPromise<CloudScanStatusResponseBaseModel> {
-            return localVarFp.scanStatus(requestParameters.key, requestParameters.xTeamId, options).then((request) => request(axios, basePath));
         },
         /**
          * Recursively searches the user\'s files by partial filename match (case-insensitive). Optionally restrict to a specific path or filter by extension. Encrypted folder contents are excluded unless a valid session token is provided via X-Folder-Session header.
@@ -8302,18 +8214,6 @@ export interface CloudApiRestoreVersionRequest {
 }
 
 /**
- * Request parameters for scanStatus operation in CloudApi.
- */
-export interface CloudApiScanStatusRequest {
-    readonly key: string
-
-    /**
-     * Optional team ID. When provided, all cloud operations target the team storage instead of personal storage.
-     */
-    readonly xTeamId?: string
-}
-
-/**
  * Request parameters for search operation in CloudApi.
  */
 export interface CloudApiSearchRequest {
@@ -8556,17 +8456,6 @@ export class CloudApi extends BaseAPI {
      */
     public restoreVersion(requestParameters: CloudApiRestoreVersionRequest, options?: RawAxiosRequestConfig) {
         return CloudApiFp(this.configuration).restoreVersion(requestParameters.cloudRestoreVersionRequestModel, requestParameters.xTeamId, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * Returns the latest antivirus scan status for the given object key.
-     * @summary Get antivirus scan status for a file
-     * @param {CloudApiScanStatusRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    public scanStatus(requestParameters: CloudApiScanStatusRequest, options?: RawAxiosRequestConfig) {
-        return CloudApiFp(this.configuration).scanStatus(requestParameters.key, requestParameters.xTeamId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

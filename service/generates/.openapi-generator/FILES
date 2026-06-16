@@ -104,8 +104,6 @@ docs/CloudObjectListModelResult.md
 docs/CloudObjectModel.md
 docs/CloudPathModel.md
 docs/CloudRestoreVersionRequestModel.md
-docs/CloudScanStatusResponseBaseModel.md
-docs/CloudScanStatusResponseModel.md
 docs/CloudSearchResponseBaseModel.md
 docs/CloudSearchResponseModel.md
 docs/CloudUpdateRequestModel.md

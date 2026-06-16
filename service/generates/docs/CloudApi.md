@@ -20,7 +20,6 @@ All URIs are relative to *http://localhost*
 |[**listVersions**](#listversions) | **GET** /Api/Cloud/Versions | List previous versions of a file|
 |[**move**](#move) | **PUT** /Api/Cloud/Move | Move/rename an object|
 |[**restoreVersion**](#restoreversion) | **PUT** /Api/Cloud/Versions/Restore | Restore a previous version of a file|
-|[**scanStatus**](#scanstatus) | **GET** /Api/Cloud/Scan/Status | Get antivirus scan status for a file|
 |[**search**](#search) | **GET** /Api/Cloud/Search | Search files by name|
 |[**update**](#update) | **PUT** /Api/Cloud/Update | Update object metadata or rename|
 |[**userStorageUsage**](#userstorageusage) | **GET** /Api/Cloud/User/StorageUsage | Get user\&#39;s storage usage|
@@ -985,61 +984,6 @@ void (empty response body)
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 |**200** |  |  -  |
-
-[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-
-# **scanStatus**
-> CloudScanStatusResponseBaseModel scanStatus()
-
-Returns the latest antivirus scan status for the given object key.
-
-### Example
-
-```typescript
-import {
-    CloudApi,
-    Configuration
-} from './api';
-
-const configuration = new Configuration();
-const apiInstance = new CloudApi(configuration);
-
-let key: string; // (default to undefined)
-let xTeamId: string; //Optional team ID. When provided, all cloud operations target the team storage instead of personal storage. (optional) (default to undefined)
-
-const { status, data } = await apiInstance.scanStatus(
-    key,
-    xTeamId
-);
-```
-
-### Parameters
-
-|Name | Type | Description  | Notes|
-|------------- | ------------- | ------------- | -------------|
-| **key** | [**string**] |  | defaults to undefined|
-| **xTeamId** | [**string**] | Optional team ID. When provided, all cloud operations target the team storage instead of personal storage. | (optional) defaults to undefined|
-
-
-### Return type
-
-**CloudScanStatusResponseBaseModel**
-
-### Authorization
-
-[cookie](../README.md#cookie)
-
-### HTTP request headers
-
- - **Content-Type**: Not defined
- - **Accept**: application/json
-
-
-### HTTP response details
-| Status code | Description | Response headers |
-|-------------|-------------|------------------|
-|**200** | Success |  -  |
-|**500** | Internal Server Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
