@@ -1,4 +1,5 @@
 export { JobsMenu } from "./components/JobsMenu";
+export { JobProgressPoller } from "./components/JobProgressPoller";
 export {
   useJobsStore,
   type Job,

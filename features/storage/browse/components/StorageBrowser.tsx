@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, useEffect, useMemo, useState } from "react";
+import { type ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { t } from "@/lib/i18n";
 import { isPreviewableName } from "@/lib/preview";
@@ -25,6 +25,7 @@ import { SEARCH_MIN_CHARS, useSearch, type SearchScope } from "../hooks/useSearc
 import { useStorageCommands } from "../hooks/useStorageCommands";
 import { usePreviewNavStore } from "../stores/previewNav.store";
 import { useViewPrefs } from "../stores/viewPrefs.store";
+import { pathHref } from "../lib/href";
 import { BreadcrumbBar } from "./BreadcrumbBar";
 import {
   BrowserError,
@@ -64,7 +65,13 @@ export function StorageBrowser({ path }: { path: string }) {
   useStorageCommands({ path, selection });
   // While inside an encrypted/hidden folder, re-lock (and re-prompt for encrypted)
   // the instant the session token's TTL lapses — content can't outlive its token.
-  useSecureFolderExpiry(path);
+  // If a HIDDEN reveal lapses while the user is inside the revealed folder, send
+  // them back out to the reveal origin (the folder re-hides and can't be browsed).
+  const onHiddenExpireInside = useCallback(
+    (origin: string) => router.replace(pathHref(origin), { scroll: false }),
+    [router],
+  );
+  useSecureFolderExpiry(path, onHiddenExpireInside);
 
   // Publish the ordered previewable-file keys (in display order) for the preview
   // modal's ←/→ navigation — a neutral hand-off so preview never imports browse

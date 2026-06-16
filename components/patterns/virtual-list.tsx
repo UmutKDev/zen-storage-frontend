@@ -96,6 +96,10 @@ export function VirtualList<R>({
           {virtualizer.getVirtualItems().map((item) => (
             <div
               key={getRowKey(rows[item.index], item.index)}
+              // Measure each row's real height (rows vary — duplicate groups have
+              // different file counts, cards differ) so absolutely-positioned rows
+              // never overlap or leave gaps. `estimateSize` is only the first guess.
+              ref={virtualizer.measureElement}
               role={rowRole}
               data-index={item.index}
               style={{

@@ -7,6 +7,7 @@ import { MotionConfig } from "framer-motion";
 import { SessionProvider } from "@/lib/auth/client";
 import { SessionSync } from "@/features/auth";
 import { NotificationProvider } from "@/features/notifications";
+import { JobProgressPoller } from "@/features/jobs";
 import { CookieConsentBanner } from "@/features/account";
 import { secureFolderTokenGetter } from "@/features/secure-folders";
 import { Toaster, TooltipProvider } from "@/components/ui";
@@ -60,6 +61,7 @@ export function Providers({ children }: { children: ReactNode }) {
     <SessionProvider>
       <QueryClientProvider client={queryClient}>
         <SessionSync />
+        <JobProgressPoller />
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
