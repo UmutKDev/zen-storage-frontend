@@ -21,7 +21,7 @@
 | `accent-foreground` | text on accent | `#ffffff` | `#1a1410` |
 | `success` | positive/clean state | `#16a34a` | `#22c55e` |
 | `warning` | quota 80/90, caution | `#d97706` | `#f59e0b` |
-| `danger` | destructive/delete/error/infected | `#dc2626` | `#ef4444` |
+| `danger` | destructive/delete/error | `#dc2626` | `#ef4444` |
 | `info` | neutral notices | `#2563eb` | `#3b82f6` |
 
 > **Palette direction (decided):** a **monochrome base** — black / white / grays for all structure (background, surfaces,
@@ -46,8 +46,6 @@ translucent surface. (Glass is *additive* to this palette; the solid tokens abov
 |---|---|
 | Quota warning (80/90%) | `warning` |
 | Quota exceeded (100%) | `danger` |
-| AV infected | `danger` |
-| AV pending | `warning` (badge) |
 | Success toasts / clean | `success` |
 | Locked / reveal‑required | `muted` chrome + `accent` CTA |
 

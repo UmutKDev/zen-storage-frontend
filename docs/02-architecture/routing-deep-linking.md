@@ -49,7 +49,7 @@ intended path).
 
 - Per‑segment `loading.tsx` (skeletons, motion‑aware) and `error.tsx` (typed‑error display + retry).
 - These back the [state-matrix](./state-matrix.md): loading / error at the route level; empty / no‑results / locked /
-  reveal‑required / quota / AV / permission inside the page.
+  reveal‑required / quota / permission inside the page.
 
 ## 5. Server vs client
 - RSC where it helps (public pages, initial shells); client components for interactive storage surfaces.

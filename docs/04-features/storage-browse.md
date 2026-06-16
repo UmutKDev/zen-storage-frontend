@@ -32,7 +32,7 @@
 
 **States (matrix)**
 loading (skeleton grid/list) · empty folder (illustration + upload/create CTAs) · no‑search‑results · network/server
-error (retry) · locked (encrypted, needs unlock) · reveal‑required (hidden) · AV pending/infected badges · quota
+error (retry) · locked (encrypted, needs unlock) · reveal‑required (hidden) · quota
 warning/exceeded (usage bar color + banner). See [state-matrix](../02-architecture/state-matrix.md).
 
 **Performance**

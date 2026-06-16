@@ -32,8 +32,8 @@
 - Images with metadata offer **scaled vs original** ([preview](./preview.md)).
 
 ## States (matrix)
-optimistic + rollback on every mutation; conflict (409) dialog; 403 (secure folder) → unlock prompt; AV‑infected may
-gate download; quota irrelevant to delete but relevant to move‑into‑encrypted. See
+optimistic + rollback on every mutation; conflict (409) dialog; 403 (secure folder) → unlock prompt;
+quota irrelevant to delete but relevant to move‑into‑encrypted. See
 [state-matrix](../02-architecture/state-matrix.md).
 
 ## a11y

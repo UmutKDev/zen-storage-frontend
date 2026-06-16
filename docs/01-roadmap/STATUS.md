@@ -1,13 +1,14 @@
 # STATUS — progress tracker
 
-> Lightweight, **always‑current** tracker. The source of truth for phase *detail* is each
+> Lightweight, **always‑current** tracker. The source of truth for phase _detail_ is each
 > [`phases/phase-N-*.md`](./phases/) file; this is the one‑screen "where are we" view.
 >
 > Legend: ⏳ not started · 🚧 in progress · ✅ done · 🚫 blocked.
 
-**Updated:** 2026-06-16 · **Branch:** `v2` · **Round:** **Phase 6 in progress — realtime/job-transport foundation + the §6.2 duplicate-scan panel (its first consumer) landed (D-P6.2/D-P6.3/D-P6.4). Notifications inbox + Phases 4/5 complete. Remaining: §6.3 archive UI, §6.4 AV gating.**
+**Updated:** 2026-06-17 · **Branch:** `v2` · **Round:** **Phase 6 in progress — job-transport foundation + §6.2 duplicate scan + §6.3 archive UI all landed (D-P6.2…D-P6.4). Notifications inbox + Phases 4/5 complete. Remaining: the live kill-socket walkthrough + the inbox/quota acceptance pass.**
 
 ## Where we are
+
 **Phase 6 has started — the notifications inbox landed (real-data Zen).** The count-only bell stub is replaced by a full
 inbox panel (`features/notifications`: `NotificationPanel`/`NotificationItem`, `useNotifications`/`useNotificationActions`,
 `notificationMeta`, `notifications.keys`): a `useInfiniteQuery` history list + Load-more, **optimistic mark-read** that
@@ -31,10 +32,19 @@ strengthened** so the resilience promise is real (rule D-S8): a new `Cloud/Archi
 `DUPLICATE_SCAN_PROGRESS` socket events (progress = socket-only/never-persisted; terminal = persisted), then the client was
 regenerated (clean: 151 insertions, 0 deletions). Green: backend `build`; frontend `tsc` + `lint` + **319 Vitest** (66 files;
 +6 suites incl. idempotent-store / fan-out / provider-lifecycle / reconcile / auth-dedupe). **Next: the job-starting surfaces**
-— §6.2 duplicate-scan panel, §6.3 archive create/extract UI, §6.4 AV-status gating — plus the deferred Phase 3/4/5 live-backend
+— §6.2 duplicate-scan panel, §6.3 archive create/extract UI — plus the deferred Phase 3/4/5 live-backend
 walkthroughs (pending creds).
 
+**§6.3 archive UI landed (2026-06-16).** Archive create/extract (`features/storage/archive`)
+launches from the bulk bar / row menu and drives the job tray (backend gained extract conflict strategy + create
+secure-scoping parity). Create zips a bulk selection; extract previews entries, supports selective extract + a new-folder
+toggle + a conflict strategy; both close on start and hand progress/cancel to the topbar `JobsMenu`. Green: `tsc` + `lint`;
+the archive flow is unit-tested + backed by `cloud.archive.service.spec`. **Phase 6's feature surfaces (notifications,
+job transport, duplicate scan, archive) are now built** — remaining is the live kill-socket walkthrough + the inbox/quota
+acceptance pass.
+
 ## Earlier — Phase 5 (secure folders)
+
 **Phase 5 is complete — secure folders.** A new leaf feature `features/secure-folders/` owns a **`sessionStorage`-scoped,
 TTL-pruned** session-token lifecycle (CLAUDE rule #5, amended by **[D-P5.7]**) consumed one-way by storage. **Stage A (token
 spine):** the 2-namespace zustand token store (`isAncestor`/`resolveToken` ancestor lookup; persists to `sessionStorage`
@@ -53,6 +63,7 @@ the last prompted a `genericMessage` so a non-403 unlock/reveal failure isn't a 
 [D-P5.1–D-P5.8](../07-decisions/DECISIONS.md).
 
 ## Earlier — Phase 4 (Preview + Share)
+
 **Phase 4 Stage C2 landed — Phase 4 is complete.** Editor files now get a **document version history** panel in the
 preview footer (sibling of the Stage-B object-version panel): lazy-fetched on expand, each row shows a **backend-computed
 diff** vs the current content (`DiffView` renders the server's unified-diff hunks — colored add/remove/context lines +
@@ -68,6 +79,7 @@ a11y added a `role="status"` diff live region + a diff-error Retry). **Decision:
 **Next: Phase 5 (secure folders) — Phase 4 live walkthrough against the backend pending creds.**
 
 ## Earlier — Phase 4 Stage C1 (CodeMirror document editor)
+
 **Phase 4 Stage C1 landed**: text/code files (`EDITOR_EXT`) open in a **CodeMirror 6 editor** with the full
 collaborative-safety lifecycle. The editor is **lazy-loaded** (`next/dynamic`, +11 MIT packages in a ~233 KB chunk —
 zero initial-load cost). On open it `readContent` (with draft) + `acquireLock` (5-min TTL; `423` → read-only "Locked by
@@ -81,6 +93,7 @@ sweep clean (a11y added a `role="status"` live region + a distinct lock-expired 
 [D-P4.5](../07-decisions/DECISIONS.md) (CodeMirror set + lazy chunk + lifecycle; size gate 480→820 KB).
 
 ## Earlier — Phase 4 Stage B (office + object versions)
+
 **Phase 4 Stage B landed**: the preview modal handles **office files** + **object version history**.
 **Office** (docx/xlsx/pptx) renders via the **Microsoft Office Online viewer** — a sandboxed `<iframe>` to
 `view.officeapps.live.com` (CSP `frame-src` gained it, [D-P4.3](../07-decisions/DECISIONS.md)), `src` = a fresh presigned
@@ -90,6 +103,7 @@ footer (`VersionHistoryPanel`, lazy on expand): list `Cloud/Versions`, restore +
 can't be deleted); `invalidateScope` refetches object+versions+folder+usage ([D-P4.4](../07-decisions/DECISIONS.md)).
 
 ## Earlier — Phase 4 Stage A (preview core + share)
+
 **Phase 4 Stage A landed** (first of 3 stages — [D-P4.0](../07-decisions/DECISIONS.md)): files now **open in a deep-linkable
 preview modal**. A new `features/preview` feature mounts into the existing `@modal/(.)preview/[key]` interceptor (with a
 non-intercepted `preview/[key]` route backing refresh / shared links; `[key]` is percent-encoded). Viewers: **image** (CDN-scaled
@@ -97,16 +111,16 @@ via `getImageCdnUrl` from `Metadata.Width/Height`, SVG/ICO unscaled), **video** 
 fallback), **PDF** (sandboxed `<iframe>` streaming the signed CDN URL — CSP `frame-src` gained the CDN, [D-P4.1](../07-decisions/DECISIONS.md)),
 and a graceful **download-to-view** `UnsupportedViewer` for everything else. The toolbar (download/share/delete/fullscreen/close)
 **reuses storage's `useDelete`/`useDownload` + confirm dialog**; **share** mints a `Cloud/PresignedUrl` → Web Share API or
-clipboard + a TTL note; an **`AvGate`** blocks infected files (body+download+share) and warns (`role=status`) while a scan is
-pending (polls `Cloud/Scan/Status`). **←/→ arrow nav** walks the previewable files of the current view (the browser publishes the
+clipboard + a TTL note. **←/→ arrow nav** walks the previewable files of the current view (the browser publishes the
 ordered key list to a storage-owned store the preview reads — keeping the two features acyclic, [D-P4.2](../07-decisions/DECISIONS.md));
 **a plain click on a file now opens preview** (selection moved fully to the checkbox / modifier-click). Behind the `preview` flag
 (default on). Green: `tsc` + `lint` + `build` (both preview routes split; `[[...path]]` unaffected) + **166 Vitest**; reviewer
-sweep applied (data-layer clean; design-system + a11y each 1 finding, fixed). **Deferred:** scaled-vs-original *download* (view is
+sweep applied (data-layer clean; design-system + a11y each 1 finding, fixed). **Deferred:** scaled-vs-original _download_ (view is
 scaled, original download works), office preview (Stage B), the document editor + version history (Stage B/C). **Next: Phase 4
 Stage B (office + object version history), then Stage C (document editor + doc versions/diff) — or Phase 5.**
 
 ## Earlier — Phase 3 Stage D (closed Phase 3)
+
 **Phase 3 Stage D closed Phase 3 (Storage Core ✅).** Storage is fully searchable, filterable, and command-driven. **Search**
 (`Cloud/Search`, scope toggle current↔global default current, shareable `?q=&scope=` URL, debounced, `SearchEmpty`/`FilteredEmpty`
 states) + **type/extension filter** (client-side over the loaded window, persisted in `viewPrefs`) feed the same
@@ -119,6 +133,7 @@ alternative to the desktop MouseSensor DnD, which is untouched. The **server-onl
 banned from client globs, un-banned for route handlers + `lib/auth`).
 
 ## Earlier — Zen design treatment
+
 **The "Zen" premium design treatment landed across every built surface** (a cross‑cutting refinement on top of
 Phases 0–3C, not a new phase). The flat shadcn wrappers gained the refined look the design docs always specified —
 realized as cva variants + a disciplined `.zs-*` machined CSS layer in `app/globals.css` (semantic tokens only;
@@ -134,6 +149,7 @@ phases: command palette (⌘K trigger only), secure‑folder reveal (`UnlockDial
 (`FileTile` unfed), archive/extract, teams. Next product task is still **Phase 3 Stage D**.
 
 ## Earlier — Phase 3 Stage C
+
 **Phase 3 Stage C (upload pipeline — the heaviest task) landed.** `features/storage/upload` ships the full multipart
 pipeline on the **`UploadPart` proxy** (D-P3.2 — 100% factory calls, no presigned PUTs): a singleton queue **engine**
 (3 files / 4 parts-per-file / 60 MB in-flight + 8 MiB parts from `lib/upload/config.ts`; per-part base64 MD5 via
@@ -163,6 +179,7 @@ live backend contract smoke passed. Authenticated end-to-end walkthrough pending
 +2FA +passkey, register, reset, route protection, legal pages + consent banner).
 
 ## Planning round checklist — ✅ complete
+
 - [x] Explored 3 layers (API `nestjs-storage`, old frontend `main`, v2 scaffold) — read‑only
 - [x] Verified contract (controllers, envelope, headers, secure‑folder tokens, gateway, **Share absent**)
 - [x] Authored core planning docs (roadmap, architecture, feature map, API inventory, decisions)
@@ -171,20 +188,22 @@ live backend contract smoke passed. Authenticated end-to-end walkthrough pending
 - [x] **User approval received; Phase 0 begun (2026-06-06). Phases 0–5 complete; Phase 6 in progress.**
 
 ## Phase status
-| Phase | Title | Status | Notes |
-|---|---|---|---|
-| 0 | Foundation + Design System | ✅ | All sub-tasks closed: data layer, design system, 0.0a CSP/headers, 0.4a privacy, 0.8a intercepting-routes (confirmed), 0.14a supply-chain CI |
-| 1 | Auth | ✅ | Full: multi-step login (+2FA **+passkey**), register, reset, route protection, sign-out teardown, **legal pages + consent banner**. Verified live vs API + 16 tests |
-| 2 | App Shell + Account | ✅ | Full: shell (sidebar/topbar/theme/profile/bell, inert workspace slot) + profile (optimistic, avatar read-only) + security (password, 2FA, passkeys, sessions) + read-only subscription + flagged API-keys stub. 32 vitest + 4 e2e; reviewers applied; live contract smoke |
-| 3 | Storage Core | ✅ | **Staged in 4 parts, all done.** A (browse) ✅ · B1 (single-item ops) ✅ · B2 (multi-select + bulk + DnD) ✅ · C (upload pipeline) ✅ · D (search + filter + ⌘K palette + central shortcut dispatcher + help overlay + touch bottom-sheet + server-seam ESLint) ✅ 2026-06-14 |
-| 4 | Preview + Share | ✅ | Full: preview modal (image/video/PDF/audio/office) + share (presigned URL) + CDN resize + CodeMirror editor + object & document versions/diff/restore; Zen lightbox redesign + office-Escape fix. Done 2026-06-14/15 (D-P4.0–D-P4.9) |
-| 5 | Secure Folders | ✅ | Full: token spine + encrypted + hidden (unlock/reveal/hide/conceal, ⇧⇧) + auto-refresh/TTL re-lock; session token `sessionStorage`-scoped (D-P5.7 amends the never-persist guarantee). Done 2026-06-14/15 (D-P5.1–D-P5.8) |
-| 6 | Advanced | 🚧 | **In progress** — notifications inbox (D-P6.1) + **realtime/job-transport foundation** (D-P6.2/D-P6.3) + **§6.2 duplicate-scan panel** (D-P6.4 — first consumer) done. Still pending: §6.3 archive create/extract UI, §6.4 AV gating |
-| 7 | Public & Polish | ⏳ | **MVP completes here** (+ onboarding, observability finish) |
-| 8 | Teams (post‑MVP) | ⏳ | architect‑for now, build last |
-| 9 | Organization & Discovery (post‑MVP) | ⏳ | **backend‑gated**: favorites/recents/tags/global‑insights/real‑share |
+
+| Phase | Title                               | Status | Notes                                                                                                                                                                                                                                                                         |
+| ----- | ----------------------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0     | Foundation + Design System          | ✅     | All sub-tasks closed: data layer, design system, 0.0a CSP/headers, 0.4a privacy, 0.8a intercepting-routes (confirmed), 0.14a supply-chain CI                                                                                                                                  |
+| 1     | Auth                                | ✅     | Full: multi-step login (+2FA **+passkey**), register, reset, route protection, sign-out teardown, **legal pages + consent banner**. Verified live vs API + 16 tests                                                                                                           |
+| 2     | App Shell + Account                 | ✅     | Full: shell (sidebar/topbar/theme/profile/bell, inert workspace slot) + profile (optimistic, avatar read-only) + security (password, 2FA, passkeys, sessions) + read-only subscription + flagged API-keys stub. 32 vitest + 4 e2e; reviewers applied; live contract smoke     |
+| 3     | Storage Core                        | ✅     | **Staged in 4 parts, all done.** A (browse) ✅ · B1 (single-item ops) ✅ · B2 (multi-select + bulk + DnD) ✅ · C (upload pipeline) ✅ · D (search + filter + ⌘K palette + central shortcut dispatcher + help overlay + touch bottom-sheet + server-seam ESLint) ✅ 2026-06-14 |
+| 4     | Preview + Share                     | ✅     | Full: preview modal (image/video/PDF/audio/office) + share (presigned URL) + CDN resize + CodeMirror editor + object & document versions/diff/restore; Zen lightbox redesign + office-Escape fix. Done 2026-06-14/15 (D-P4.0–D-P4.9)                                          |
+| 5     | Secure Folders                      | ✅     | Full: token spine + encrypted + hidden (unlock/reveal/hide/conceal, ⇧⇧) + auto-refresh/TTL re-lock; session token `sessionStorage`-scoped (D-P5.7 amends the never-persist guarantee). Done 2026-06-14/15 (D-P5.1–D-P5.8)                                                     |
+| 6     | Advanced                            | 🚧     | **In progress** — notifications inbox (D-P6.1) + **realtime/job-transport foundation** (D-P6.2/D-P6.3) + **§6.2 duplicate-scan panel** (D-P6.4 — first consumer) + **§6.3 archive create/extract UI** done. Still pending: the live kill-socket walkthrough + inbox/quota acceptance pass                                          |
+| 7     | Public & Polish                     | ⏳     | **MVP completes here** (+ onboarding, observability finish)                                                                                                                                                                                                                   |
+| 8     | Teams (post‑MVP)                    | ⏳     | architect‑for now, build last                                                                                                                                                                                                                                                 |
+| 9     | Organization & Discovery (post‑MVP) | ⏳     | **backend‑gated**: favorites/recents/tags/global‑insights/real‑share                                                                                                                                                                                                          |
 
 ## Current scaffold state (v2)
+
 - **Installed:** `next@16.2.6`, `react@19.2.4`, `react-dom@19.2.4`; dev: `@openapitools/openapi-generator-cli`,
   `shadcn@4`, `tailwindcss@4`, `eslint`, `typescript`.
 - **Present:** `openapitools.json` (generator `typescript-axios` 7.17.0 → `service/generates`, `modelPackage:"dto"`,
@@ -199,15 +218,17 @@ live backend contract smoke passed. Authenticated end-to-end walkthrough pending
   shadcn init (`components.json`), motion/i18n/theme libs, providers, route groups.
 
 ## What's next
-1. **Finish Phase 6 (Advanced):** the foundation + the §6.2 duplicate-scan panel are done (D-P6.2/D-P6.3/D-P6.4).
-   Remaining = the other two **job-starting surfaces**: §6.3 archive create/extract UI (+ preview + selective extract +
-   conflict) and §6.4 AV-status gating. See [Phase 6](./phases/phase-6-advanced.md).
+
+1. **Finish Phase 6 (Advanced):** the foundation + the §6.2 duplicate-scan panel + the §6.3 archive create/extract UI are
+   done (D-P6.2/D-P6.3/D-P6.4). Remaining = the live kill-socket walkthrough + the inbox/quota acceptance pass.
+   See [Phase 6](./phases/phase-6-advanced.md).
 2. **Deferred live-backend walkthroughs (need login creds):** the Phase 3 upload matrix (small + large multipart w/
    progress, pause/resume, cancel→server Abort, kill-tab-at-50%→resume without re-sending part 1, forced 409
    REPLACE/KEEP_BOTH/SKIP + apply-to-all, quota/max-size pre-flight, folder drop/picker, zero-byte) + the B1/B2 ops matrix;
-   the Phase 4 viewers/share/AV/editor round-trip; the Phase 5 unlock/reveal/conceal + bfcache/cross-tab + TTL re-lock.
+   the Phase 4 viewers/share/editor round-trip; the Phase 5 unlock/reveal/conceal + bfcache/cross-tab + TTL re-lock.
 
 ## Recent status entries
+
 - **2026-06-16 (Phase 6 — §6.2 duplicate-scan panel, D-P6.4)** — The first consumer of the job plumbing. New
   `features/storage/duplicates/` (kept inside storage; consumes `@/features/jobs` one-way): `useDuplicateScan` (start →
   `useJobsStore.track(ScanId)` so the socket fan-out + `reconcileActiveJobs` drive progress; result via `useQuery` gated on
@@ -243,7 +264,7 @@ live backend contract smoke passed. Authenticated end-to-end walkthrough pending
   `lib/utils/format-relative-time.ts` (native `Intl`); `account.shell.notifications.*` i18n. Persistent `sr-only`
   `aria-live` region + loading/empty/error states. Green: tsc/lint/build + **~296 vitest** + size-limit ~804.51/820 KB.
   **D-P6.1.** Remaining Phase 6: toast fan-out + quota warnings, jobs socket/poll transport, archive/extract,
-  duplicate-scan, AV gating. (commit 40039d8)
+  duplicate-scan. (commit 40039d8)
 - **2026-06-15 (Storage auto-refresh + secure-folder TTL re-lock — D-P5.8)** — Browse listings now refetch on a 60s
   interval (`BROWSE_REFETCH_INTERVAL_MS`) + `refetchOnWindowFocus`, so out-of-band changes (a new upload, a moved folder)
   surface without a manual reload. New `features/secure-folders/hooks/useSecureFolderExpiry.ts` watches the TTL of the token
@@ -268,30 +289,30 @@ live backend contract smoke passed. Authenticated end-to-end walkthrough pending
 - **2026-06-14 (fix: catch-all route decode)** — Decode catch-all route segments so folders with spaces in their names load
   (`[[...path]]`). Phase 3 polish. (commit abaad85)
 - **2026-06-14 (Phase 4 — Preview + Share → Phase 4 ✅)** — Closed Phase 4. Deep-linkable preview modal
-  (image/video/audio/PDF/office via the Office Online iframe), share via `Cloud/PresignedUrl` + `AvGate` scan gate, CDN
+  (image/video/audio/PDF/office via the Office Online iframe), share via `Cloud/PresignedUrl`, CDN
   image resize, ←/→ nav; CodeMirror 6 document editor (lazy chunk, lock/heartbeat/draft/409-reload lifecycle); object &
   document version history + backend-computed diff (`DiffView`, no diff lib) + restore/delete. Backend gap fixed: `GET
-  Cloud/Documents/Versions` was `void` → added `@ApiSuccessResponse` + regenerated client. size-limit gate 480→820 KB for
+Cloud/Documents/Versions` was `void` → added `@ApiSuccessResponse` + regenerated client. size-limit gate 480→820 KB for
   the lazy editor chunk. **D-P4.0–D-P4.8.** (commit c0f6484)
 - **2026-06-14 (Phase 3 Stage D — search + filter + ⌘K palette + touch + server-seam → Phase 3 ✅)** — Closed Phase 3.
   **Search:** `getSearch` on `cloudApiFactory.search` (envelope-unwrapped), `storageKeys.search` (ownerId + scope + path
-  + query + extension), `useSearch` (≥2-char `enabled` gate, AbortSignal, keepPrevious), `CommandSearch` (URL `?q=&scope=`
-  source of truth via debounced derive-on-render + scope toggle), search-mode switch + `SearchEmpty`/`FilteredEmpty`.
-  **Filter:** `filterEntries`/`arrangeEntries` (categories from `lib/utils/file-meta` `extensionCategory`), `viewPrefs`
-  `filterType`/`filterExt` (v2), `FilterMenu` (mirrors `SortMenu`). **Palette + shortcuts:** neutral
-  `lib/command-palette` registry (`useCommand`/`useCommands` via `useSyncExternalStore`) — shell contributes nav, storage
-  contributes actions/selection/search via `useStorageCommands`; feature-local `storageUi` store lifts the bulk/create/
-  **sheet** triggers out of component state so the palette can fire them while `BulkActionBar` runs the bulk path over
-  `selectedEntries` (the **locked ⌘K↔selection contract**, test-covered); `features/shell/CommandPalette` (`shouldFilter`
-  off + manual filter); real central `useShortcutDispatcher` (one keydown, text-input/overlay guard, generic
-  `mod+<letter>`) + `ShortcutProvider` (⌘K/?/⌘\) + `ShortcutsHelp`; ⌘U migrated off its self-listener. **Touch:**
-  `useCoarsePointer` + `useLongPress` (touch-only, `consumeSuppressedClick`) → bottom `Sheet` `EntryActionsSheet`
-  (Move/Add files/Delete) on `BrowseRow`/`BrowseCard`; desktop MouseSensor DnD untouched. **Seam:** `eslint.config.mjs`
-  bans `@/lib/auth/server` from client globs (un-banned for `app/**/route.ts` + `lib/auth/**`), verified by
-  `tests/lint/server-seam.test.ts` (ESLint Node API). Mounted provider + palette + help in `(app)/layout`;
-  `renderWithProviders` now supplies router/pathname/searchParams contexts (also fixed 3 stale post-Zen test assertions).
-  Green: `tsc`/`lint`/`build` + **148 vitest** (+12). Reviewer sweep applied: design NIT (`rounded-[5px]`→`rounded-sm`);
-  a11y — `SheetDescription` added, search live region gated on `!isFetching`, loading skeleton labeled. Phase 3 ✅.
+  - query + extension), `useSearch` (≥2-char `enabled` gate, AbortSignal, keepPrevious), `CommandSearch` (URL `?q=&scope=`
+    source of truth via debounced derive-on-render + scope toggle), search-mode switch + `SearchEmpty`/`FilteredEmpty`.
+    **Filter:** `filterEntries`/`arrangeEntries` (categories from `lib/utils/file-meta` `extensionCategory`), `viewPrefs`
+    `filterType`/`filterExt` (v2), `FilterMenu` (mirrors `SortMenu`). **Palette + shortcuts:** neutral
+    `lib/command-palette` registry (`useCommand`/`useCommands` via `useSyncExternalStore`) — shell contributes nav, storage
+    contributes actions/selection/search via `useStorageCommands`; feature-local `storageUi` store lifts the bulk/create/
+    **sheet** triggers out of component state so the palette can fire them while `BulkActionBar` runs the bulk path over
+    `selectedEntries` (the **locked ⌘K↔selection contract**, test-covered); `features/shell/CommandPalette` (`shouldFilter`
+    off + manual filter); real central `useShortcutDispatcher` (one keydown, text-input/overlay guard, generic
+    `mod+<letter>`) + `ShortcutProvider` (⌘K/?/⌘\) + `ShortcutsHelp`; ⌘U migrated off its self-listener. **Touch:**
+    `useCoarsePointer` + `useLongPress` (touch-only, `consumeSuppressedClick`) → bottom `Sheet` `EntryActionsSheet`
+    (Move/Add files/Delete) on `BrowseRow`/`BrowseCard`; desktop MouseSensor DnD untouched. **Seam:** `eslint.config.mjs`
+    bans `@/lib/auth/server` from client globs (un-banned for `app/**/route.ts` + `lib/auth/**`), verified by
+    `tests/lint/server-seam.test.ts` (ESLint Node API). Mounted provider + palette + help in `(app)/layout`;
+    `renderWithProviders` now supplies router/pathname/searchParams contexts (also fixed 3 stale post-Zen test assertions).
+    Green: `tsc`/`lint`/`build` + **148 vitest** (+12). Reviewer sweep applied: design NIT (`rounded-[5px]`→`rounded-sm`);
+    a11y — `SheetDescription` added, search live region gated on `!isFetching`, loading skeleton labeled. Phase 3 ✅.
 - **2026-06-14 (Zen alignment — sidebar + usage)** — Closed the remaining gaps vs the Zen app‑chrome reference.
   **Storage‑usage now lives in the sidebar only** (per the design — chat6 "kullanım bilgisi artık yalnızca
   sidebar'da"): new bottom‑pinned `SidebarUsageCard` (solid card, gradient fill, collapses to a `{pct}%` chip),
@@ -390,8 +411,8 @@ live backend contract smoke passed. Authenticated end-to-end walkthrough pending
   countdown, a11y); `SessionSync` wires the session token-source + sign-out handler; proxy route protection
   (`auth()` wrapper + redirects, composed with security headers); full `signOutAndCleanup` teardown. The P0 dev loop
   is gone (`/api/auth/session` → 200). Verified: build/tsc/lint green, 15 vitest (incl. multi-step login + 2FA handoff
-  + teardown-order), browser render of login/register (light+dark) + `/storage`→`/login?from=` redirect. Decisions
-  D-P1.0–D-P1.4. Deferred: passkey login (→P2), legal pages + consent banner (follow-up).
+  - teardown-order), browser render of login/register (light+dark) + `/storage`→`/login?from=` redirect. Decisions
+    D-P1.0–D-P1.4. Deferred: passkey login (→P2), legal pages + consent banner (follow-up).
 - **2026-06-06 (pass 2)** — **Closed P0 security + privacy foundation (0.0a + 0.4a).** Security headers + per-request
   CSP **nonce** emitted from the proxy via `lib/security/*` (Report-Only at P0 — enforcing flips in P7, D-P0.8); HSTS/CSP
   prod-gated. PII **scrubber** (`lib/observability/scrubber.ts`) wired into the reporter; **consent store**
@@ -408,6 +429,7 @@ live backend contract smoke passed. Authenticated end-to-end walkthrough pending
   [`docs/01-roadmap/phases/phase-0-foundation.md`](./phases/phase-0-foundation.md). ESLint enforce mode: **full at P0**.
 
 ## Blockers / waiting on
+
 - **Login creds** for the deferred live-backend walkthroughs (Phases 3/4/5 — non‑blocking; code is unit-verified).
 - **API team** on the backend‑gated org features (Q10 favorites, Q11 recents, Q12 tags, Q13 insights) + Q2 (webhook HMAC)
-  + activating the avatar endpoint (Q7) — all **non‑blocking for MVP**. (Q1 sharing + Q5 CDN resize are resolved.)
+  - activating the avatar endpoint (Q7) — all **non‑blocking for MVP**. (Q1 sharing + Q5 CDN resize are resolved.)

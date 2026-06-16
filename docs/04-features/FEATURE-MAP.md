@@ -20,7 +20,7 @@ Legend: 🟢 MVP · 🟡 MVP‑light / "coming soon" · ⚪ post‑MVP (Teams/de
 | Preview & edit | [preview.md](./preview.md) | 4 | `Cloud/Find`,`/PresignedUrl`,`/Versions`,`Documents/*` |
 | Sharing 🟢 | [sharing.md](./sharing.md) | 4 | `Cloud/PresignedUrl` (signed time‑limited link — **the** share mechanism) |
 | Secure folders | [secure-folders.md](./secure-folders.md) | 5 | `Cloud/Directory/Unlock`…`/Conceal` |
-| Advanced | [advanced.md](./advanced.md) | 6 | `Scan/Duplicate/*`,`Archive/*`,`Scan/Status`,`Notification/*` |
+| Advanced | [advanced.md](./advanced.md) | 6 | `Scan/Duplicate/*`,`Archive/*`,`Notification/*` |
 | Public | [public.md](./public.md) | 7 | `Subscription/My` |
 | Onboarding 🟢 | [onboarding.md](./onboarding.md) | 7 | none (frontend) |
 | Quick Access (favorites/recents) ⚪ | [quick-access.md](./quick-access.md) | 9 | **none — backend‑first, post‑MVP, no interim** (Q10/Q11) |

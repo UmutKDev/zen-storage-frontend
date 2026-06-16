@@ -20,7 +20,7 @@
 **Routing:** intercepting/parallel route or modal keyed by file `Key` → deep‑linkable; closing returns to folder.
 **Keyboard:** ←/→ navigate **previewable** items only; Esc closes; arrows/space scroll within PDF/large media; focus
 trapped.
-**State matrix:** loading; error; **AV pending** (gated/warn), **AV infected** (block/warn). 
+**State matrix:** loading; error.
 
 ## By type
 | Type | Component | Source | Notes |

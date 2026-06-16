@@ -23,7 +23,7 @@
 
 ## 4. Color & contrast
 - Text/background meets **AA** (4.5:1 body, 3:1 large) in **both** themes.
-- **Never rely on color alone** for state — pair with icon/text (e.g. AV‑infected = color + icon + label). See
+- **Never rely on color alone** for state — pair with icon/text (e.g. locked/encrypted = color + icon + label). See
   [color](../03-design-system/foundations/color.md).
 
 ## 5. Motion

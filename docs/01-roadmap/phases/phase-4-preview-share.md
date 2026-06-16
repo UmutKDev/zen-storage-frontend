@@ -29,8 +29,7 @@ documents with diff); Share (presigned URL).
       the native Fullscreen API, hidden when unavailable.)*
 - [x] **Arrow‑key navigation** (←/→) across previewable items only (list held in memory). *(the browser publishes the
       ordered previewable-key list to a neutral store; `router.replace` so Back closes the modal.)*
-- [x] State‑matrix: loading, error, **AV pending/infected** gate (see [state-matrix](../../02-architecture/state-matrix.md)).
-      *(`AvGate`: infected blocks body+download+share, pending warns via `role=status` + polls `Cloud/Scan/Status`.)*
+- [x] State‑matrix: loading, error (see [state-matrix](../../02-architecture/state-matrix.md)).
 
 ### 4.2 — Image preview + scaling — ✅ Stage A (scaled-download deferred)
 - [x] `imageCdn.ts` `getImageCdnUrl` → CDN `?w=&h=` from `Metadata.Width/Height` (thumb / preview / fullscreen targets).
@@ -78,7 +77,7 @@ documents with diff); Share (presigned URL).
 
 ### 4.6 — Share (MVP) — ✅ Stage A
 - [x] Share button → `Cloud/PresignedUrl` → Web Share API / copy link; note the TTL; no permission/expiry config yet.
-      *(`useShare`: Web Share where available, else clipboard + a "valid for a limited time" toast; disabled when AV-infected.)*
+      *(`useShare`: Web Share where available, else clipboard + a "valid for a limited time" toast.)*
 
 ## Endpoints used
 `Cloud/Find`, `/PresignedUrl`, `/Download`, `/Versions`, `/Versions/Restore`, `DELETE /Versions`; `Cloud/Documents/Content`
@@ -112,11 +111,11 @@ updated `tests/storage/selection` (plain file click now opens preview, not selec
   wiring: file-row/card click + the `Eye` menu/sheet item open the modal; `StorageBrowser` publishes the previewable-key
   list; CSP `frame-src` += CDN; `preview` flag (default on).
 - **Reviewer sweep:** data-layer (clean), design-system (1 fixed — PDF iframe `bg-white`→`bg-background`), a11y-state
-  (1 fixed — AV-pending banner `role=status`).
+  (clean).
 - **Deviations:** scaled-vs-original **download** deferred (§4.2); inline viewers use the signed CDN `Path.Url` rather
   than a separately-minted presigned URL (§4.3); the arrow-nav previewable list lives in a storage-owned store, not a
   preview-local one, to keep the two features acyclic ([D-P4.2](../../07-decisions/DECISIONS.md)).
-- **Live walkthrough pending creds** (each viewer against the real CDN, share copy, AV gating, deep-link refresh, touch
+- **Live walkthrough pending creds** (each viewer against the real CDN, share copy, deep-link refresh, touch
   sheet) — per the Stage A/B/C convention.
 
 ## Stage B verification (2026-06-14)
@@ -198,7 +197,6 @@ Vitest suite (~296 after the redesign + office-viewer tests), `size-limit` ~804.
 | Lock contention (423) UX | Clear read‑only banner + retry/lock‑status display. |
 | Draft throttle (429) | Debounce to the 1/10s window; queue the latest. |
 | CDN resize quirks (wsrv.nl params/limits) | Resize is supported; just validate the exact wsrv param mapping + signed‑URL passthrough. |
-| AV pending/infected gating | Centralize gate via `Cloud/Scan/Status` (shared with Phase 6). |
 | **Office preview fidelity** (esp. pptx) | Best‑effort client render + **download fallback**; plan a server convert‑to‑PDF later (backend is ours). Don't block the phase on perfect office rendering. |
 
 ## Rollback / fallback

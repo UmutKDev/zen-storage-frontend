@@ -31,7 +31,7 @@ conflict handling · quota enforcement** — smooth even in large folders. (Phas
 - **Storage core** (the whole of §2).
 - Preview (image/video/PDF/text/**audio**/**office** — office best‑effort) + text editing (lock/draft/version restore) + **Share via presigned URL**.
 - Secure folders (encrypted + hidden) with the in‑memory token lifecycle.
-- Advanced: duplicate scan, archive, AV status, notification inbox.
+- Advanced: duplicate scan, archive, notification inbox.
 - Public pages (landing/features/pricing "coming soon") + responsiveness + a11y baseline + performance budget +
   full state‑matrix coverage + i18n‑ready (EN).
 - **Premium feel:** the glass design system + motion (reduced‑motion aware) is part of MVP, not a later coat of paint.
@@ -68,7 +68,7 @@ conflict handling · quota enforcement** — smooth even in large folders. (Phas
 ## 6. The MVP quality bar (definition of done)
 MVP is "done" only when, across **every** surface:
 - Works for the happy path **and** all applicable [state‑matrix](../02-architecture/state-matrix.md) states
-  (empty/no‑results/error/locked/reveal‑required/AV/quota).
+  (empty/no‑results/error/locked/reveal‑required/quota).
 - Goes through the generated **factory + `Instance`** (no raw fetch, no hand‑rolled DTOs).
 - Copy is via **i18n keys**; UI uses **semantic tokens + glass discipline**; **motion respects reduced‑motion**.
 - Is **keyboard‑accessible** with visible focus (a11y baseline).

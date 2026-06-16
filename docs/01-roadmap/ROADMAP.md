@@ -15,7 +15,7 @@
   keep-largest default; `AlertDialog` confirm). Resolve-by-delete is **cross-folder** (`deleteEntries` + whole-scope
   invalidate + local prune; path-scoped `useDelete` deliberately avoided). Launched via a toolbar `ScanButton` + a
   `"storage:scan-duplicates"` ⌘K command + a `DuplicateScanDialogs` controller. Reviewers clean (data-layer + a11y findings
-  fixed). Green: tsc/lint/build + **323 vitest**. **Remaining Phase 6:** §6.3 archive create/extract UI, §6.4 AV gating.
+  fixed). Green: tsc/lint/build + **323 vitest**. **Remaining Phase 6:** §6.3 archive create/extract UI.
 - **2026-06-16 (Phase 6 — realtime / job-transport foundation — D-P6.2/D-P6.3)** — The `/notifications` socket now
   **actually connects** (it was REST-only). Frontend: `getSocket(sessionId)` singleton + typed `notification` envelope
   (`lib/socket`); `NotificationProvider` (storm-pause / invalidation-based reconnect reconcile / polling fallback / 401);
@@ -26,8 +26,8 @@
   `DUPLICATE_SCAN_PROGRESS` + `NotificationService.EmitTransientToUser` (socket-only, no history) → client regenerated
   (clean: 151 ins/0 del). Deviations from the "locked" `realtime-socket §4` (backend reality): PascalCase `SessionId`,
   invalidation-based reconcile, History-based poll (no `/Notifications/Recent`). Green: backend `build` + frontend
-  `tsc`/`lint` + **319 vitest** (+6 suites). **Remaining Phase 6:** the §6.2/§6.3/§6.4 job-starting panels (duplicate-scan,
-  archive create/extract, AV gating).
+  `tsc`/`lint` + **319 vitest** (+6 suites). **Remaining Phase 6:** the §6.2/§6.3 job-starting panels (duplicate-scan,
+  archive create/extract).
 - **2026-06-15 (Phase 6 — real-data notifications inbox)** — **Opens Phase 6.** The notification inbox goes real-data:
   backend `Notification/History` + unread-count **typed** (`NotificationHistoryItemModel`/`UnreadCountResponseModel`) +
   committed client **regenerated** (rule #2 — no hand-rolled DTOs; the D-P4.8 idiom). New `features/notifications`
@@ -36,7 +36,7 @@
   `notifications.keys`, `lib/utils/format-relative-time.ts`, `account.shell.notifications.*` i18n. Zen design: tone-tinted
   icon tiles, relative time, unread dot, loading/empty/error states + a persistent `sr-only` `aria-live` region. Green:
   tsc/lint/build + **~296 vitest** + size-limit ~804.51/820 KB. **D-P6.1. Remaining Phase 6:** toast fan-out + quota
-  warnings, duplicate-scan UI, archive create/extract, AV-status gating, socket-first job transport. (commit 40039d8)
+  warnings, duplicate-scan UI, archive create/extract, socket-first job transport. (commit 40039d8)
 - **2026-06-15 (Storage auto-refresh + secure-folder TTL re-lock — D-P5.8)** — Browse listings refetch on a 60s interval
   (`BROWSE_REFETCH_INTERVAL_MS`) + `refetchOnWindowFocus`, so a folder reflects out-of-band changes without a manual reload.
   New `features/secure-folders/hooks/useSecureFolderExpiry.ts` re-prompts for the passphrase (unlock dialog) when an
@@ -97,8 +97,8 @@
   `preview/[key]` route (refresh/shared-link backstop; `[key]` percent-encoded). **Viewers**: image (CDN-scaled via
   `getImageCdnUrl`, SVG/ICO unscaled), video + audio (native, codec fallback), **PDF** (sandboxed `<iframe>` on the signed
   CDN URL — CSP `frame-src` += CDN, **D-P4.1**), `UnsupportedViewer` download-to-view fallback. **Toolbar** reuses
-  storage's `useDelete`/`useDownload` + confirm dialog; **share** = `Cloud/PresignedUrl` → Web Share/clipboard + TTL note;
-  **`AvGate`** (polls `Cloud/Scan/Status`) blocks infected + warns pending. **←/→ nav** over a storage-published
+  storage's `useDelete`/`useDownload` + confirm dialog; **share** = `Cloud/PresignedUrl` → Web Share/clipboard + TTL note.
+  **←/→ nav** over a storage-published
   previewable-key store (acyclic, **D-P4.2**); plain file click now opens preview (selection → checkbox/modifier). Pure
   helpers in neutral `lib/preview`. Behind the `preview` flag (default on). Green: tsc/lint/build + **166 vitest** (+18);
   reviewer sweep (data-layer clean; design-system + a11y each 1, fixed). **Deferred:** scaled-vs-original *download*,
@@ -217,7 +217,7 @@
 | 3 | Storage Core | [phase-3](./phases/phase-3-storage-core.md) | ✅ done (browse + ops + bulk/DnD + upload + search/filter/⌘K/touch) |
 | 4 | Preview + Share | [phase-4](./phases/phase-4-preview-share.md) | ✅ done (preview core + share + office + CodeMirror editor + object & document versions/diff/restore; Zen lightbox + office-Escape fix) |
 | 5 | Secure Folders | [phase-5](./phases/phase-5-secure-folders.md) | ✅ done (encrypted + hidden folders; `sessionStorage`-scoped token lifecycle + TTL re-lock — D-P5.7/5.8) |
-| 6 | Advanced | [phase-6](./phases/phase-6-advanced.md) | 🚧 notification inbox done (real-data Zen, D-P6.1); duplicate-scan / archive-extract / AV gating / socket-first job transport pending |
+| 6 | Advanced | [phase-6](./phases/phase-6-advanced.md) | 🚧 notifications inbox (D-P6.1) + socket/job transport (D-P6.2/D-P6.3) + duplicate scan (D-P6.4) + archive create/extract all done; remaining = the live kill-socket walkthrough + inbox/quota acceptance pass |
 | 7 | Public & Polish (**MVP done**) | [phase-7](./phases/phase-7-public-polish.md) | ⏳ |
 | 8 | Teams (post‑MVP) | [phase-8](./phases/phase-8-teams.md) | ⏳ |
 | 9 | Organization & Discovery (post‑MVP, **backend‑gated**) | [phase-9](./phases/phase-9-organization.md) | ⏳ |
@@ -252,7 +252,7 @@ Legend: ⏳ not started · 🚧 in progress · ✅ done · 🚫 blocked.
       └───────┬──────┘   └────┬─────────────┘
               └─────┬─────────┘
             ┌───────▼───────────┐
-            │ Phase 6 — Advanced │  duplicate scan, archive, AV status, notification inbox
+            │ Phase 6 — Advanced │  duplicate scan, archive, notification inbox
             └───────┬───────────┘
             ┌───────▼───────────┐
             │ Phase 7 — Public   │  landing/features/pricing + responsive/a11y/perf/polish
@@ -339,7 +339,7 @@ clear‑on‑logout/tab‑close) and the `Instance` header injection. This is th
 `features/secure-folders/stores/secureFolders.store.ts` through `app/providers.tsx`.
 
 ### Phase 6 — Advanced → [details](./phases/phase-6-advanced.md)
-**Duplicate scan**, **archive** create/extract (with preview + selective extract), **AV scan status** gating, and the
+**Duplicate scan**, **archive** create/extract (with preview + selective extract), and the
 **notification inbox** (history/unread/read) alongside toasts and quota warnings — all with **socket‑first + polling
 fallback** for live jobs.
 

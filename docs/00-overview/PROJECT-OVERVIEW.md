@@ -20,7 +20,7 @@ The product surface, end to end:
   history + restore, share (presigned URL).
 - **Secure folders** — encrypted folders (passphrase) and hidden folders (`Shift Shift` reveal), with a short‑lived
   in‑memory session‑token lifecycle.
-- **Advanced** — duplicate scan, archive (zip/extract), antivirus scan status, notifications (toasts + inbox).
+- **Advanced** — duplicate scan, archive (zip/extract), notifications (toasts + inbox).
 - **Teams (last)** — workspace switch (Personal ↔ Team), members, invitations, team storage — architected for now,
   built last.
 
@@ -82,7 +82,7 @@ Deliberately **out** of MVP (post‑MVP):
   bulk), search, filter, and sort their files — smoothly, even in large folders.
 - A user can preview image/video/PDF/text/audio/office, edit text safely (locking + drafts + version restore), and share via link.
 - A user can create encrypted and hidden folders and work inside them within the token lifecycle.
-- A user can run duplicate scans and archive operations with live progress, see AV status, and receive notifications.
+- A user can run duplicate scans and archive operations with live progress, and receive notifications.
 - Public pages (landing/features/pricing) are live; the whole app is responsive, accessible (baseline), themed
   (light/dark), animated (with reduced‑motion support), and internationalization‑ready (EN copy via keys).
 - Everything works under a single shared data layer with consistent error/empty/loading/quota/secure states.

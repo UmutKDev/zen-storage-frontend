@@ -11,7 +11,6 @@
 | GET | `/List/Objects` | `CloudListObjectsRequestModel` | `CloudObjectModel[]` | files only |
 | GET | `/Search` | `CloudSearchRequestModel` (Path, Extension, Search, pagination) | `CloudSearchResponseModel` | **path + extension** ⇒ global vs current |
 | GET | `/User/StorageUsage` | — | `CloudUserStorageUsageResponseModel` | used/limit bytes, % (usage bar) |
-| GET | `/Scan/Status` | `CloudKeyRequestModel` | `CloudScanStatusResponseModel \| null` | **AV** (pending/clean/infected) |
 | GET | `/Find` | `CloudKeyRequestModel` (Key) | `CloudObjectModel` | single object metadata |
 | GET | `/PresignedUrl` | `CloudPreSignedUrlRequestModel` (Key) | `string` | **basis of MVP "Share"** + direct download |
 | PUT | `/Move` | `CloudMoveRequestModel` | `boolean` | `idempotency-key`; conflict strategy |
@@ -27,7 +26,7 @@
 | POST | `/Scan/Duplicate/Cancel` | `CloudDuplicateScanIdRequestModel` | `…CancelResponseModel` | |
 
 > Route decorators re‑confirmed in `cloud.controller.ts` (List@89, Breadcrumb@120, Directories@133, Objects@164,
-> Search@186, StorageUsage@216, Scan/Status@229, Find@243, PresignedUrl@254, Move@278, Delete@298, Update@313,
+> Search@186, StorageUsage@216, Find@243, PresignedUrl@254, Move@278, Delete@298, Update@313,
 > Download@330, Versions@404, Versions/Restore@419, Versions DELETE@433, Duplicate Start@450/Status@464/Result@477/Cancel@489).
 
 ## Key model — `CloudObjectModel` (`cloud.model.ts`)
@@ -47,4 +46,3 @@
 - **Download** streams binary and **bypasses the envelope** — don't run it through the unwrap path
   ([data-layer §5](../../02-architecture/data-layer.md)).
 - Move/Delete require **`Idempotency-Key`** (the [Instance](../../02-architecture/data-layer.md) attaches it).
-- AV status gates preview/download (see [state-matrix](../../02-architecture/state-matrix.md)).

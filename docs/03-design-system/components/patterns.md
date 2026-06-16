@@ -7,7 +7,7 @@
 
 | Pattern | Built from | Used by | Notes |
 |---|---|---|---|
-| **FileCard / FileRow** | card/row + avatar/icon + badge + menu | storage grid/list | encrypted/hidden/AV badges; selectable; draggable |
+| **FileCard / FileRow** | card/row + avatar/icon + badge + menu | storage grid/list | encrypted/hidden badges; selectable; draggable |
 | **FileIcon** | icon set (lucide) by extension/mime | everywhere files appear | consistent type → icon map |
 | **Breadcrumb** | button + separator + overflow menu | storage header | deep‑link aware; collapses on small screens |
 | **UsageBar** | progress + tooltip | shell | %, near‑limit color (warning/danger) |

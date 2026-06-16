@@ -1,6 +1,6 @@
 # Feature — Advanced (Phase 6) 🟢
 
-> Duplicate scan, archive, AV status, notifications. Transport: socket‑first + poll
+> Duplicate scan, archive, notifications. Transport: socket‑first + poll
 > ([realtime-socket](../02-architecture/realtime-socket.md)). API: [cloud-archive](../05-api/modules/cloud-archive.md),
 > [notifications](../05-api/modules/notifications.md).
 
@@ -18,11 +18,6 @@ selecting which to delete.
 | Create (zip) | bulk action → `JobIndicator` | `Archive/Create/Start`/`Cancel` | output file appears in folder; progress (socket+poll) |
 | Extract | item menu → job | `Archive/Extract/Start`/`Cancel`, `/Preview` | **preview entries**; **selective extract**; output conflict (dialog); cancel |
 **Formats:** ZIP / TAR / TAR_GZ / RAR. **Socket events:** `ARCHIVE_CREATE_*`, `ARCHIVE_EXTRACT_*`.
-
-## AV scan status
-**Where:** badge on items + preview/download gate. **Endpoint:** `Cloud/Scan/Status`.
-**States:** pending (gated/warn), infected (block or warn‑on‑download), clean (unobstructed). Ties to
-[state-matrix](../02-architecture/state-matrix.md).
 
 ## Notifications
 | Surface | Component | Source | Notes |

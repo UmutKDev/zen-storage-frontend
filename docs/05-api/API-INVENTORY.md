@@ -5,8 +5,8 @@
 > [open-questions](../07-decisions/open-questions.md).
 >
 > **Last verified:** 2026-05-30 (controllers re‑confirmed present + route decorators match). **Stack:** NestJS 11,
-> PostgreSQL/TypeORM + MongoDB (audit/notifications) + Redis (BullMQ/cache), **S3‑compatible object storage (rustfs)**,
-> ClamAV. **Objects are served from the CDN `cdn.storage.umutk.me`** (HMAC‑signed URLs; image resize via a **wsrv.nl**
+> PostgreSQL/TypeORM + MongoDB (audit/notifications) + Redis (BullMQ/cache), **S3‑compatible object storage (rustfs)**.
+> **Objects are served from the CDN `cdn.storage.umutk.me`** (HMAC‑signed URLs; image resize via a **wsrv.nl**
 > reverse proxy supporting `?w`/`?h`). (Backend code may still reference "S3 + CloudFront" generically; the deployed CDN
 > is the above.)
 
@@ -66,7 +66,6 @@
 | Secure folders | `Cloud/Directory/Unlock`/`Lock`/`Encrypt`/`Decrypt`/`Hide`/`Unhide`/`Reveal`/`Conceal` | [cloud-directory](./modules/cloud-directory.md) |
 | Duplicate scan | `Cloud/Scan/Duplicate/Start`/`Status`/`Result`/`Cancel` | [cloud-core](./modules/cloud-core.md) |
 | Archive | `Cloud/Archive/Create/*`,`/Extract/*`,`/Preview` | [cloud-archive](./modules/cloud-archive.md) |
-| AV status | `Cloud/Scan/Status` | [cloud-core](./modules/cloud-core.md) |
 | Notifications | `Api/v1/Notification/*` + `/notifications` socket | [notifications](./modules/notifications.md) |
 | Subscription/Pricing | `Subscription/My` (+ admin CRUD) | [subscription](./modules/subscription.md) |
 | Teams (last) | `Team/*`, `Team/Members/*`, `Team/Invitations/*` (`x-team-id`) | [teams](./modules/teams.md) |

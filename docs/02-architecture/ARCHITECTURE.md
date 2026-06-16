@@ -69,7 +69,7 @@ features/                             # DOMAIN FEATURES — flat root, black-box
   secure-folders/ advanced/ notifications/ onboarding/ marketing/ teams/ post-mvp/
   # storage   = browse/ upload/ operations/ search/ shared/
   # account   = profile/ security/ subscription/
-  # advanced  = duplicate-scan/ archive/ av-status/
+  # advanced  = duplicate-scan/ archive/
   # post-mvp  = quick-access/ tags/ insights/
 components/
   ui/                                 # shadcn primitives (via MCP) + premium wrappers + index.ts

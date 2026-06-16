@@ -45,7 +45,7 @@ nextjs-storage/
 │   ├── advanced/notifications/onboarding/marketing/teams/post-mvp/
 │   # storage = nested sub-features: browse/upload/operations/search/shared/
 │   # account = nested: profile/security/subscription/
-│   # advanced = nested: duplicate-scan/archive/av-status/
+│   # advanced = nested: duplicate-scan/archive/
 │   # post-mvp = nested: quick-access/tags/insights/
 │
 ├── components/
@@ -187,7 +187,7 @@ features/storage/
 └── index.ts                          # parent barrel: named re-exports from browse/upload/operations/search
 ```
 
-Same nested pattern for `account/{profile,security,subscription}`, `advanced/{duplicate-scan,archive,av-status}`,
+Same nested pattern for `account/{profile,security,subscription}`, `advanced/{duplicate-scan,archive}`,
 and `post-mvp/{quick-access,tags,insights}`.
 
 > **`shared/` is storage-internal.** The parent `features/storage/index.ts` deliberately does **not** re-export
@@ -343,7 +343,7 @@ These are the **10 hard rules**, ESLint-pinned at P0 (full error, not warn).
 | **P3** | `features/storage/{browse,upload,operations,search,shared}/`, `features/command-palette/`, `components/patterns/*`, feature-local stores (uploads, selection, viewPrefs) |
 | **P4** | `features/preview/viewers/*`, `features/document-editor/`, intercepting route `@modal/(.)preview/[key]` |
 | **P5** | `features/secure-folders/` (in-memory store, ancestor-aware) — `registerSecureFolderTokenSource` wired to real getter |
-| **P6** | `features/advanced/{duplicate-scan,archive,av-status}/`, `features/notifications/` |
+| **P6** | `features/advanced/{duplicate-scan,archive}/`, `features/notifications/` |
 | **P7** | `features/marketing/*`, `features/onboarding/`, `app/(public)/*` |
 | **P8** | `features/teams/` activated; `WorkspaceSwitcher` exposed |
 | **P9** | `features/post-mvp/{quick-access,tags,insights}/` |

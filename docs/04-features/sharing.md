@@ -16,8 +16,7 @@
 - One `useShare` hook funnels it (single place to extend if the model ever changes).
 
 ## States (matrix)
-generating link (loading) · copied (success toast) · share unsupported (fallback to copy) · AV‑infected (block share of
-an infected file) · expired‑link awareness. See [state-matrix](../02-architecture/state-matrix.md).
+generating link (loading) · copied (success toast) · share unsupported (fallback to copy) · expired‑link awareness. See [state-matrix](../02-architecture/state-matrix.md).
 
 ## Not planned (unless requested)
 Managed share links with user‑set permissions (view vs download), revoke, link lists, or public‑anyone ACLs. The

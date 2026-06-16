@@ -59,12 +59,11 @@
 - **Multipart upload** — large‑file upload split into parts: `CreateMultipartUpload` → `GetMultipartPartUrls` (presign) →
   PUT parts → `CompleteMultipartUpload` / `Abort`.
 - **Presigned URL** — a time‑limited direct S3 URL (`Cloud/PresignedUrl`); the basis of MVP download **and** "Share".
-- **AV scan** — ClamAV status per object (`Cloud/Scan/Status`): pending / clean / infected; gates download/preview.
 - **Duplicate scan** — async job (SHA‑256 + perceptual dHash) producing groups + similarity + potential savings.
 - **Archive job** — async zip/extract (BullMQ) with progress via socket + polling fallback.
 - **Quota warning** — socket events at **80 / 90 / 100%** usage (`QUOTA_WARNING` / `QUOTA_EXCEEDED`).
-- **State matrix** — the full set of per‑surface states beyond loading/empty/error (locked, reveal‑required, AV
-  pending/infected, quota warning/exceeded, permission‑denied). See [`../02-architecture/state-matrix.md`](../02-architecture/state-matrix.md).
+- **State matrix** — the full set of per‑surface states beyond loading/empty/error (locked, reveal‑required, quota
+  warning/exceeded, permission‑denied). See [`../02-architecture/state-matrix.md`](../02-architecture/state-matrix.md).
 
 ## Frontend stack terms
 
