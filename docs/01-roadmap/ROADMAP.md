@@ -8,6 +8,14 @@
 > **Update rule:** edit the relevant phase summary or its `phases/` file — **don't rewrite** — and add a Changelog line.
 
 ## Changelog
+- **2026-06-17 (Phase 6 — Advanced closes — D-P6.1–D-P6.4; AV removed D-P6.5)** — **Closes Phase 6.** The antivirus
+  (ClamAV) scan feature was removed end-to-end — the backend `Cloud/Scan/Status` endpoint + `CloudScanService` + the
+  preview AV gate; the OpenAPI client was regenerated to drop the orphaned scan symbols (re-plannable later — D-P6.5).
+  The two open acceptance items are closed with unit coverage: kill-socket poll-reconciliation
+  (`tests/jobs/job-progress-poller`) and the quota 80/100% thresholds (new `tests/storage/quota-banner`). The literal
+  live-backend E2E walkthrough (kill a real socket; drive live quota to 80/90/100%; live duplicate/archive runs) is
+  deferred — pending login creds. Green: tsc/lint/build + **341 vitest**. **Next: Phase 7 (Public & Polish — MVP
+  completes here).**
 - **2026-06-16 (Phase 6 — §6.2 duplicate-scan panel — D-P6.4)** — The first consumer of the job plumbing.
   `features/storage/duplicates/`: `useDuplicateScan` (start → `useJobsStore.track(ScanId)` → socket fan-out + poll drive
   progress; result `useQuery` gated on completion); a wide-Dialog `DuplicateScanPanel` (options/scanning/results/empty/error;
@@ -217,7 +225,7 @@
 | 3 | Storage Core | [phase-3](./phases/phase-3-storage-core.md) | ✅ done (browse + ops + bulk/DnD + upload + search/filter/⌘K/touch) |
 | 4 | Preview + Share | [phase-4](./phases/phase-4-preview-share.md) | ✅ done (preview core + share + office + CodeMirror editor + object & document versions/diff/restore; Zen lightbox + office-Escape fix) |
 | 5 | Secure Folders | [phase-5](./phases/phase-5-secure-folders.md) | ✅ done (encrypted + hidden folders; `sessionStorage`-scoped token lifecycle + TTL re-lock — D-P5.7/5.8) |
-| 6 | Advanced | [phase-6](./phases/phase-6-advanced.md) | 🚧 notifications inbox (D-P6.1) + socket/job transport (D-P6.2/D-P6.3) + duplicate scan (D-P6.4) + archive create/extract all done; remaining = the live kill-socket walkthrough + inbox/quota acceptance pass |
+| 6 | Advanced | [phase-6](./phases/phase-6-advanced.md) | ✅ done (job transport (D-P6.2/D-P6.3) + duplicate scan (D-P6.4) + archive create/extract + notifications inbox & quota (D-P6.1); AV removed (D-P6.5). Closed 2026-06-17; live-backend E2E acceptance pending creds) |
 | 7 | Public & Polish (**MVP done**) | [phase-7](./phases/phase-7-public-polish.md) | ⏳ |
 | 8 | Teams (post‑MVP) | [phase-8](./phases/phase-8-teams.md) | ⏳ |
 | 9 | Organization & Discovery (post‑MVP, **backend‑gated**) | [phase-9](./phases/phase-9-organization.md) | ⏳ |

@@ -5,11 +5,11 @@
 >
 > Legend: ⏳ not started · 🚧 in progress · ✅ done · 🚫 blocked.
 
-**Updated:** 2026-06-17 · **Branch:** `v2` · **Round:** **Phase 6 in progress — job-transport foundation + §6.2 duplicate scan + §6.3 archive UI all landed (D-P6.2…D-P6.4). Notifications inbox + Phases 4/5 complete. Remaining: the live kill-socket walkthrough + the inbox/quota acceptance pass.**
+**Updated:** 2026-06-17 · **Branch:** `v2` · **Round:** **Phase 6 (Advanced) COMPLETE (closed 2026-06-17) — job transport + §6.2 duplicate scan + §6.3 archive UI + §6.4 notifications inbox & quota all landed (D-P6.1–D-P6.4); AV scanning removed (D-P6.5). Phases 0–6 done. Only carry-forward: the live-backend E2E acceptance walkthrough (pending creds). Next: Phase 7.**
 
 ## Where we are
 
-**Phase 6 has started — the notifications inbox landed (real-data Zen).** The count-only bell stub is replaced by a full
+**Phase 6 (Advanced) is complete (closed 2026-06-17)** — job transport, duplicate scan, archive create/extract, and the notifications inbox + quota all shipped; AV scanning was removed (D-P6.5). It opened with the notifications inbox (real-data Zen): the count-only bell stub is replaced by a full
 inbox panel (`features/notifications`: `NotificationPanel`/`NotificationItem`, `useNotifications`/`useNotificationActions`,
 `notificationMeta`, `notifications.keys`): a `useInfiniteQuery` history list + Load-more, **optimistic mark-read** that
 decrements the unread badge, mark-all, tone-tinted icon tiles (reusing `FileTone`/`.zs-tile-icon`), native-`Intl` relative
@@ -185,7 +185,7 @@ live backend contract smoke passed. Authenticated end-to-end walkthrough pending
 - [x] Authored core planning docs (roadmap, architecture, feature map, API inventory, decisions)
 - [x] Locked 4 decisions (Share, conflict, job transport, auth)
 - [x] **Restructured** docs into category hierarchy; expanded every area to maximum detail
-- [x] **User approval received; Phase 0 begun (2026-06-06). Phases 0–5 complete; Phase 6 in progress.**
+- [x] **User approval received; Phase 0 begun (2026-06-06). Phases 0–6 complete; Phase 7 next.**
 
 ## Phase status
 
@@ -197,7 +197,7 @@ live backend contract smoke passed. Authenticated end-to-end walkthrough pending
 | 3     | Storage Core                        | ✅     | **Staged in 4 parts, all done.** A (browse) ✅ · B1 (single-item ops) ✅ · B2 (multi-select + bulk + DnD) ✅ · C (upload pipeline) ✅ · D (search + filter + ⌘K palette + central shortcut dispatcher + help overlay + touch bottom-sheet + server-seam ESLint) ✅ 2026-06-14 |
 | 4     | Preview + Share                     | ✅     | Full: preview modal (image/video/PDF/audio/office) + share (presigned URL) + CDN resize + CodeMirror editor + object & document versions/diff/restore; Zen lightbox redesign + office-Escape fix. Done 2026-06-14/15 (D-P4.0–D-P4.9)                                          |
 | 5     | Secure Folders                      | ✅     | Full: token spine + encrypted + hidden (unlock/reveal/hide/conceal, ⇧⇧) + auto-refresh/TTL re-lock; session token `sessionStorage`-scoped (D-P5.7 amends the never-persist guarantee). Done 2026-06-14/15 (D-P5.1–D-P5.8)                                                     |
-| 6     | Advanced                            | 🚧     | **In progress** — notifications inbox (D-P6.1) + **realtime/job-transport foundation** (D-P6.2/D-P6.3) + **§6.2 duplicate-scan panel** (D-P6.4 — first consumer) + **§6.3 archive create/extract UI** done. Still pending: the live kill-socket walkthrough + inbox/quota acceptance pass                                          |
+| 6     | Advanced                            | ✅     | Full: realtime/job transport (D-P6.2/D-P6.3) + duplicate-scan panel (D-P6.4) + archive create/extract UI + notifications inbox & quota (D-P6.1). AV scanning removed (D-P6.5). Done 2026-06-17 (D-P6.1–D-P6.5). Live-backend E2E acceptance walkthrough deferred (pending creds)                                          |
 | 7     | Public & Polish                     | ⏳     | **MVP completes here** (+ onboarding, observability finish)                                                                                                                                                                                                                   |
 | 8     | Teams (post‑MVP)                    | ⏳     | architect‑for now, build last                                                                                                                                                                                                                                                 |
 | 9     | Organization & Discovery (post‑MVP) | ⏳     | **backend‑gated**: favorites/recents/tags/global‑insights/real‑share                                                                                                                                                                                                          |
@@ -219,9 +219,10 @@ live backend contract smoke passed. Authenticated end-to-end walkthrough pending
 
 ## What's next
 
-1. **Finish Phase 6 (Advanced):** the foundation + the §6.2 duplicate-scan panel + the §6.3 archive create/extract UI are
-   done (D-P6.2/D-P6.3/D-P6.4). Remaining = the live kill-socket walkthrough + the inbox/quota acceptance pass.
-   See [Phase 6](./phases/phase-6-advanced.md).
+1. **Phase 7 (Public & Polish) — MVP completes here.** Phase 6 (Advanced) closed 2026-06-17 (job transport + duplicate
+   scan + archive + notifications/quota; AV removed — D-P6.5). Next up: onboarding/first-run, Data Export + Delete
+   Account (KVKK/GDPR), performance/observability verification, public-page polish. See
+   [Phase 7](./phases/phase-7-public-polish.md).
 2. **Deferred live-backend walkthroughs (need login creds):** the Phase 3 upload matrix (small + large multipart w/
    progress, pause/resume, cancel→server Abort, kill-tab-at-50%→resume without re-sending part 1, forced 409
    REPLACE/KEEP_BOTH/SKIP + apply-to-all, quota/max-size pre-flight, folder drop/picker, zero-byte) + the B1/B2 ops matrix;

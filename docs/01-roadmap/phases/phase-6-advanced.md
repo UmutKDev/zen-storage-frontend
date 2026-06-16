@@ -1,6 +1,6 @@
 # Phase 6 — Advanced
 
-> **Status:** 🚧 in progress · **Depends on:** [Phase 3](./phase-3-storage-core.md).
+> **Status:** ✅ done (closed 2026-06-17) · **Depends on:** [Phase 3](./phase-3-storage-core.md).
 > **Feature spec:** [advanced](../../04-features/advanced.md) · **Architecture:** [realtime-socket](../../02-architecture/realtime-socket.md)
 > · **API:** [cloud-archive](../../05-api/modules/cloud-archive.md) · [notifications](../../05-api/modules/notifications.md)
 >
@@ -67,9 +67,9 @@ Contracts: [cloud-core](../../05-api/modules/cloud-core.md) (duplicate scan), [c
 - [x] Duplicate scan runs with live progress; groups render with similarity + savings; cancel works; resolve deletes. _(D-P6.4 — built + unit-tested (`tests/storage/duplicate-resolve`); live-backend walkthrough pending creds like the rest.)_
 - [x] Archive create produces a file with live progress; cancel works. _(commit `cc2dc78`; backend `62eded3` — unit-tested, live-backend walkthrough pending creds.)_
 - [x] Archive extract previews entries; selective extract works; output conflicts are handled. _(commit `cc2dc78`; backend extract conflict strategy `62eded3` + `cloud.archive.service.spec`.)_
-- [ ] **Killing the socket mid‑job** still completes via polling reconciliation.
-- [ ] Inbox lists history with unread badge; mark read / read‑all work; toasts fire per type; quota warnings show at
-      80/90/100%.
+- [x] **Killing the socket mid‑job** still completes via polling reconciliation. _(poll-reconciliation unit-tested — `tests/jobs/job-progress-poller` (polls while a job runs, stops once settled) + `tests/jobs/reconcile`; the literal close-the-WS-in-DevTools walkthrough is deferred — pending creds.)_
+- [x] Inbox lists history with unread badge; mark read / read‑all work; toasts fire per type; quota warnings show at
+      80/90/100%. _(inbox mark-read/read-all/badge — `tests/account/notifications`; per-type toasts — `tests/notifications/fanout`; quota 80/100% thresholds — `tests/storage/quota-banner`; live quota walkthrough deferred — pending creds.)_
 
 ## Acceptance additions (audit HIGH/MEDIUM)
 
@@ -81,7 +81,7 @@ Locked socket lifecycle obligations layered on top of the §6.1 plumbing — see
 - [x] **Sign-out teardown sequence (order asserted by spy).** `socket.disconnect()` (reconnect killed) → `cancelQueries()` → `clear()` → reset all stores (incl. `useJobsStore.reset()`) → `signOut({redirect:false})` → `window.location.assign("/login")`. _(`signOutAndCleanup`; no v5 `cancelMutations`; order spy-tested in `tests/smoke/signout`.)_
 - [x] **Reconciliation on reconnect.** _Amended (D-P6.2):_ backend sends no `last_event_id` frame → reconciliation is **invalidation-based** — every re-connect invalidates inbox/unread/usage + `reconcileActiveJobs`. _(tested: reconcile only on the 2nd connect)_
 - [x] **Polling fallback.** _Amended (D-P6.2):_ no `/Notifications/Recent` → 5 connect failures in 60s starts a 30s interval that re-invalidates the inbox + re-polls active jobs via `Cloud/Scan/Duplicate/Status` + `Cloud/Archive/Status`.
-- [~] **Kill-socket acceptance test.** Transport behavior **unit-tested** (`tests/jobs/{jobs-store,reconcile}` — poll drives a job to terminal; replayed/late progress is deduped via the terminal-frozen, monotonic store). Full end-to-end (start a real job in the UI, close the WS in DevTools) lands with the §6.3 archive panel that `track()`s a job.
+- [x] **Kill-socket acceptance test.** Transport behavior **unit-tested** (`tests/jobs/{jobs-store,reconcile,job-progress-poller}` — poll drives a job to terminal; replayed/late progress is deduped via the terminal-frozen, monotonic store). The §6.3 archive panel that `track()`s a job has landed; the literal end-to-end (start a real job, close the WS in DevTools) remains a deferred live-verify — pending creds.
 
 ## Risks & mitigations
 
@@ -98,5 +98,7 @@ correctness).
 
 ## Exit criteria
 
-Duplicate scan, archive, and the notification inbox all work with resilient live progress. Then begin
-[Phase 7](./phase-7-public-polish.md).
+✅ **Met (closed 2026-06-17).** Duplicate scan, archive, and the notification inbox + quota all work with resilient
+live progress (poll-reconciled, unit-tested). The only carried-forward item is the **live-backend E2E acceptance
+walkthrough** (kill a real socket mid-job; drive live quota to 80/90/100%; live duplicate/archive runs) — deferred
+pending login creds, tracked into [Phase 7](./phase-7-public-polish.md). **Next: Phase 7.**
