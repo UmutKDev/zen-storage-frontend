@@ -131,6 +131,39 @@
       "upgrade": "Upgrade plan",
       "dismiss": "Dismiss"
     },
+    "archive": {
+      "create": {
+        "title": "Create archive",
+        "itemsSuffix": "items selected",
+        "format": "Format",
+        "name": "Name (optional)",
+        "namePlaceholder": "archive",
+        "cancel": "Cancel",
+        "submit": "Create archive",
+        "jobTitle": "Creating archive",
+        "failed": "Couldn't start the archive."
+      },
+      "extract": {
+        "into": "Extracts into",
+        "intoThisFolder": "Extracts into this folder",
+        "newFolder": "Extract into a new folder",
+        "loading": "Reading archive…",
+        "previewError": "Couldn't read this archive.",
+        "retry": "Try again",
+        "empty": "This archive is empty.",
+        "selectAll": "Select all",
+        "selectNone": "Select none",
+        "selectedSuffix": "selected",
+        "entriesLabel": "Archive entries",
+        "onConflict": "If files already exist",
+        "keepBoth": "Keep both",
+        "skip": "Skip",
+        "replace": "Replace",
+        "cancel": "Cancel",
+        "submit": "Extract",
+        "jobTitle": "Extracting archive"
+      }
+    },
     "duplicate": {
       "button": "Find duplicates",
       "title": "Find duplicate files",
@@ -250,6 +283,8 @@
         "rename": "Rename",
         "move": "Move",
         "download": "Download",
+        "archive": "Create zip",
+        "extract": "Extract",
         "delete": "Delete"
       },
       "create": {

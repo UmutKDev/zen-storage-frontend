@@ -282,7 +282,25 @@ export interface CloudArchiveExtractStartRequestModel {
      * Specific entry paths to extract (selective extraction). Omit for full extraction.
      */
     'SelectedEntries'?: Array<string>;
+    /**
+     * How to handle an existing extract-output folder. Defaults to REPLACE.
+     */
+    'Strategy'?: CloudArchiveExtractStartRequestModelStrategyEnum;
+    /**
+     * When true (default), extract into a new subfolder named after the archive; when false, extract straight into the archive’s folder.
+     */
+    'CreateFolder'?: boolean;
 }
+
+export const CloudArchiveExtractStartRequestModelStrategyEnum = {
+    Fail: 'FAIL',
+    Replace: 'REPLACE',
+    Skip: 'SKIP',
+    KeepBoth: 'KEEP_BOTH'
+} as const;
+
+export type CloudArchiveExtractStartRequestModelStrategyEnum = typeof CloudArchiveExtractStartRequestModelStrategyEnum[keyof typeof CloudArchiveExtractStartRequestModelStrategyEnum];
+
 export interface CloudArchiveExtractStartResponseBaseModel {
     'Result': CloudArchiveExtractStartResponseModel;
     'Status': BaseStatusModel;
@@ -7077,10 +7095,11 @@ export const CloudApiAxiosParamCreator = function (configuration?: Configuration
          * @param {boolean} [delimiter] 
          * @param {boolean} [isMetadataProcessing] 
          * @param {string} [xFolderSession] Session token for encrypted folder access
+         * @param {string} [xHiddenSession] Session token for hidden folder access
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listObjects: async (xTeamId?: string, search?: string, skip?: number, take?: number, path?: string, delimiter?: boolean, isMetadataProcessing?: boolean, xFolderSession?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        listObjects: async (xTeamId?: string, search?: string, skip?: number, take?: number, path?: string, delimiter?: boolean, isMetadataProcessing?: boolean, xFolderSession?: string, xHiddenSession?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             const localVarPath = `/Api/Cloud/List/Objects`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -7126,6 +7145,9 @@ export const CloudApiAxiosParamCreator = function (configuration?: Configuration
             }
             if (xFolderSession != null) {
                 localVarHeaderParameter['x-folder-session'] = String(xFolderSession);
+            }
+            if (xHiddenSession != null) {
+                localVarHeaderParameter['x-hidden-session'] = String(xHiddenSession);
             }
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -7678,11 +7700,12 @@ export const CloudApiFp = function(configuration?: Configuration) {
          * @param {boolean} [delimiter] 
          * @param {boolean} [isMetadataProcessing] 
          * @param {string} [xFolderSession] Session token for encrypted folder access
+         * @param {string} [xHiddenSession] Session token for hidden folder access
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async listObjects(xTeamId?: string, search?: string, skip?: number, take?: number, path?: string, delimiter?: boolean, isMetadataProcessing?: boolean, xFolderSession?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CloudObjectListBaseModel>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.listObjects(xTeamId, search, skip, take, path, delimiter, isMetadataProcessing, xFolderSession, options);
+        async listObjects(xTeamId?: string, search?: string, skip?: number, take?: number, path?: string, delimiter?: boolean, isMetadataProcessing?: boolean, xFolderSession?: string, xHiddenSession?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CloudObjectListBaseModel>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listObjects(xTeamId, search, skip, take, path, delimiter, isMetadataProcessing, xFolderSession, xHiddenSession, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['CloudApi.listObjects']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -7930,7 +7953,7 @@ export const CloudApiFactory = function (configuration?: Configuration, basePath
          * @throws {RequiredError}
          */
         listObjects(requestParameters: CloudApiListObjectsRequest = {}, options?: RawAxiosRequestConfig): AxiosPromise<CloudObjectListBaseModel> {
-            return localVarFp.listObjects(requestParameters.xTeamId, requestParameters.search, requestParameters.skip, requestParameters.take, requestParameters.path, requestParameters.delimiter, requestParameters.isMetadataProcessing, requestParameters.xFolderSession, options).then((request) => request(axios, basePath));
+            return localVarFp.listObjects(requestParameters.xTeamId, requestParameters.search, requestParameters.skip, requestParameters.take, requestParameters.path, requestParameters.delimiter, requestParameters.isMetadataProcessing, requestParameters.xFolderSession, requestParameters.xHiddenSession, options).then((request) => request(axios, basePath));
         },
         /**
          * Returns the version history (non-current versions) for the given file key. Requires S3 bucket versioning to be enabled.
@@ -8233,6 +8256,11 @@ export interface CloudApiListObjectsRequest {
      * Session token for encrypted folder access
      */
     readonly xFolderSession?: string
+
+    /**
+     * Session token for hidden folder access
+     */
+    readonly xHiddenSession?: string
 }
 
 /**
@@ -8494,7 +8522,7 @@ export class CloudApi extends BaseAPI {
      * @throws {RequiredError}
      */
     public listObjects(requestParameters: CloudApiListObjectsRequest = {}, options?: RawAxiosRequestConfig) {
-        return CloudApiFp(this.configuration).listObjects(requestParameters.xTeamId, requestParameters.search, requestParameters.skip, requestParameters.take, requestParameters.path, requestParameters.delimiter, requestParameters.isMetadataProcessing, requestParameters.xFolderSession, options).then((request) => request(this.axios, this.basePath));
+        return CloudApiFp(this.configuration).listObjects(requestParameters.xTeamId, requestParameters.search, requestParameters.skip, requestParameters.take, requestParameters.path, requestParameters.delimiter, requestParameters.isMetadataProcessing, requestParameters.xFolderSession, requestParameters.xHiddenSession, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

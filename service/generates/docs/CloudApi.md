@@ -767,6 +767,7 @@ let path: string; // (optional) (default to undefined)
 let delimiter: boolean; // (optional) (default to undefined)
 let isMetadataProcessing: boolean; // (optional) (default to true)
 let xFolderSession: string; //Session token for encrypted folder access (optional) (default to undefined)
+let xHiddenSession: string; //Session token for hidden folder access (optional) (default to undefined)
 
 const { status, data } = await apiInstance.listObjects(
     xTeamId,
@@ -776,7 +777,8 @@ const { status, data } = await apiInstance.listObjects(
     path,
     delimiter,
     isMetadataProcessing,
-    xFolderSession
+    xFolderSession,
+    xHiddenSession
 );
 ```
 
@@ -792,6 +794,7 @@ const { status, data } = await apiInstance.listObjects(
 | **delimiter** | [**boolean**] |  | (optional) defaults to undefined|
 | **isMetadataProcessing** | [**boolean**] |  | (optional) defaults to true|
 | **xFolderSession** | [**string**] | Session token for encrypted folder access | (optional) defaults to undefined|
+| **xHiddenSession** | [**string**] | Session token for hidden folder access | (optional) defaults to undefined|
 
 
 ### Return type

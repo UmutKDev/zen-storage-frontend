@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import {
   Eye,
   EyeOff,
+  FolderArchive,
   FolderInput,
   KeyRound,
   Lock,
@@ -30,6 +31,8 @@ import {
 } from "@/components/ui";
 import type { FolderEntry } from "../../browse/lib/entries";
 import { folderHref, folderPathOf } from "../../browse/lib/href";
+import { isExtractableArchive } from "../../archive/lib/archive";
+import { ArchiveExtractDialog } from "../../archive/components/ArchiveExtractDialog";
 import { useUploadsStore } from "../../upload/stores/uploads.store";
 import { useDelete } from "../hooks/useDelete";
 import { useStorageUiStore } from "../stores/storageUi.store";
@@ -76,7 +79,9 @@ export function EntryActionsSheet({ path }: { path: string }) {
   const router = useRouter();
   const previewEnabled = useFlag("preview");
 
-  const [dialog, setDialog] = useState<null | "move" | "delete">(null);
+  const [dialog, setDialog] = useState<null | "move" | "delete" | "extract">(
+    null,
+  );
   const del = useDelete(path, () => setDialog(null));
 
   // Keep the last entry while the sheet/dialog animates closed (the store clears
@@ -95,6 +100,10 @@ export function EntryActionsSheet({ path }: { path: string }) {
   const onDelete = () => {
     closeSheet();
     setDialog("delete");
+  };
+  const onExtract = () => {
+    closeSheet();
+    setDialog("extract");
   };
   const onAddFiles = () => {
     closeSheet();
@@ -188,6 +197,13 @@ export function EntryActionsSheet({ path }: { path: string }) {
               label={t("storage.sheet.move")}
               onClick={onMove}
             />
+            {shown?.kind === "file" && isExtractableArchive(shown.name) ? (
+              <SheetAction
+                icon={FolderArchive}
+                label={t("storage.ops.menu.extract")}
+                onClick={onExtract}
+              />
+            ) : null}
             <SheetAction
               icon={Upload}
               label={t("storage.sheet.addFiles")}
@@ -218,6 +234,15 @@ export function EntryActionsSheet({ path }: { path: string }) {
           onOpenChange={(o) => !o && setDialog(null)}
           onConfirm={() => del.remove([shown])}
           isPending={del.isPending}
+        />
+      ) : null}
+      {dialog === "extract" && shown?.kind === "file" ? (
+        <ArchiveExtractDialog
+          archiveKey={shown.file.Path.Key}
+          archiveName={shown.name}
+          path={path}
+          open
+          onOpenChange={(o) => !o && setDialog(null)}
         />
       ) : null}
     </>

@@ -10,7 +10,7 @@ import type { FolderEntry } from "../../browse/lib/entries";
  * touch long-press bottom sheet (`EntryActionsSheet`). Reset is unnecessary: the
  * values are transient open flags, never persisted.
  */
-export type BulkDialogKind = "move" | "delete";
+export type BulkDialogKind = "move" | "delete" | "archive";
 export type CreateDialogKind = "folder" | "file";
 
 interface StorageUiState {

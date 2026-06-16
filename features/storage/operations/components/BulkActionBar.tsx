@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Download, FolderInput, Trash2, X } from "lucide-react";
+import { Download, FileArchive, FolderInput, Trash2, X } from "lucide-react";
 import { t } from "@/lib/i18n";
 import { toast as toastVariant } from "@/lib/motion";
 import { Button, Separator } from "@/components/ui";
@@ -11,6 +11,7 @@ import { useDelete } from "../hooks/useDelete";
 import { useDownload } from "../hooks/useDownload";
 import { focusBrowseContent } from "../lib/feedback";
 import { useStorageUiStore } from "../stores/storageUi.store";
+import { ArchiveCreateDialog } from "../../archive/components/ArchiveCreateDialog";
 import { DeleteConfirmDialog } from "./DeleteConfirmDialog";
 import { MoveDialog } from "./MoveDialog";
 
@@ -100,6 +101,14 @@ export function BulkActionBar({
               </span>
             ) : null}
             <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setDialog("archive")}
+            >
+              <FileArchive className="size-4" />
+              {t("storage.ops.menu.archive")}
+            </Button>
+            <Button
               variant="ghost-destructive"
               size="sm"
               onClick={() => setDialog("delete")}
@@ -142,6 +151,15 @@ export function BulkActionBar({
             });
           }}
           isPending={del.isPending}
+        />
+      ) : null}
+      {dialog === "archive" && selection.count > 0 ? (
+        <ArchiveCreateDialog
+          entries={selection.selectedEntries}
+          path={path}
+          open
+          onOpenChange={(o) => !o && closeDialog()}
+          onArchived={clearAndRefocus}
         />
       ) : null}
     </>

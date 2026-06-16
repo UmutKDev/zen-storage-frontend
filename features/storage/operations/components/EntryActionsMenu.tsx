@@ -6,6 +6,7 @@ import {
   Download,
   Eye,
   EyeOff,
+  FolderArchive,
   FolderInput,
   KeyRound,
   Lock,
@@ -28,6 +29,8 @@ import {
 } from "@/components/ui";
 import type { FolderEntry } from "../../browse/lib/entries";
 import { folderPathOf } from "../../browse/lib/href";
+import { isExtractableArchive } from "../../archive/lib/archive";
+import { ArchiveExtractDialog } from "../../archive/components/ArchiveExtractDialog";
 import { useRename } from "../hooks/useRename";
 import { useDelete } from "../hooks/useDelete";
 import { useDownload } from "../hooks/useDownload";
@@ -35,7 +38,7 @@ import { NameDialog } from "./NameDialog";
 import { DeleteConfirmDialog } from "./DeleteConfirmDialog";
 import { MoveDialog } from "./MoveDialog";
 
-type OpenDialog = null | "rename" | "move" | "delete";
+type OpenDialog = null | "rename" | "move" | "delete" | "extract";
 
 /** Per-row/card actions menu (rename / move / download / delete) + its dialogs. */
 export function EntryActionsMenu({
@@ -87,6 +90,12 @@ export function EntryActionsMenu({
             <DropdownMenuItem onSelect={() => download(entry.file.Path.Key)}>
               <Download className="size-4" />
               {t("storage.ops.menu.download")}
+            </DropdownMenuItem>
+          ) : null}
+          {entry.kind === "file" && isExtractableArchive(entry.name) ? (
+            <DropdownMenuItem onSelect={() => setDialog("extract")}>
+              <FolderArchive className="size-4" />
+              {t("storage.ops.menu.extract")}
             </DropdownMenuItem>
           ) : null}
           {entry.kind === "dir" && !entry.dir.IsEncrypted ? (
@@ -208,6 +217,15 @@ export function EntryActionsMenu({
           onOpenChange={(o) => !o && close()}
           onConfirm={() => del.remove([entry])}
           isPending={del.isPending}
+        />
+      ) : null}
+      {dialog === "extract" && entry.kind === "file" ? (
+        <ArchiveExtractDialog
+          archiveKey={entry.file.Path.Key}
+          archiveName={entry.name}
+          path={path}
+          open
+          onOpenChange={(o) => !o && close()}
         />
       ) : null}
     </>
