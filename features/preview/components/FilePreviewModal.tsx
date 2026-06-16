@@ -22,7 +22,6 @@ import { t } from "@/lib/i18n";
 import { cn, parentPath, toSegments } from "@/lib/utils";
 import { previewHref, viewerKindForName } from "@/lib/preview";
 import { usePreviewObject } from "../hooks/usePreviewObject";
-import { useScanStatus } from "../hooks/useScanStatus";
 import { usePreviewNavigation } from "../hooks/usePreviewNavigation";
 import { useEditorStore } from "../stores/editor.store";
 import type { PreviewMode } from "../types";
@@ -100,7 +99,6 @@ export function FilePreviewModal({
 
   const { object, isPending, isFetching, isError, refetch } =
     usePreviewObject(activeKey);
-  const { gate } = useScanStatus(activeKey);
   const nav = usePreviewNavigation(activeKey, selectKey);
 
   const isEditor = object ? viewerKindForName(object.Name) === "editor" : false;
@@ -170,7 +168,6 @@ export function FilePreviewModal({
             <PreviewToolbar
               object={object}
               folderPath={parentPath(activeKey)}
-              blocked={gate === "infected"}
               railOpen={railOpen}
               layoutFullscreen={layoutFullscreen}
               onToggleRail={() => setRailOpen((o) => !o)}
@@ -214,7 +211,6 @@ export function FilePreviewModal({
               <>
                 <PreviewStage
                   object={object}
-                  gate={gate}
                   zoom={zoom}
                   onZoomChange={setZoom}
                   hasPrev={nav.hasPrev}
@@ -230,7 +226,6 @@ export function FilePreviewModal({
                   onTabChange={setActiveRailTab}
                   previewKey={activeKey}
                   object={object}
-                  gate={gate}
                   isEditor={isEditor}
                   onViewDiff={(docKey, versionId) =>
                     setDiffFor({ docKey, versionId })

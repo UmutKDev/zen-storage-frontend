@@ -219,7 +219,7 @@ function EditorSurface({
       <div className="flex items-center gap-2 border-b border-border/60 px-3 py-1.5 text-xs">
         {/* Persistent polite live region: lock/draft/save status changes
             asynchronously (lock acquire, heartbeat loss, save) and must be
-            announced — matches the AvGate `role="status"` precedent. */}
+            announced via `role="status"`. */}
         <span role="status" className="flex items-center gap-1.5">
           {!canEdit ? (
             <span className="flex items-center gap-1.5 text-warning">

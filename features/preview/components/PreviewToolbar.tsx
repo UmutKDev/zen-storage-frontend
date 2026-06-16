@@ -35,13 +35,11 @@ import { useShare } from "../hooks/useShare";
  * Preview header (Zen lightbox): a neutral icon tile + file name + meta line
  * (type · size), then the action strip — Share, version History (focuses the
  * rail's Versions tab), a More menu (Download / Delete), a details-rail toggle,
- * a layout-fullscreen toggle, and Close. `blocked` (AV infected) disables the
- * outward actions (share/download); deleting closes the modal via `onClose`.
+ * a layout-fullscreen toggle, and Close. Deleting closes the modal via `onClose`.
  */
 export function PreviewToolbar({
   object,
   folderPath,
-  blocked,
   railOpen,
   layoutFullscreen,
   onToggleRail,
@@ -51,7 +49,6 @@ export function PreviewToolbar({
 }: {
   object: CloudObjectModel;
   folderPath: string;
-  blocked: boolean;
   railOpen: boolean;
   layoutFullscreen: boolean;
   onToggleRail: () => void;
@@ -96,7 +93,7 @@ export function PreviewToolbar({
         <Button
           variant="ghost"
           size="icon-sm"
-          disabled={blocked || sharing}
+          disabled={sharing}
           aria-label={t("share.button")}
           onClick={() => void share(object.Path.Key, object.Name)}
         >
@@ -121,7 +118,6 @@ export function PreviewToolbar({
             <DropdownMenuRichItem
               icon={Download}
               label={t("preview.download")}
-              disabled={blocked}
               onSelect={() => download(object.Path.Key)}
             />
             <DropdownMenuRichItem

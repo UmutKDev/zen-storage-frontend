@@ -745,19 +745,11 @@
       "modified": "Modified",
       "ownerLabel": "Owner",
       "owner": "You",
-      "avClean": "Scanned · no threats found",
-      "avScanning": "Scanning for threats…",
-      "avThreat": "Threat found",
       "copyShareLink": "Copy share link"
     },
     "unsupported": "No preview available",
     "downloadToView": "Download the file to view it.",
     "openInNewTab": "Open in new tab",
-    "av": {
-      "pendingBody": "This file is still being scanned for malware. Download with care.",
-      "infectedTitle": "Malware detected",
-      "infectedBody": "This file was flagged by the malware scanner and can’t be previewed, downloaded, or shared."
-    },
     "video": {
       "codecUnsupported": "This video format can’t be played here. Download it to view."
     },

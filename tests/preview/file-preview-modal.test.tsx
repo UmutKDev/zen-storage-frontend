@@ -5,7 +5,6 @@ import { renderWithProviders } from "../test-utils";
 import { useWorkspaceStore } from "@/stores";
 
 const findObject = vi.fn();
-const getScanStatus = vi.fn();
 const getShareUrl = vi.fn();
 
 // Mutable nav-key list the storage mock reads (set per test).
@@ -14,7 +13,7 @@ const { navKeys } = vi.hoisted(() => ({ navKeys: { current: [] as string[] } }))
 vi.mock("@/features/preview/api", async (importOriginal) => {
   const actual =
     await importOriginal<typeof import("@/features/preview/api")>();
-  return { ...actual, findObject, getScanStatus, getShareUrl };
+  return { ...actual, findObject, getShareUrl };
 });
 
 // The toolbar reuses storage's delete/download + the nav store reads the
@@ -50,7 +49,6 @@ beforeEach(() => {
   vi.clearAllMocks();
   navKeys.current = [];
   useWorkspaceStore.getState().setOwner("u1");
-  getScanStatus.mockResolvedValue(null); // no scan record → not gated
 });
 afterEach(() => useWorkspaceStore.getState().reset());
 
@@ -66,20 +64,6 @@ describe("FilePreviewModal", () => {
     expect(img.getAttribute("src")).toBe(
       "https://cdn.storage.umutk.me/k/photo.jpg?w=800",
     );
-  });
-
-  it("blocks the body and disables download/share when infected", async () => {
-    findObject.mockResolvedValue(imageObject());
-    getScanStatus.mockResolvedValue({ Status: "infected" });
-
-    renderWithProviders(
-      <FilePreviewModal previewKey="k/photo.jpg" mode="page" />,
-    );
-
-    expect(await screen.findByText(/malware detected/i)).toBeInTheDocument();
-    expect(screen.queryByRole("img", { name: "photo.jpg" })).toBeNull();
-    expect(screen.getByRole("button", { name: "Download" })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "Share" })).toBeDisabled();
   });
 
   it("shares via the clipboard when Web Share is unavailable", async () => {

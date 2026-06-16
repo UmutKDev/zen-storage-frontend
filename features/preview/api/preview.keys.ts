@@ -7,8 +7,6 @@ import { scopedKey } from "@/lib/api";
 export const previewKeys = {
   object: (ownerId: string, key: string) =>
     scopedKey(ownerId, "preview", "object", key),
-  scan: (ownerId: string, key: string) =>
-    scopedKey(ownerId, "preview", "scan", key),
   /** Presigned URL used as the Microsoft Office embed `src`. */
   officeSrc: (ownerId: string, key: string) =>
     scopedKey(ownerId, "preview", "office-src", key),

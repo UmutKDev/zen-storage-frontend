@@ -1,7 +1,6 @@
 export { previewKeys } from "./preview.keys";
 export {
   findObject,
-  getScanStatus,
   getPresignedSrc,
   downloadBlob,
   listVersions,

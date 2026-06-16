@@ -5,12 +5,11 @@ import { renderWithProviders } from "../test-utils";
 import { useWorkspaceStore } from "@/stores";
 
 const findObject = vi.fn();
-const getScanStatus = vi.fn();
 
 vi.mock("@/features/preview/api", async (importOriginal) => {
   const actual =
     await importOriginal<typeof import("@/features/preview/api")>();
-  return { ...actual, findObject, getScanStatus };
+  return { ...actual, findObject };
 });
 vi.mock("@/features/storage", () => ({
   useDelete: () => ({ remove: vi.fn(), isPending: false }),
@@ -54,7 +53,6 @@ const imageObject = {
 beforeEach(() => {
   vi.clearAllMocks();
   useWorkspaceStore.getState().setOwner("u1");
-  getScanStatus.mockResolvedValue(null);
   findObject.mockResolvedValue(imageObject);
 });
 afterEach(() => {

@@ -1,14 +1,6 @@
 "use client";
 
-import {
-  Download,
-  History,
-  Info,
-  Link as LinkIcon,
-  ShieldAlert,
-  ShieldCheck,
-  ShieldQuestion,
-} from "lucide-react";
+import { Download, History, Info, Link as LinkIcon } from "lucide-react";
 import {
   Button,
   Tabs,
@@ -20,7 +12,6 @@ import { cn, fileMeta, formatBytes, formatDateTime } from "@/lib/utils";
 import { t } from "@/lib/i18n";
 import { useDownload } from "@/features/storage";
 import type { CloudObjectModel } from "@/service/models";
-import type { ScanGate } from "../hooks/useScanStatus";
 import { useShare } from "../hooks/useShare";
 import { VersionHistoryRail } from "./VersionHistoryRail";
 import { DocumentVersionsRail } from "./DocumentVersionsRail";
@@ -38,43 +29,12 @@ function DetailRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-/** The AV scan line — driven by the real scan gate; nothing rendered when the
- *  status is unknown (no data to assert). */
-function ScanLine({ gate }: { gate: ScanGate }) {
-  if (gate === "clean") {
-    return (
-      <p className="flex items-center gap-2 text-xs text-success" role="status">
-        <ShieldCheck className="size-3.5 shrink-0" />
-        {t("preview.rail.avClean")}
-      </p>
-    );
-  }
-  if (gate === "pending") {
-    return (
-      <p className="flex items-center gap-2 text-xs text-warning" role="status">
-        <ShieldQuestion className="size-3.5 shrink-0" />
-        {t("preview.rail.avScanning")}
-      </p>
-    );
-  }
-  if (gate === "infected") {
-    // Assertive — a threat result should interrupt (matches the AvGate body banner).
-    return (
-      <p className="flex items-center gap-2 text-xs text-destructive" role="alert">
-        <ShieldAlert className="size-3.5 shrink-0" />
-        {t("preview.rail.avThreat")}
-      </p>
-    );
-  }
-  return null;
-}
-
 /**
- * The collapsible right details rail. Two tabs — **Details** (real metadata +
- * the AV scan status; no fabricated integrity data) and **Versions** (the
- * object/document history) — over a footer with Download + Copy-share-link.
- * Collapsing animates the outer width to 0 while the inner content stays pinned
- * at 300px so it doesn't reflow mid-transition.
+ * The collapsible right details rail. Two tabs — **Details** (real metadata, no
+ * fabricated integrity data) and **Versions** (the object/document history) —
+ * over a footer with Download + Copy-share-link. Collapsing animates the outer
+ * width to 0 while the inner content stays pinned at 300px so it doesn't reflow
+ * mid-transition.
  */
 export function PreviewDetailsRail({
   open,
@@ -82,7 +42,6 @@ export function PreviewDetailsRail({
   onTabChange,
   previewKey,
   object,
-  gate,
   isEditor,
   onViewDiff,
 }: {
@@ -91,13 +50,11 @@ export function PreviewDetailsRail({
   onTabChange: (tab: RailTab) => void;
   previewKey: string;
   object: CloudObjectModel;
-  gate: ScanGate;
   isEditor: boolean;
   onViewDiff: (docKey: string, versionId: string) => void;
 }) {
   const { download } = useDownload();
   const { share, isPending: sharing } = useShare();
-  const blocked = gate === "infected";
   const typeLabel = fileMeta(object.Name, "file").label;
 
   return (
@@ -142,9 +99,6 @@ export function PreviewDetailsRail({
               value={formatDateTime(object.LastModified)}
             />
             <DetailRow label={t("preview.rail.ownerLabel")} value={t("preview.rail.owner")} />
-            <div className="mt-3 border-t border-border pt-3">
-              <ScanLine gate={gate} />
-            </div>
           </TabsContent>
 
           <TabsContent
@@ -163,7 +117,6 @@ export function PreviewDetailsRail({
           <Button
             variant="default"
             className="w-full"
-            disabled={blocked}
             onClick={() => download(object.Path.Key)}
           >
             <Download className="size-4" />
@@ -172,7 +125,7 @@ export function PreviewDetailsRail({
           <Button
             variant="outline"
             className="w-full"
-            disabled={blocked || sharing}
+            disabled={sharing}
             onClick={() => void share(object.Path.Key, object.Name)}
           >
             <LinkIcon className="size-4" />

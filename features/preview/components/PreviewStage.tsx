@@ -4,9 +4,7 @@ import { X } from "lucide-react";
 import { Button } from "@/components/ui";
 import { t } from "@/lib/i18n";
 import type { CloudObjectModel } from "@/service/models";
-import type { ScanGate } from "../hooks/useScanStatus";
 import { useDocumentDiff } from "../hooks/useDocumentDiff";
-import { AvGate } from "./states/AvGate";
 import { PreviewBody } from "./PreviewBody";
 import { PreviewNavButtons } from "./PreviewNavButtons";
 import { DiffView } from "./DiffView";
@@ -62,15 +60,14 @@ function StageDiffOverlay({
 }
 
 /**
- * The preview body area: the AV-gated viewer + the floating prev/next arrows +
- * (for the editor) a full-stage diff overlay. The dark "stage" backdrop is owned
- * by the image/video viewers (the only media that benefits) — everything else
- * (audio, pdf, office, editor, unsupported, AV alerts) renders on the neutral
- * `bg-background` surface so their light-surface chrome stays legible.
+ * The preview body area: the viewer + the floating prev/next arrows + (for the
+ * editor) a full-stage diff overlay. The dark "stage" backdrop is owned by the
+ * image/video viewers (the only media that benefits) — everything else (audio,
+ * pdf, office, editor, unsupported) renders on the neutral `bg-background`
+ * surface so their light-surface chrome stays legible.
  */
 export function PreviewStage({
   object,
-  gate,
   zoom,
   onZoomChange,
   hasPrev,
@@ -81,7 +78,6 @@ export function PreviewStage({
   onCloseDiff,
 }: {
   object: CloudObjectModel;
-  gate: ScanGate;
   zoom: number;
   onZoomChange: (zoom: number) => void;
   hasPrev: boolean;
@@ -93,18 +89,16 @@ export function PreviewStage({
 }) {
   return (
     <div className="relative flex min-h-0 flex-1 flex-col bg-background">
-      <AvGate gate={gate}>
-        {/* Keyed by the file so the viewer REMOUNTS per file — otherwise a heavy
-            viewer (the PDF blob, the office iframe) keeps showing the previous
-            file's content while the next one loads. The shell/toolbar/rail stay
-            mounted (they're outside PreviewBody), so fullscreen/zoom/rail persist. */}
-        <PreviewBody
-          key={object.Path.Key}
-          object={object}
-          zoom={zoom}
-          onZoomChange={onZoomChange}
-        />
-      </AvGate>
+      {/* Keyed by the file so the viewer REMOUNTS per file — otherwise a heavy
+          viewer (the PDF blob, the office iframe) keeps showing the previous
+          file's content while the next one loads. The shell/toolbar/rail stay
+          mounted (they're outside PreviewBody), so fullscreen/zoom/rail persist. */}
+      <PreviewBody
+        key={object.Path.Key}
+        object={object}
+        zoom={zoom}
+        onZoomChange={onZoomChange}
+      />
       <PreviewNavButtons
         hasPrev={hasPrev}
         hasNext={hasNext}

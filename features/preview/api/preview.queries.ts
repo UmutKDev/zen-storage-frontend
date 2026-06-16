@@ -1,7 +1,6 @@
 import { cloudApiFactory, cloudDocumentsApiFactory } from "@/service/factories";
 import type {
   CloudObjectModel,
-  CloudScanStatusResponseModel,
   CloudVersionListResponseModel,
   DocumentContentResponseModel,
   DocumentDiffResponseModel,
@@ -20,19 +19,6 @@ export async function findObject(
 ): Promise<CloudObjectModel> {
   const res = await cloudApiFactory.find({ key }, { signal });
   return res.data as unknown as CloudObjectModel;
-}
-
-/**
- * Antivirus scan status via `Cloud/Scan/Status`. Returns `null` when the backend
- * has no scan record (treated as "not gated"). `res.data` is the bare model
- * (post-envelope).
- */
-export async function getScanStatus(
-  key: string,
-  signal?: AbortSignal,
-): Promise<CloudScanStatusResponseModel | null> {
-  const res = await cloudApiFactory.scanStatus({ key }, { signal });
-  return res.data as unknown as CloudScanStatusResponseModel | null;
 }
 
 /**
