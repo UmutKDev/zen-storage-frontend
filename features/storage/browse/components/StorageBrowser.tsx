@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import { type ReactNode, useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { t } from "@/lib/i18n";
 import { isPreviewableName } from "@/lib/preview";
@@ -22,12 +22,15 @@ import { FileDropZone } from "../../upload/components/FileDropZone";
 import { UploadButton } from "../../upload/components/UploadButton";
 import { useFolderEntries } from "../hooks/useFolderEntries";
 import { usePendingEntries } from "../hooks/usePendingEntries";
-import { SEARCH_MIN_CHARS, useSearch, type SearchScope } from "../hooks/useSearch";
+import {
+  SEARCH_MIN_CHARS,
+  useSearch,
+  type SearchScope,
+} from "../hooks/useSearch";
 import { useStorageCommands } from "../hooks/useStorageCommands";
 import { usePreviewNavStore } from "../stores/previewNav.store";
 import { useViewPrefs } from "../stores/viewPrefs.store";
 import { matchEntries } from "../lib/entries";
-import { pathHref } from "../lib/href";
 import { BreadcrumbBar } from "./BreadcrumbBar";
 import {
   BrowserError,
@@ -91,15 +94,14 @@ export function StorageBrowser({ path }: { path: string }) {
 
   const selection = useItemSelection(entries, path);
   useStorageCommands({ path, selection });
-  // While inside an encrypted/hidden folder, re-lock (and re-prompt for encrypted)
-  // the instant the session token's TTL lapses — content can't outlive its token.
-  // If a HIDDEN reveal lapses while the user is inside the revealed folder, send
-  // them back out to the reveal origin (the folder re-hides and can't be browsed).
-  const onHiddenExpireInside = useCallback(
-    (origin: string) => router.replace(pathHref(origin), { scroll: false }),
-    [router],
-  );
-  useSecureFolderExpiry(path, onHiddenExpireInside);
+  // While inside an encrypted folder, re-lock + re-prompt the instant the session
+  // TTL lapses — content can't outlive its token. A HIDDEN reveal lapse only
+  // re-hides the revealed items (clears the token + toasts); we deliberately do
+  // NOT relocate the user. Bouncing them out (to root, when revealed at root) was
+  // the bad experience — and the reveal origin's subtree also holds plain folders
+  // they're entitled to stay in. They keep browsing; the toast explains the
+  // re-hide, and re-revealing (⇧⇧) brings hidden items back.
+  useSecureFolderExpiry(path);
 
   // Publish the ordered previewable-file keys (in display order) for the preview
   // modal's ←/→ navigation — a neutral hand-off so preview never imports browse

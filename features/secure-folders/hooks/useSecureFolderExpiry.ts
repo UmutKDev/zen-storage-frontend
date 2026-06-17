@@ -45,15 +45,7 @@ function delayUntil(expiresAtSeconds: number): number {
  * backstop the away case. Resolving ignores expiry here (no clock in render —
  * pure); the real expiry decision is the `Date.now()` read at fire time.
  */
-export function useSecureFolderExpiry(
-  path: string,
-  /** Called when a HIDDEN reveal expires while the user is INSIDE the revealed
-   *  area (their path is a descendant of the reveal origin), not merely viewing
-   *  the parent listing. Receives the reveal origin to navigate back to — the
-   *  re-hidden folder can no longer be browsed, so the host returns the user
-   *  there instead of leaving them stranded inside it. */
-  onHiddenExpireInside?: (revealOrigin: string) => void,
-): void {
+export function useSecureFolderExpiry(path: string): void {
   const tokens = useSecureFoldersStore((s) => s.tokens);
   const encrypted = resolveTokenEntry(tokens.encrypted, path);
   const hidden = resolveTokenEntry(tokens.hidden, path);
@@ -76,23 +68,18 @@ export function useSecureFolderExpiry(
     return () => clearTimeout(id);
   }, [encKey, encExpiresAt, path]);
 
-  // Hidden: re-hide. No prompt, but a polite toast (announced via the Toaster's
-  // live region) tells the user why the revealed items just vanished — otherwise
-  // the content change is silent for sighted and screen-reader users alike.
+  // Hidden: re-hide. No prompt and no navigation — the revealed items just
+  // re-hide in their parent listings; the user keeps browsing wherever they are
+  // (the reveal origin's subtree also holds plain folders they may be inside). A
+  // polite toast (announced via the Toaster's live region) tells the user why the
+  // revealed items vanished — otherwise the change is silent for sighted and
+  // screen-reader users alike; re-revealing (⇧⇧) brings them back.
   useEffect(() => {
     if (hiddenKey === null || hiddenExpiresAt === null) return;
     const id = setTimeout(() => {
       useSecureFoldersStore.getState().clearToken("hidden", hiddenKey);
       toast(t("storage.ops.secure.expired.hidden"));
-      // If the user navigated INTO the revealed area (path is a descendant of
-      // the reveal origin) rather than just viewing the parent listing, the
-      // now-re-hidden folder can no longer be browsed — hand back the origin so
-      // the host navigates them out instead of stranding them inside it.
-      const insideRevealedArea =
-        path !== hiddenKey &&
-        (hiddenKey === "" || path.startsWith(`${hiddenKey}/`));
-      if (insideRevealedArea) onHiddenExpireInside?.(hiddenKey);
     }, delayUntil(hiddenExpiresAt));
     return () => clearTimeout(id);
-  }, [hiddenKey, hiddenExpiresAt, path, onHiddenExpireInside]);
+  }, [hiddenKey, hiddenExpiresAt]);
 }
