@@ -9,6 +9,7 @@ import {
 import { useJobsStore, type Job, type JobStatus } from "../stores/jobs.store";
 import {
   fetchArchiveStatus,
+  fetchDirectoryCreateStatus,
   fetchDuplicateScanStatus,
 } from "../api/jobs.queries";
 import { scanPhaseRank } from "./scanPhaseRank";
@@ -94,6 +95,33 @@ async function reconcileScan(qc: QueryClient, job: Job): Promise<void> {
   }
 }
 
+async function reconcileDirectoryCreate(
+  qc: QueryClient,
+  job: Job,
+): Promise<void> {
+  try {
+    const res = await fetchDirectoryCreateStatus(job.id);
+    const status = archiveStatusToJob(res.Status);
+    if (status === "running") {
+      useJobsStore.getState().applyEvent(job.id, "folder-create", {
+        percentage: res.Percentage,
+      });
+      return;
+    }
+    useJobsStore
+      .getState()
+      .settle(job.id, status, { error: res.Error ?? undefined });
+    invalidateAfterJob(qc);
+  } catch (err) {
+    // 404 = job evicted/finished → cancelled. A TypeError (status endpoint not in
+    // the client yet) leaves the job running for the socket events to settle.
+    if (isApiError(err) && err.code === "NOT_FOUND") {
+      useJobsStore.getState().settle(job.id, "cancelled");
+      invalidateAfterJob(qc);
+    }
+  }
+}
+
 /**
  * Poll every active job's status and settle/advance the store accordingly.
  * Drives the polling fallback (socket down) and reconnect reconciliation — the
@@ -109,7 +137,9 @@ export async function reconcileActiveJobs(qc: QueryClient): Promise<void> {
     active.map((job) =>
       job.kind === "duplicate-scan"
         ? reconcileScan(qc, job)
-        : reconcileArchive(qc, job),
+        : job.kind === "folder-create"
+          ? reconcileDirectoryCreate(qc, job)
+          : reconcileArchive(qc, job),
     ),
   );
 }

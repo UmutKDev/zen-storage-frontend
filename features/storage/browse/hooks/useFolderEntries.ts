@@ -57,6 +57,10 @@ export function useFolderEntries(path: string) {
 
   return {
     entries,
+    /** The pre-filter, pre-sort entry list — used to tell a "filter hid the
+     *  matches" search-empty from a genuine no-match (a name match may exist in
+     *  `rawEntries` but be hidden by the active type/extension filter). */
+    rawEntries: raw,
     /** Count before the type/extension filter — lets the browser show a
      *  "filter hid everything" state instead of the "empty folder" state. */
     totalCount: raw.length,

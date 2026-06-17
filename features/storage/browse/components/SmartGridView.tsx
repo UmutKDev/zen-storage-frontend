@@ -5,20 +5,22 @@ import { VirtualList } from "@/components/patterns/virtual-list";
 import { t } from "@/lib/i18n";
 import type { ItemSelection } from "../../operations";
 import type { FolderEntry } from "../lib/entries";
+import type { PendingEntry } from "../lib/pending";
 import { justifyRows } from "../lib/justify";
 import { resolveTileMedia } from "../lib/tile";
 import { useViewPrefs } from "../stores/viewPrefs.store";
 import { useContainerWidth } from "../hooks/useContainerWidth";
 import { TileCard } from "./TileCard";
+import { PendingTile } from "./PendingTile";
 
 /** Matches `.zs-smartgrid { gap }` so the JS wrap-points agree with the CSS. */
 const GRID_GAP = 8;
 
-interface Tile {
-  entry: FolderEntry;
-  url?: string;
-  ratio: number;
-}
+/** A grid tile is either an in-flight pending placeholder (square) or a real
+ *  entry tile (image thumbnail or icon). Both carry a `ratio` for justification. */
+type Tile =
+  | { pending: PendingEntry; ratio: number }
+  | { entry: FolderEntry; url?: string; ratio: number };
 
 /**
  * The zen **smart grid**: a Yandex-style justified grid of {@link TileCard}s —
@@ -32,17 +34,23 @@ export function SmartGridView({
   entries,
   path,
   selection,
+  pending = [],
 }: {
   entries: FolderEntry[];
   path: string;
   selection: ItemSelection;
+  /** In-flight operations shown as non-interactive square tiles before the real ones. */
+  pending?: PendingEntry[];
 }) {
   const rowHeight = useViewPrefs((s) => s.gridRowH);
   const { ref, width } = useContainerWidth();
 
   const tiles = useMemo<Tile[]>(
-    () => entries.map((entry) => ({ entry, ...resolveTileMedia(entry, rowHeight) })),
-    [entries, rowHeight],
+    () => [
+      ...pending.map((p) => ({ pending: p, ratio: 1 })),
+      ...entries.map((entry) => ({ entry, ...resolveTileMedia(entry, rowHeight) })),
+    ],
+    [pending, entries, rowHeight],
   );
   const rows = useMemo(
     () => justifyRows(tiles, { containerWidth: width, rowHeight, gap: GRID_GAP }),
@@ -56,7 +64,7 @@ export function SmartGridView({
     <div ref={ref} className="h-full">
       <VirtualList
         rows={rows}
-        itemCount={entries.length}
+        itemCount={entries.length + pending.length}
         estimateSize={Math.round(rowHeight * 1.05 + GRID_GAP)}
         rowRole="none"
         renderRow={(row, index) => (
@@ -72,23 +80,31 @@ export function SmartGridView({
               } as CSSProperties
             }
           >
-            {row.map((tile) => (
-              <TileCard
-                key={`${tile.entry.kind}:${tile.entry.key}`}
-                entry={tile.entry}
-                path={path}
-                selection={selection}
-                thumbnailUrl={tile.url}
-                ratio={tile.ratio}
-              />
-            ))}
+            {row.map((tile) =>
+              "pending" in tile ? (
+                <PendingTile key={`pending:${tile.pending.id}`} entry={tile.pending} />
+              ) : (
+                <TileCard
+                  key={`${tile.entry.kind}:${tile.entry.key}`}
+                  entry={tile.entry}
+                  path={path}
+                  selection={selection}
+                  thumbnailUrl={tile.url}
+                  ratio={tile.ratio}
+                />
+              ),
+            )}
             {index === rows.length - 1 ? (
               <span className="zs-smartgrid__spacer" aria-hidden />
             ) : null}
           </div>
         )}
         getRowKey={(row, index) =>
-          row[0] ? `${row[0].entry.kind}:${row[0].entry.key}` : index
+          row[0]
+            ? "pending" in row[0]
+              ? `pending:${row[0].pending.id}`
+              : `${row[0].entry.kind}:${row[0].entry.key}`
+            : index
         }
         ariaLabel={t("storage.list.label")}
         className="h-full"

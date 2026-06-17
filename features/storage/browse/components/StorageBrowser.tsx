@@ -21,6 +21,7 @@ import { DuplicateScanDialogs } from "../../duplicates/components/DuplicateScanD
 import { FileDropZone } from "../../upload/components/FileDropZone";
 import { UploadButton } from "../../upload/components/UploadButton";
 import { useFolderEntries } from "../hooks/useFolderEntries";
+import { usePendingEntries } from "../hooks/usePendingEntries";
 import { SEARCH_MIN_CHARS, useSearch, type SearchScope } from "../hooks/useSearch";
 import { useStorageCommands } from "../hooks/useStorageCommands";
 import { usePreviewNavStore } from "../stores/previewNav.store";
@@ -64,10 +65,23 @@ export function StorageBrowser({ path }: { path: string }) {
   //    mode that round-trips (`useSearch` stays disabled until then).
   const folder = useFolderEntries(path);
   const search = useSearch({ query, scope, path });
+  // In-flight operations for this folder (optimistic creates + durable jobs),
+  // rendered as non-interactive pending rows above the real entries (browse only).
+  const pending = usePendingEntries(path);
   const globalSearch = searching && scope === "global";
   const localResults = useMemo(
     () => matchEntries(folder.entries, query),
     [folder.entries, query],
+  );
+  // Whether a name match exists in the folder IGNORING the active type/extension
+  // filter — distinguishes "your filter hid the matches" (offer Clear filter) from
+  // a genuine no-match (offer Search everywhere). Only meaningful for local search.
+  const localRawMatchCount = useMemo(
+    () =>
+      searching && !globalSearch
+        ? matchEntries(folder.rawEntries, query).length
+        : 0,
+    [searching, globalSearch, folder.rawEntries, query],
   );
   const entries = !searching
     ? folder.entries
@@ -123,13 +137,16 @@ export function StorageBrowser({ path }: { path: string }) {
   }
 
   // Search result count, announced politely (separate region — it changes
-  // independently of selection). Local "This folder" results are always ready
-  // (synchronous); "Everywhere" is gated on `!isFetching` so a refetch that keeps
-  // the previous results on screen (placeholderData) doesn't announce a stale
-  // count before the new one settles.
+  // independently of selection). Local "This folder" announces only once the
+  // folder listing is actually the rendered content (not skeleton/error/locked) —
+  // mirroring its content branch so it never says "0 results" over a spinner.
+  // "Everywhere" is gated on `!isFetching` so a refetch that keeps the previous
+  // results on screen (placeholderData) doesn't announce a stale count.
   const countReady =
     searching &&
-    (globalSearch ? !search.isFetching && !search.isError : true);
+    (globalSearch
+      ? !search.isFetching && !search.isError
+      : !folder.isPending && !folder.isError && !folder.isLocked);
   const searchLive = countReady
     ? entries.length === 1
       ? t("storage.search.oneResult")
@@ -144,12 +161,18 @@ export function StorageBrowser({ path }: { path: string }) {
     ) : search.isPending ? (
       <BrowserSkeleton />
     ) : entries.length === 0 ? (
-      <SearchEmpty
-        query={query}
-        scope="global"
-        onBroaden={broadenSearch}
-        onClear={clearSearch}
-      />
+      // Matches exist but the active filter hid them → offer Clear filter;
+      // otherwise it's a genuine no-match everywhere.
+      folder.isFiltered && search.rawCount > 0 ? (
+        <FilteredEmpty onClear={() => setFilter("all", "")} />
+      ) : (
+        <SearchEmpty
+          query={query}
+          scope="global"
+          onBroaden={broadenSearch}
+          onClear={clearSearch}
+        />
+      )
     ) : view === "grid" ? (
       <SmartGridView entries={entries} path={path} selection={selection} />
     ) : (
@@ -172,12 +195,18 @@ export function StorageBrowser({ path }: { path: string }) {
     ) : folder.isPending ? (
       <BrowserSkeleton />
     ) : entries.length === 0 ? (
-      <SearchEmpty
-        query={query}
-        scope="current"
-        onBroaden={broadenSearch}
-        onClear={clearSearch}
-      />
+      // A name match exists in this folder but the active filter hid it → offer
+      // Clear filter; otherwise it's a true no-match here → offer Search everywhere.
+      folder.isFiltered && localRawMatchCount > 0 ? (
+        <FilteredEmpty onClear={() => setFilter("all", "")} />
+      ) : (
+        <SearchEmpty
+          query={query}
+          scope="current"
+          onBroaden={broadenSearch}
+          onClear={clearSearch}
+        />
+      )
     ) : view === "grid" ? (
       <SmartGridView entries={entries} path={path} selection={selection} />
     ) : (
@@ -197,16 +226,26 @@ export function StorageBrowser({ path }: { path: string }) {
       <BrowserError onRetry={folder.refetch} />
     ) : folder.isPending ? (
       <BrowserSkeleton />
-    ) : entries.length === 0 ? (
+    ) : entries.length === 0 && pending.length === 0 ? (
       folder.totalCount > 0 && folder.isFiltered ? (
         <FilteredEmpty onClear={() => setFilter("all", "")} />
       ) : (
         <EmptyFolder />
       )
     ) : view === "grid" ? (
-      <SmartGridView entries={entries} path={path} selection={selection} />
+      <SmartGridView
+        entries={entries}
+        path={path}
+        selection={selection}
+        pending={pending}
+      />
     ) : (
-      <ListView entries={entries} path={path} selection={selection} />
+      <ListView
+        entries={entries}
+        path={path}
+        selection={selection}
+        pending={pending}
+      />
     );
   }
 

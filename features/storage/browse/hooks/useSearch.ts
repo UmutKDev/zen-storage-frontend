@@ -68,17 +68,21 @@ export function useSearch(opts: {
     placeholderData: (prev) => prev,
   });
 
-  const entries = useMemo<FolderEntry[]>(() => {
+  const raw = useMemo<FolderEntry[]>(() => {
     const data = search.data;
     if (!data) return [];
-    return arrangeEntries(
-      toEntries(data.Directories ?? [], data.Objects ?? []),
-      { sortKey, sortDir, filterType, filterExt },
-    );
-  }, [search.data, sortKey, sortDir, filterType, filterExt]);
+    return toEntries(data.Directories ?? [], data.Objects ?? []);
+  }, [search.data]);
+  const entries = useMemo<FolderEntry[]>(
+    () => arrangeEntries(raw, { sortKey, sortDir, filterType, filterExt }),
+    [raw, sortKey, sortDir, filterType, filterExt],
+  );
 
   return {
     entries,
+    /** Match count BEFORE the type/extension filter — lets the browser tell a
+     *  "filter hid the matches" empty (offer Clear filter) from a true no-match. */
+    rawCount: raw.length,
     enabled,
     // `isPending` is `true` for a disabled query in TanStack v5; gate on enabled.
     isPending: enabled && search.isPending,

@@ -14,26 +14,47 @@ import { surfacePassthroughError } from "../lib/feedback";
  */
 export function useConflictMutation<TVars>(opts: {
   run: (vars: TVars, strategy?: ConflictStrategy) => Promise<void>;
-  onSuccess?: (vars: TVars) => void;
+  onSuccess?: (vars: TVars) => void | Promise<void>;
+  /**
+   * Optional optimistic feedback: invoked once when the op starts and returns a
+   * cleanup run when it settles (success, terminal error, or cancel). Use it to
+   * show an instant pending row (creates) or a busy in-place spinner (move/rename).
+   * The cleanup runs AFTER `onSuccess` resolves, so awaiting the invalidation
+   * there swaps the placeholder for the real row with no flash.
+   */
+  optimistic?: (vars: TVars) => () => void;
 }) {
   const [conflict, setConflict] = useState<ConflictDetailsResponseModel | null>(
     null,
   );
   const [isPending, setIsPending] = useState(false);
   const varsRef = useRef<TVars | null>(null);
+  // Cleanup for the active optimistic placeholder — held across conflict retries
+  // (the op is still in flight while the prompt is open) and run once on settle.
+  const cleanupRef = useRef<(() => void) | null>(null);
+  const settleOptimistic = () => {
+    cleanupRef.current?.();
+    cleanupRef.current = null;
+  };
 
   const attempt = async (vars: TVars, strategy?: ConflictStrategy) => {
     setIsPending(true);
+    if (opts.optimistic && cleanupRef.current === null) {
+      cleanupRef.current = opts.optimistic(vars);
+    }
     try {
       await opts.run(vars, strategy);
       setConflict(null);
-      opts.onSuccess?.(vars);
+      await opts.onSuccess?.(vars);
+      settleOptimistic();
     } catch (error) {
       const details = extractConflictDetails(error);
       if (details) {
         varsRef.current = vars;
         setConflict(details);
+        // Keep the placeholder — the op is paused awaiting conflict resolution.
       } else {
+        settleOptimistic();
         surfacePassthroughError(error);
       }
     } finally {
@@ -55,10 +76,14 @@ export function useConflictMutation<TVars>(opts: {
         (!conflict || conflict.ConflictCount >= conflict.TotalItems)
       ) {
         setConflict(null);
+        settleOptimistic();
         return;
       }
       if (varsRef.current !== null) void attempt(varsRef.current, strategy);
     },
-    cancelConflict: () => setConflict(null),
+    cancelConflict: () => {
+      setConflict(null);
+      settleOptimistic();
+    },
   };
 }

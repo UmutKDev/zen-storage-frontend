@@ -9,6 +9,7 @@ import { storageKeys } from "../../browse/api";
 import type { FolderEntry } from "../../browse/lib/entries";
 import { moveEntries } from "../api";
 import { entryItem } from "../lib/paths";
+import { usePendingOpsStore } from "../stores/pendingOps.store";
 import { useConflictMutation } from "./useConflictMutation";
 
 /** Move one or many entries in a single `Cloud/Move` call. The entries ride in
@@ -22,16 +23,22 @@ export function useMove(onDone: () => void) {
   }>({
     run: ({ entries, destinationKey }, strategy) =>
       moveEntries({ items: entries.map(entryItem), destinationKey, strategy }),
-    onSuccess: ({ entries }) => {
+    // Dim the moved rows in place until the refetch drops them from the source.
+    optimistic: ({ entries }) => {
+      const keys = entries.map((e) => e.key);
+      usePendingOpsStore.getState().setBusy(keys);
+      return () => usePendingOpsStore.getState().clearBusy(keys);
+    },
+    onSuccess: async ({ entries }) => {
       toast.success(
         entries.length > 1
           ? `${entries.length} ${t("storage.ops.bulk.movedSuffix")}`
           : t("storage.ops.move.done"),
       );
+      onDone();
       // A move changes both source + destination folders — invalidate the
       // owner's storage namespace (folders + usage; not unrelated caches).
-      if (ownerId) void invalidateKey(qc, storageKeys.all(ownerId));
-      onDone();
+      if (ownerId) await invalidateKey(qc, storageKeys.all(ownerId));
     },
   });
 }

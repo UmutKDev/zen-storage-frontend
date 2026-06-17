@@ -14,6 +14,7 @@ export {
   type ItemSelection,
 } from "./hooks/useItemSelection";
 export { useSelectionStore } from "./stores/selection.store";
+export { usePendingOpsStore, type PendingOp } from "./stores/pendingOps.store";
 export {
   useStorageUiStore,
   type BulkDialogKind,

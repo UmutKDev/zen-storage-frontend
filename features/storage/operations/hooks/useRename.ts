@@ -8,6 +8,7 @@ import type { FolderEntry } from "../../browse/lib/entries";
 import { renameDirectory, renameFile } from "../api";
 import { dirRenamePath } from "../lib/paths";
 import { invalidateFolder } from "../lib/invalidate";
+import { usePendingOpsStore } from "../stores/pendingOps.store";
 import { useConflictMutation } from "./useConflictMutation";
 
 export function useRename(entry: FolderEntry, path: string, onDone: () => void) {
@@ -26,10 +27,16 @@ export function useRename(entry: FolderEntry, path: string, onDone: () => void) 
             Name: name,
             ConflictStrategy: strategy,
           }),
-    onSuccess: () => {
+    // Dim the row in place while the rename is in flight (held until the refetch
+    // swaps it for the renamed entry).
+    optimistic: () => {
+      usePendingOpsStore.getState().setBusy([entry.key]);
+      return () => usePendingOpsStore.getState().clearBusy([entry.key]);
+    },
+    onSuccess: async () => {
       toast.success(t("storage.ops.rename.done"));
-      if (ownerId) invalidateFolder(qc, ownerId, path);
       onDone();
+      if (ownerId) await invalidateFolder(qc, ownerId, path);
     },
   });
 }

@@ -18,6 +18,9 @@ const SUPPRESS = { suppressErrorToast: true } as const;
  * the caller on a true result.
  */
 export async function cancelJob(job: Job): Promise<boolean> {
+  // Folder-create has no cancel endpoint (a single S3 put) — never report it
+  // cancellable, and never misroute it into an archive cancel endpoint.
+  if (job.kind === "folder-create") return false;
   try {
     if (job.kind === "duplicate-scan") {
       const res = await cloudApiFactory.duplicateScanCancel(

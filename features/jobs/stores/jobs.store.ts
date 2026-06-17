@@ -1,8 +1,12 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
-/** Long-running async jobs (archive create/extract, duplicate scan). */
-export type JobKind = "archive-create" | "archive-extract" | "duplicate-scan";
+/** Long-running async jobs (archive create/extract, duplicate scan, folder create). */
+export type JobKind =
+  | "archive-create"
+  | "archive-extract"
+  | "duplicate-scan"
+  | "folder-create";
 export type JobStatus = "running" | "complete" | "failed" | "cancelled";
 
 export interface Job {

@@ -124,4 +124,54 @@ describe("StorageBrowser search", () => {
     // A global search shows server results, not the current folder's local files.
     expect(screen.queryByText("local.txt")).not.toBeInTheDocument();
   });
+
+  it('"This folder" offers Clear-filter (not "No matches") when the active filter hides a name-match', async () => {
+    getDirectories.mockResolvedValue([]);
+    // "report.txt" matches the query by name but is a text file, hidden by the
+    // active Images filter — so it's filter-suppressed, not a true no-match.
+    getObjects.mockResolvedValue([file("report.txt", 1)]);
+    useViewPrefs.setState({ filterType: "image" });
+    mockSearchParams = new URLSearchParams({ q: "report", scope: "current" });
+
+    renderWithProviders(<StorageBrowser path="" />);
+
+    expect(await screen.findByText("No matching items")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Clear filter" }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("No matches")).not.toBeInTheDocument();
+    expect(getSearch).not.toHaveBeenCalled();
+  });
+
+  it('"Everywhere" offers Clear-filter when the filter hides all global results', async () => {
+    getDirectories.mockResolvedValue([]);
+    getObjects.mockResolvedValue([]);
+    getSearch.mockResolvedValue({
+      Directories: [],
+      Objects: [file("report.txt", 1)], // a text file, hidden by Images filter
+    });
+    useViewPrefs.setState({ filterType: "image" });
+    mockSearchParams = new URLSearchParams({ q: "report", scope: "global" });
+
+    renderWithProviders(<StorageBrowser path="" />);
+
+    expect(await screen.findByText("No matching items")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Clear filter" }),
+    ).toBeInTheDocument();
+    await waitFor(() => expect(getSearch).toHaveBeenCalled());
+  });
+
+  it("does not announce a result count while the folder is still loading", async () => {
+    getDirectories.mockReturnValue(new Promise(() => {})); // never resolves
+    getObjects.mockReturnValue(new Promise(() => {}));
+    mockSearchParams = new URLSearchParams({ q: "report", scope: "current" });
+
+    renderWithProviders(<StorageBrowser path="" />);
+
+    // The skeleton is shown; the polite live region must NOT announce "0 results"
+    // over it (premature/misleading for a screen-reader user).
+    expect(await screen.findByLabelText("Loading…")).toBeInTheDocument();
+    expect(screen.queryByText(/results?/i)).not.toBeInTheDocument();
+  });
 });

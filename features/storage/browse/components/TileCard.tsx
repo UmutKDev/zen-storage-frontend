@@ -2,11 +2,16 @@
 
 import Link from "next/link";
 import type { CSSProperties } from "react";
+import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { t } from "@/lib/i18n";
 import { Checkbox } from "@/components/ui";
 import type { FolderEntry } from "../lib/entries";
-import { EntryActionsMenu, type ItemSelection } from "../../operations";
+import {
+  EntryActionsMenu,
+  usePendingOpsStore,
+  type ItemSelection,
+} from "../../operations";
 import { useEntryInteraction } from "../hooks/useEntryInteraction";
 import { FileTile } from "./FileTile";
 
@@ -52,6 +57,8 @@ export function TileCard({
   } = useEntryInteraction(entry, path, selection);
   const isMedia = Boolean(thumbnailUrl);
   const content = <FileTile entry={entry} thumbnailUrl={thumbnailUrl} />;
+  // Dimmed in-place while a move/rename for this tile is in flight.
+  const busy = usePendingOpsStore((s) => Boolean(s.busyKeys[entry.key]));
 
   return (
     <div
@@ -60,6 +67,7 @@ export function TileCard({
       {...longPressHandlers}
       onMouseDown={onMouseDown}
       data-selected={selected}
+      aria-busy={busy || undefined}
       role="listitem"
       style={{ "--zs-ratio": isMedia ? ratio : 1 } as CSSProperties}
       className={cn(
@@ -69,12 +77,16 @@ export function TileCard({
         locked && "zs-tile--locked",
         hidden && "zs-tile--hidden",
         dropIsOver && "ring-2 ring-ring",
+        busy && "pointer-events-none opacity-60",
       )}
     >
       {navigable ? (
         <Link
           href={href}
-          onClick={linkOnClick}
+          // Busy (move/rename) → inert to pointer AND keyboard, matching aria-busy.
+          onClick={busy ? (e) => e.preventDefault() : linkOnClick}
+          tabIndex={busy ? -1 : undefined}
+          aria-disabled={busy || undefined}
           className="zs-tile__inner no-underline outline-none"
         >
           {content}
@@ -82,9 +94,10 @@ export function TileCard({
       ) : (
         <div
           role={buttonRole}
-          tabIndex={buttonTabIndex}
-          onClick={buttonOnClick}
-          onKeyDown={buttonOnKeyDown}
+          tabIndex={busy ? -1 : buttonTabIndex}
+          onClick={busy ? undefined : buttonOnClick}
+          onKeyDown={busy ? undefined : buttonOnKeyDown}
+          aria-disabled={busy || undefined}
           className="zs-tile__inner outline-none"
         >
           {content}
@@ -115,6 +128,14 @@ export function TileCard({
           <EntryActionsMenu entry={entry} path={path} />
         </div>
       )}
+      {busy ? (
+        <span className="absolute inset-0 z-[3] grid place-items-center">
+          <Loader2
+            aria-hidden
+            className="size-6 text-muted-foreground motion-safe:animate-spin"
+          />
+        </span>
+      ) : null}
     </div>
   );
 }

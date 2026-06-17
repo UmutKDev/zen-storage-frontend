@@ -123,7 +123,7 @@ describe("bulk delete", () => {
     ]);
   });
 
-  it("optimistically removes the rows before the response resolves", async () => {
+  it("marks the targeted rows busy in place while the delete is in flight", async () => {
     let release: () => void = () => undefined;
     deleteEntries.mockImplementation(
       () => new Promise<void>((resolve) => (release = resolve)),
@@ -137,11 +137,19 @@ describe("bulk delete", () => {
     const dialog = await screen.findByRole("alertdialog");
     await user.click(within(dialog).getByRole("button", { name: "Delete" }));
 
+    // In flight: the targeted rows stay on screen but dimmed/busy (loading
+    // feedback), and untargeted rows are untouched.
     await waitFor(() =>
-      expect(screen.queryByText("a.txt")).not.toBeInTheDocument(),
+      expect(
+        screen.getByText("a.txt").closest('[aria-busy="true"]'),
+      ).toBeInTheDocument(),
     );
-    expect(screen.queryByText("b.txt")).not.toBeInTheDocument();
-    expect(screen.getByText("Photos")).toBeInTheDocument();
+    expect(
+      screen.getByText("b.txt").closest('[aria-busy="true"]'),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Photos").closest('[aria-busy="true"]'),
+    ).toBeNull();
     release();
   });
 });

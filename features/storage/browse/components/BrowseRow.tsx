@@ -1,11 +1,16 @@
 "use client";
 
 import Link from "next/link";
+import { Loader2 } from "lucide-react";
 import { cn, fileMeta, formatBytes, formatDate, toneClass } from "@/lib/utils";
 import { t } from "@/lib/i18n";
 import { Checkbox } from "@/components/ui";
 import type { FolderEntry } from "../lib/entries";
-import { EntryActionsMenu, type ItemSelection } from "../../operations";
+import {
+  EntryActionsMenu,
+  usePendingOpsStore,
+  type ItemSelection,
+} from "../../operations";
 import { useEntryInteraction } from "../hooks/useEntryInteraction";
 import { EntryStatusChip, entryIsHidden, entryStatus } from "./EntryStatusChip";
 
@@ -75,6 +80,8 @@ export function BrowseRow({
     buttonOnKeyDown,
     onToggle,
   } = useEntryInteraction(entry, path, selection);
+  // Dimmed in-place while a move/rename for this row is in flight.
+  const busy = usePendingOpsStore((s) => Boolean(s.busyKeys[entry.key]));
 
   return (
     <div
@@ -83,14 +90,21 @@ export function BrowseRow({
       {...longPressHandlers}
       onMouseDown={onMouseDown}
       data-selected={selected}
+      aria-busy={busy || undefined}
       className={cn(
         "zs-file-row group flex items-center gap-1 border-b border-border/50 pl-2 pr-1 transition-colors hover:bg-accent/60",
         selected && "bg-accent/90 shadow-[inset_0_1px_0_0_var(--glass-highlight)]",
         dropIsOver && "ring-2 ring-ring",
         (locked || hidden) && "opacity-70",
+        busy && "pointer-events-none opacity-60",
       )}
     >
-      {selectable ? (
+      {busy ? (
+        <Loader2
+          aria-hidden
+          className="size-4 shrink-0 text-muted-foreground motion-safe:animate-spin"
+        />
+      ) : selectable ? (
         <Checkbox
           checked={selected}
           onCheckedChange={onToggle}
@@ -108,7 +122,11 @@ export function BrowseRow({
       {navigable ? (
         <Link
           href={href}
-          onClick={linkOnClick}
+          // While busy (move/rename in flight) the row is inert to pointer AND
+          // keyboard — drop the tab stop + block activation so it matches aria-busy.
+          onClick={busy ? (e) => e.preventDefault() : linkOnClick}
+          tabIndex={busy ? -1 : undefined}
+          aria-disabled={busy || undefined}
           className="flex min-w-0 flex-1 items-center gap-3 rounded-md px-2 py-2.5 outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <RowContent entry={entry} />
@@ -116,9 +134,10 @@ export function BrowseRow({
       ) : (
         <div
           role={buttonRole}
-          tabIndex={buttonTabIndex}
-          onClick={buttonOnClick}
-          onKeyDown={buttonOnKeyDown}
+          tabIndex={busy ? -1 : buttonTabIndex}
+          onClick={busy ? undefined : buttonOnClick}
+          onKeyDown={busy ? undefined : buttonOnKeyDown}
+          aria-disabled={busy || undefined}
           className="flex min-w-0 flex-1 items-center gap-3 rounded-md px-2 py-2.5 outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <RowContent entry={entry} />

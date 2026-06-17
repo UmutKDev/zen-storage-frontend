@@ -5,6 +5,7 @@ import {
   Archive,
   ArchiveRestore,
   Ban,
+  FolderPlus,
   ListChecks,
   Loader2,
   ScanSearch,
@@ -24,10 +25,15 @@ import {
 import { useJobsStore, type Job, type JobKind, type JobStatus } from "../stores/jobs.store";
 import { cancelJob } from "../api/jobs.mutations";
 
-const KIND_META: Record<JobKind, { icon: LucideIcon; tone: FileTone; labelKey: string }> = {
-  "archive-create": { icon: Archive, tone: "amber", labelKey: "jobs.kind.archiveCreate" },
-  "archive-extract": { icon: ArchiveRestore, tone: "amber", labelKey: "jobs.kind.archiveExtract" },
-  "duplicate-scan": { icon: ScanSearch, tone: "teal", labelKey: "jobs.kind.duplicateScan" },
+const KIND_META: Record<
+  JobKind,
+  { icon: LucideIcon; tone: FileTone; labelKey: string; cancellable: boolean }
+> = {
+  "archive-create": { icon: Archive, tone: "amber", labelKey: "jobs.kind.archiveCreate", cancellable: true },
+  "archive-extract": { icon: ArchiveRestore, tone: "amber", labelKey: "jobs.kind.archiveExtract", cancellable: true },
+  "duplicate-scan": { icon: ScanSearch, tone: "teal", labelKey: "jobs.kind.duplicateScan", cancellable: true },
+  // A single S3 put — no cancel endpoint; show no Cancel control (would be a no-op).
+  "folder-create": { icon: FolderPlus, tone: "blue", labelKey: "jobs.kind.folderCreate", cancellable: false },
 };
 
 const STATUS_KEY: Record<JobStatus, string> = {
@@ -106,7 +112,7 @@ function JobRow({
           >
             <X />
           </Button>
-        ) : (
+        ) : meta.cancellable ? (
           <Button
             variant="ghost"
             size="icon-sm"
@@ -116,7 +122,7 @@ function JobRow({
           >
             <Ban />
           </Button>
-        )}
+        ) : null}
       </div>
       {job.status === "running" ? (
         <Progress value={job.percentage} aria-label={t("jobs.progressLabel")} />

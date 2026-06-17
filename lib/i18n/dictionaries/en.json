@@ -214,6 +214,11 @@
       "title": "This folder is empty",
       "description": "Upload files or create a folder to get started."
     },
+    "pending": {
+      "inProgress": "In progress…",
+      "creatingFolder": "Creating folder…",
+      "creatingFile": "Creating file…"
+    },
     "error": { "title": "Couldn’t load this folder" },
     "badge": { "encrypted": "Encrypted", "hidden": "Hidden", "locked": "Locked" },
     "status": {
@@ -820,7 +825,8 @@
     "kind": {
       "archiveCreate": "Creating archive",
       "archiveExtract": "Extracting archive",
-      "duplicateScan": "Scanning for duplicates"
+      "duplicateScan": "Scanning for duplicates",
+      "folderCreate": "Creating folder"
     },
     "status": {
       "running": "In progress",

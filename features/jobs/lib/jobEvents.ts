@@ -40,6 +40,12 @@ const JOB_EVENTS: Partial<Record<string, JobEvent>> = {
     kind: "duplicate-scan",
     terminal: "cancelled",
   },
+  // Folder create (async). Raw string values until the client is regenerated and
+  // `NotificationType.FolderCreate*` exists — the map + `jobEventFor` are
+  // string-keyed, so these match the backend `FOLDER_CREATE_*` emit verbatim.
+  FOLDER_CREATE_PROGRESS: { kind: "folder-create" },
+  FOLDER_CREATE_COMPLETE: { kind: "folder-create", terminal: "complete" },
+  FOLDER_CREATE_FAILED: { kind: "folder-create", terminal: "failed" },
 };
 
 /** The job-event descriptor for a notification type, or undefined if not a job. */
@@ -52,6 +58,7 @@ const PROGRESS_TYPES = new Set<string>([
   NotificationType.ArchiveCreateProgress,
   NotificationType.ArchiveExtractProgress,
   NotificationType.DuplicateScanProgress,
+  "FOLDER_CREATE_PROGRESS",
 ]);
 
 /** True for high-frequency progress events (transient — never toasted/persisted). */

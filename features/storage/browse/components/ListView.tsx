@@ -4,17 +4,30 @@ import { VirtualList } from "@/components/patterns/virtual-list";
 import { t } from "@/lib/i18n";
 import type { ItemSelection } from "../../operations";
 import type { FolderEntry } from "../lib/entries";
+import type { PendingEntry } from "../lib/pending";
 import { BrowseRow } from "./BrowseRow";
+import { PendingRow } from "./PendingRow";
+
+/** A list row is either an in-flight pending placeholder (rendered above) or a
+ *  real entry. Kept local to the render so selection/DnD never see pending. */
+type ListRow = { pending: PendingEntry } | { entry: FolderEntry };
 
 export function ListView({
   entries,
   path,
   selection,
+  pending = [],
 }: {
   entries: FolderEntry[];
   path: string;
   selection: ItemSelection;
+  /** In-flight operations shown as non-interactive rows above the real entries. */
+  pending?: PendingEntry[];
 }) {
+  const rows: ListRow[] = [
+    ...pending.map((p) => ({ pending: p })),
+    ...entries.map((e) => ({ entry: e })),
+  ];
   return (
     <div className="zs-file-panel flex h-full flex-col">
       {/* Visual column header — decorative over the virtualized list, so it's
@@ -28,12 +41,20 @@ export function ListView({
         <span className="w-[40px] shrink-0" />
       </div>
       <VirtualList
-        rows={entries}
+        rows={rows}
         estimateSize={57}
-        renderRow={(entry) => (
-          <BrowseRow entry={entry} path={path} selection={selection} />
-        )}
-        getRowKey={(entry) => `${entry.kind}:${entry.key}`}
+        renderRow={(row) =>
+          "pending" in row ? (
+            <PendingRow entry={row.pending} />
+          ) : (
+            <BrowseRow entry={row.entry} path={path} selection={selection} />
+          )
+        }
+        getRowKey={(row) =>
+          "pending" in row
+            ? `pending:${row.pending.id}`
+            : `${row.entry.kind}:${row.entry.key}`
+        }
         ariaLabel={t("storage.list.label")}
         className="min-h-0 flex-1"
       />

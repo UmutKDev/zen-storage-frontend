@@ -3,10 +3,12 @@ import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { renderWithProviders } from "../test-utils";
 import { useWorkspaceStore } from "@/stores";
+import { useJobsStore } from "@/features/jobs";
 import { ApiError } from "@/lib/api";
 import type { FolderEntry } from "@/features/storage/browse/lib/entries";
 
 const createFolder = vi.fn();
+const startDirectoryCreate = vi.fn();
 const createFile = vi.fn();
 const renameFile = vi.fn();
 const renameDirectory = vi.fn();
@@ -17,6 +19,7 @@ const getDirectories = vi.fn();
 
 vi.mock("@/features/storage/operations/api", () => ({
   createFolder,
+  startDirectoryCreate,
   createFile,
   renameFile,
   renameDirectory,
@@ -75,11 +78,12 @@ beforeEach(() => {
 });
 afterEach(() => {
   useWorkspaceStore.getState().reset();
+  useJobsStore.setState({ jobs: {} });
 });
 
 describe("CreateMenu", () => {
-  it("creates a folder with the trailing-slash path", async () => {
-    createFolder.mockResolvedValue(undefined);
+  it("creates a plain folder via the async job with the trailing-slash path", async () => {
+    startDirectoryCreate.mockResolvedValue({ JobId: "j1", Path: "docs/Reports/" });
     const user = userEvent.setup();
     renderWithProviders(<CreateMenu path="docs" />);
 
@@ -89,14 +93,18 @@ describe("CreateMenu", () => {
     await user.type(within(dialog).getByLabelText("Folder name"), "Reports");
     await user.click(within(dialog).getByRole("button", { name: "Create" }));
 
-    await waitFor(() => expect(createFolder).toHaveBeenCalled());
-    expect(createFolder.mock.calls[0]?.[0]).toMatchObject({ Path: "docs/Reports/" });
+    await waitFor(() => expect(startDirectoryCreate).toHaveBeenCalled());
+    expect(startDirectoryCreate.mock.calls[0]?.[0]).toMatchObject({
+      Path: "docs/Reports/",
+    });
+    // Plain creation goes through the durable job, not the sync endpoint.
+    expect(createFolder).not.toHaveBeenCalled();
   });
 
   it("routes a name clash through the conflict prompt and retries with REPLACE", async () => {
-    createFolder
+    startDirectoryCreate
       .mockRejectedValueOnce(conflictError())
-      .mockResolvedValueOnce(undefined);
+      .mockResolvedValueOnce({ JobId: "j1", Path: "Reports/" });
     const user = userEvent.setup();
     renderWithProviders(<CreateMenu path="" />);
 
@@ -106,14 +114,16 @@ describe("CreateMenu", () => {
     await user.type(within(dialog).getByLabelText("Folder name"), "Reports");
     await user.click(within(dialog).getByRole("button", { name: "Create" }));
 
-    // conflict prompt appears
+    // conflict prompt appears (the 409 from the Start endpoint propagates)
     expect(
       await screen.findByText("Name already in use"),
     ).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: /Replace/ }));
 
-    await waitFor(() => expect(createFolder).toHaveBeenCalledTimes(2));
-    expect(createFolder.mock.calls[1]?.[0]).toMatchObject({
+    await waitFor(() =>
+      expect(startDirectoryCreate).toHaveBeenCalledTimes(2),
+    );
+    expect(startDirectoryCreate.mock.calls[1]?.[0]).toMatchObject({
       ConflictStrategy: "REPLACE",
     });
   });
