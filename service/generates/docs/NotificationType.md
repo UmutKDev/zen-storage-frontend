@@ -19,6 +19,12 @@
 
 * `ArchiveExtractFailed` (value: `'ARCHIVE_EXTRACT_FAILED'`)
 
+* `FolderCreateProgress` (value: `'FOLDER_CREATE_PROGRESS'`)
+
+* `FolderCreateComplete` (value: `'FOLDER_CREATE_COMPLETE'`)
+
+* `FolderCreateFailed` (value: `'FOLDER_CREATE_FAILED'`)
+
 * `QuotaWarning` (value: `'QUOTA_WARNING'`)
 
 * `QuotaExceeded` (value: `'QUOTA_EXCEEDED'`)

@@ -7,6 +7,8 @@ All URIs are relative to *http://localhost*
 |[**directoryConceal**](#directoryconceal) | **POST** /Api/Cloud/Directory/Conceal | Conceal hidden directories|
 |[**directoryConvertToEncrypted**](#directoryconverttoencrypted) | **POST** /Api/Cloud/Directory/Encrypt | Convert a directory to encrypted|
 |[**directoryCreate**](#directorycreate) | **POST** /Api/Cloud/Directory | Create a directory|
+|[**directoryCreateStart**](#directorycreatestart) | **POST** /Api/Cloud/Directory/Create/Start | Start async plain directory creation|
+|[**directoryCreateStatus**](#directorycreatestatus) | **GET** /Api/Cloud/Directory/Create/Status | Get directory-create job status|
 |[**directoryDecrypt**](#directorydecrypt) | **POST** /Api/Cloud/Directory/Decrypt | Remove encryption from a directory|
 |[**directoryDelete**](#directorydelete) | **DELETE** /Api/Cloud/Directory | Delete a directory|
 |[**directoryHide**](#directoryhide) | **POST** /Api/Cloud/Directory/Hide | Hide a directory|
@@ -192,6 +194,121 @@ const { status, data } = await apiInstance.directoryCreate(
 |-------------|-------------|------------------|
 |**200** | Success |  -  |
 |**409** | Conflict detected — directory already exists |  -  |
+|**500** | Internal Server Error |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **directoryCreateStart**
+> DirectoryCreateStartResponseBaseModel directoryCreateStart(directoryCreateStartRequestModel)
+
+Starts an async job to create a PLAIN (non-encrypted) directory and returns a JobId immediately. Conflict detection runs synchronously: FAIL returns 409, SKIP onto an existing folder returns an empty JobId (no-op), KEEP_BOTH resolves a new path. Progress + completion are pushed via WebSocket notifications. Encrypted directories must use POST /Cloud/Directory instead.
+
+### Example
+
+```typescript
+import {
+    CloudDirectoryApi,
+    Configuration,
+    DirectoryCreateStartRequestModel
+} from './api';
+
+const configuration = new Configuration();
+const apiInstance = new CloudDirectoryApi(configuration);
+
+let directoryCreateStartRequestModel: DirectoryCreateStartRequestModel; //
+let xTeamId: string; //Optional team ID. When provided, directory operations target the team storage. (optional) (default to undefined)
+let xFolderSession: string; //Session token for encrypted folder access (optional) (default to undefined)
+
+const { status, data } = await apiInstance.directoryCreateStart(
+    directoryCreateStartRequestModel,
+    xTeamId,
+    xFolderSession
+);
+```
+
+### Parameters
+
+|Name | Type | Description  | Notes|
+|------------- | ------------- | ------------- | -------------|
+| **directoryCreateStartRequestModel** | **DirectoryCreateStartRequestModel**|  | |
+| **xTeamId** | [**string**] | Optional team ID. When provided, directory operations target the team storage. | (optional) defaults to undefined|
+| **xFolderSession** | [**string**] | Session token for encrypted folder access | (optional) defaults to undefined|
+
+
+### Return type
+
+**DirectoryCreateStartResponseBaseModel**
+
+### Authorization
+
+[cookie](../README.md#cookie)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+|**200** | Success |  -  |
+|**409** | Conflict detected — directory already exists |  -  |
+|**500** | Internal Server Error |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **directoryCreateStatus**
+> DirectoryCreateStatusResponseBaseModel directoryCreateStatus()
+
+Returns the current state + progress of an async directory-create job. Polling fallback for clients that missed socket progress events.
+
+### Example
+
+```typescript
+import {
+    CloudDirectoryApi,
+    Configuration
+} from './api';
+
+const configuration = new Configuration();
+const apiInstance = new CloudDirectoryApi(configuration);
+
+let jobId: string; //Job ID returned by directory create start (default to undefined)
+let xTeamId: string; //Optional team ID. When provided, directory operations target the team storage. (optional) (default to undefined)
+
+const { status, data } = await apiInstance.directoryCreateStatus(
+    jobId,
+    xTeamId
+);
+```
+
+### Parameters
+
+|Name | Type | Description  | Notes|
+|------------- | ------------- | ------------- | -------------|
+| **jobId** | [**string**] | Job ID returned by directory create start | defaults to undefined|
+| **xTeamId** | [**string**] | Optional team ID. When provided, directory operations target the team storage. | (optional) defaults to undefined|
+
+
+### Return type
+
+**DirectoryCreateStatusResponseBaseModel**
+
+### Authorization
+
+[cookie](../README.md#cookie)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+|**200** | Success |  -  |
 |**500** | Internal Server Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)

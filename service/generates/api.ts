@@ -910,6 +910,68 @@ export const DirectoryCreateRequestModelConflictStrategyEnum = {
 
 export type DirectoryCreateRequestModelConflictStrategyEnum = typeof DirectoryCreateRequestModelConflictStrategyEnum[keyof typeof DirectoryCreateRequestModelConflictStrategyEnum];
 
+export interface DirectoryCreateStartRequestModel {
+    /**
+     * Directory path to create
+     */
+    'Path': string;
+    'ConflictStrategy'?: DirectoryCreateStartRequestModelConflictStrategyEnum;
+}
+
+export const DirectoryCreateStartRequestModelConflictStrategyEnum = {
+    Fail: 'FAIL',
+    Replace: 'REPLACE',
+    Skip: 'SKIP',
+    KeepBoth: 'KEEP_BOTH'
+} as const;
+
+export type DirectoryCreateStartRequestModelConflictStrategyEnum = typeof DirectoryCreateStartRequestModelConflictStrategyEnum[keyof typeof DirectoryCreateStartRequestModelConflictStrategyEnum];
+
+export interface DirectoryCreateStartResponseBaseModel {
+    'Result': DirectoryCreateStartResponseModel;
+    'Status': BaseStatusModel;
+}
+export interface DirectoryCreateStartResponseModel {
+    /**
+     * BullMQ job id. Empty string when the create was a no-op (SKIP onto an existing folder) — nothing was enqueued.
+     */
+    'JobId': string;
+    /**
+     * Resolved directory path the worker will create
+     */
+    'Path': string;
+}
+export interface DirectoryCreateStatusResponseBaseModel {
+    'Result': DirectoryCreateStatusResponseModel;
+    'Status': BaseStatusModel;
+}
+export interface DirectoryCreateStatusResponseModel {
+    'JobId': string;
+    /**
+     * Current BullMQ job state
+     */
+    'Status': DirectoryCreateStatusResponseModelStatusEnum;
+    /**
+     * Computed completion percentage (0-100)
+     */
+    'Percentage'?: number;
+    /**
+     * Resolved directory path
+     */
+    'Path'?: string;
+    'Error'?: string;
+}
+
+export const DirectoryCreateStatusResponseModelStatusEnum = {
+    Waiting: 'waiting',
+    Delayed: 'delayed',
+    Active: 'active',
+    Completed: 'completed',
+    Failed: 'failed'
+} as const;
+
+export type DirectoryCreateStatusResponseModelStatusEnum = typeof DirectoryCreateStatusResponseModelStatusEnum[keyof typeof DirectoryCreateStatusResponseModelStatusEnum];
+
 export interface DirectoryDecryptRequestModel {
     /**
      * Encrypted directory path to decrypt
@@ -1318,6 +1380,9 @@ export const NotificationType = {
     ArchiveExtractProgress: 'ARCHIVE_EXTRACT_PROGRESS',
     ArchiveExtractComplete: 'ARCHIVE_EXTRACT_COMPLETE',
     ArchiveExtractFailed: 'ARCHIVE_EXTRACT_FAILED',
+    FolderCreateProgress: 'FOLDER_CREATE_PROGRESS',
+    FolderCreateComplete: 'FOLDER_CREATE_COMPLETE',
+    FolderCreateFailed: 'FOLDER_CREATE_FAILED',
     QuotaWarning: 'QUOTA_WARNING',
     QuotaExceeded: 'QUOTA_EXCEEDED',
     TeamInvitationReceived: 'TEAM_INVITATION_RECEIVED',
@@ -9257,6 +9322,95 @@ export const CloudDirectoryApiAxiosParamCreator = function (configuration?: Conf
             };
         },
         /**
+         * Starts an async job to create a PLAIN (non-encrypted) directory and returns a JobId immediately. Conflict detection runs synchronously: FAIL returns 409, SKIP onto an existing folder returns an empty JobId (no-op), KEEP_BOTH resolves a new path. Progress + completion are pushed via WebSocket notifications. Encrypted directories must use POST /Cloud/Directory instead.
+         * @summary Start async plain directory creation
+         * @param {DirectoryCreateStartRequestModel} directoryCreateStartRequestModel 
+         * @param {string} [xTeamId] Optional team ID. When provided, directory operations target the team storage.
+         * @param {string} [xFolderSession] Session token for encrypted folder access
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        directoryCreateStart: async (directoryCreateStartRequestModel: DirectoryCreateStartRequestModel, xTeamId?: string, xFolderSession?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'directoryCreateStartRequestModel' is not null or undefined
+            assertParamExists('directoryCreateStart', 'directoryCreateStartRequestModel', directoryCreateStartRequestModel)
+            const localVarPath = `/Api/Cloud/Directory/Create/Start`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication cookie required
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            if (xTeamId != null) {
+                localVarHeaderParameter['x-team-id'] = String(xTeamId);
+            }
+            if (xFolderSession != null) {
+                localVarHeaderParameter['x-folder-session'] = String(xFolderSession);
+            }
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(directoryCreateStartRequestModel, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Returns the current state + progress of an async directory-create job. Polling fallback for clients that missed socket progress events.
+         * @summary Get directory-create job status
+         * @param {string} jobId Job ID returned by directory create start
+         * @param {string} [xTeamId] Optional team ID. When provided, directory operations target the team storage.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        directoryCreateStatus: async (jobId: string, xTeamId?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'jobId' is not null or undefined
+            assertParamExists('directoryCreateStatus', 'jobId', jobId)
+            const localVarPath = `/Api/Cloud/Directory/Create/Status`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication cookie required
+
+            if (jobId !== undefined) {
+                localVarQueryParameter['JobId'] = jobId;
+            }
+
+
+    
+            if (xTeamId != null) {
+                localVarHeaderParameter['x-team-id'] = String(xTeamId);
+            }
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Removes encryption from a directory (keeps files). Provide passphrase via X-Folder-Passphrase header.
          * @summary Remove encryption from a directory
          * @param {string} xFolderPassphrase Passphrase for decryption
@@ -9698,6 +9852,35 @@ export const CloudDirectoryApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Starts an async job to create a PLAIN (non-encrypted) directory and returns a JobId immediately. Conflict detection runs synchronously: FAIL returns 409, SKIP onto an existing folder returns an empty JobId (no-op), KEEP_BOTH resolves a new path. Progress + completion are pushed via WebSocket notifications. Encrypted directories must use POST /Cloud/Directory instead.
+         * @summary Start async plain directory creation
+         * @param {DirectoryCreateStartRequestModel} directoryCreateStartRequestModel 
+         * @param {string} [xTeamId] Optional team ID. When provided, directory operations target the team storage.
+         * @param {string} [xFolderSession] Session token for encrypted folder access
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async directoryCreateStart(directoryCreateStartRequestModel: DirectoryCreateStartRequestModel, xTeamId?: string, xFolderSession?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<DirectoryCreateStartResponseBaseModel>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.directoryCreateStart(directoryCreateStartRequestModel, xTeamId, xFolderSession, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['CloudDirectoryApi.directoryCreateStart']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Returns the current state + progress of an async directory-create job. Polling fallback for clients that missed socket progress events.
+         * @summary Get directory-create job status
+         * @param {string} jobId Job ID returned by directory create start
+         * @param {string} [xTeamId] Optional team ID. When provided, directory operations target the team storage.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async directoryCreateStatus(jobId: string, xTeamId?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<DirectoryCreateStatusResponseBaseModel>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.directoryCreateStatus(jobId, xTeamId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['CloudDirectoryApi.directoryCreateStatus']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Removes encryption from a directory (keeps files). Provide passphrase via X-Folder-Passphrase header.
          * @summary Remove encryption from a directory
          * @param {string} xFolderPassphrase Passphrase for decryption
@@ -9859,6 +10042,26 @@ export const CloudDirectoryApiFactory = function (configuration?: Configuration,
             return localVarFp.directoryCreate(requestParameters.directoryCreateRequestModel, requestParameters.xTeamId, requestParameters.xFolderPassphrase, requestParameters.xFolderSession, options).then((request) => request(axios, basePath));
         },
         /**
+         * Starts an async job to create a PLAIN (non-encrypted) directory and returns a JobId immediately. Conflict detection runs synchronously: FAIL returns 409, SKIP onto an existing folder returns an empty JobId (no-op), KEEP_BOTH resolves a new path. Progress + completion are pushed via WebSocket notifications. Encrypted directories must use POST /Cloud/Directory instead.
+         * @summary Start async plain directory creation
+         * @param {CloudDirectoryApiDirectoryCreateStartRequest} requestParameters Request parameters.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        directoryCreateStart(requestParameters: CloudDirectoryApiDirectoryCreateStartRequest, options?: RawAxiosRequestConfig): AxiosPromise<DirectoryCreateStartResponseBaseModel> {
+            return localVarFp.directoryCreateStart(requestParameters.directoryCreateStartRequestModel, requestParameters.xTeamId, requestParameters.xFolderSession, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Returns the current state + progress of an async directory-create job. Polling fallback for clients that missed socket progress events.
+         * @summary Get directory-create job status
+         * @param {CloudDirectoryApiDirectoryCreateStatusRequest} requestParameters Request parameters.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        directoryCreateStatus(requestParameters: CloudDirectoryApiDirectoryCreateStatusRequest, options?: RawAxiosRequestConfig): AxiosPromise<DirectoryCreateStatusResponseBaseModel> {
+            return localVarFp.directoryCreateStatus(requestParameters.jobId, requestParameters.xTeamId, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Removes encryption from a directory (keeps files). Provide passphrase via X-Folder-Passphrase header.
          * @summary Remove encryption from a directory
          * @param {CloudDirectoryApiDirectoryDecryptRequest} requestParameters Request parameters.
@@ -9995,6 +10198,38 @@ export interface CloudDirectoryApiDirectoryCreateRequest {
      * Session token for encrypted folder access
      */
     readonly xFolderSession?: string
+}
+
+/**
+ * Request parameters for directoryCreateStart operation in CloudDirectoryApi.
+ */
+export interface CloudDirectoryApiDirectoryCreateStartRequest {
+    readonly directoryCreateStartRequestModel: DirectoryCreateStartRequestModel
+
+    /**
+     * Optional team ID. When provided, directory operations target the team storage.
+     */
+    readonly xTeamId?: string
+
+    /**
+     * Session token for encrypted folder access
+     */
+    readonly xFolderSession?: string
+}
+
+/**
+ * Request parameters for directoryCreateStatus operation in CloudDirectoryApi.
+ */
+export interface CloudDirectoryApiDirectoryCreateStatusRequest {
+    /**
+     * Job ID returned by directory create start
+     */
+    readonly jobId: string
+
+    /**
+     * Optional team ID. When provided, directory operations target the team storage.
+     */
+    readonly xTeamId?: string
 }
 
 /**
@@ -10178,6 +10413,28 @@ export class CloudDirectoryApi extends BaseAPI {
      */
     public directoryCreate(requestParameters: CloudDirectoryApiDirectoryCreateRequest, options?: RawAxiosRequestConfig) {
         return CloudDirectoryApiFp(this.configuration).directoryCreate(requestParameters.directoryCreateRequestModel, requestParameters.xTeamId, requestParameters.xFolderPassphrase, requestParameters.xFolderSession, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Starts an async job to create a PLAIN (non-encrypted) directory and returns a JobId immediately. Conflict detection runs synchronously: FAIL returns 409, SKIP onto an existing folder returns an empty JobId (no-op), KEEP_BOTH resolves a new path. Progress + completion are pushed via WebSocket notifications. Encrypted directories must use POST /Cloud/Directory instead.
+     * @summary Start async plain directory creation
+     * @param {CloudDirectoryApiDirectoryCreateStartRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public directoryCreateStart(requestParameters: CloudDirectoryApiDirectoryCreateStartRequest, options?: RawAxiosRequestConfig) {
+        return CloudDirectoryApiFp(this.configuration).directoryCreateStart(requestParameters.directoryCreateStartRequestModel, requestParameters.xTeamId, requestParameters.xFolderSession, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Returns the current state + progress of an async directory-create job. Polling fallback for clients that missed socket progress events.
+     * @summary Get directory-create job status
+     * @param {CloudDirectoryApiDirectoryCreateStatusRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public directoryCreateStatus(requestParameters: CloudDirectoryApiDirectoryCreateStatusRequest, options?: RawAxiosRequestConfig) {
+        return CloudDirectoryApiFp(this.configuration).directoryCreateStatus(requestParameters.jobId, requestParameters.xTeamId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
