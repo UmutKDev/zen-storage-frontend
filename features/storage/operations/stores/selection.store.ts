@@ -18,6 +18,12 @@ interface SelectionState {
   setRange: (keys: ReadonlyArray<string>) => void;
   /** Select-all over the current folder's selectable keys; anchor unchanged. */
   setAll: (keys: ReadonlyArray<string>) => void;
+  /**
+   * Drop the given keys from the selection (e.g. after they're deleted) — a
+   * partial prune that leaves the rest selected. No-op when nothing matches.
+   * Clears the anchor only if it was among the removed keys.
+   */
+  deselect: (keys: ReadonlyArray<string>) => void;
   clear: () => void;
 }
 
@@ -36,5 +42,23 @@ export const useSelectionStore = create<SelectionState>()((set) => ({
     }),
   setRange: (keys) => set({ selectedKeys: new Set(keys) }),
   setAll: (keys) => set({ selectedKeys: new Set(keys) }),
+  deselect: (keys) =>
+    set((state) => {
+      if (state.selectedKeys.size === 0) return state;
+      const next = new Set(state.selectedKeys);
+      let changed = false;
+      let anchorRemoved = false;
+      for (const key of keys) {
+        if (next.delete(key)) {
+          changed = true;
+          if (key === state.anchorKey) anchorRemoved = true;
+        }
+      }
+      if (!changed) return state;
+      return {
+        selectedKeys: next.size === 0 ? EMPTY : next,
+        anchorKey: anchorRemoved ? null : state.anchorKey,
+      };
+    }),
   clear: () => set({ selectedKeys: EMPTY, anchorKey: null }),
 }));

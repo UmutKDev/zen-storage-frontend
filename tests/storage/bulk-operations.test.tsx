@@ -123,6 +123,63 @@ describe("bulk delete", () => {
     ]);
   });
 
+  it("prunes the deleted keys from the selection so the bar self-dismisses", async () => {
+    deleteEntries.mockResolvedValue(undefined);
+    const user = userEvent.setup();
+    renderWithProviders(<StorageBrowser path="" />);
+    await screen.findByText("a.txt");
+
+    await selectFiles(user); // a.txt + b.txt
+    // Bulk-action bar is open (its Move button exists only on the bar).
+    expect(screen.getByRole("button", { name: "Move" })).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Delete" }));
+    const dialog = await screen.findByRole("alertdialog");
+    await user.click(within(dialog).getByRole("button", { name: "Delete" }));
+
+    await waitFor(() => expect(deleteEntries).toHaveBeenCalledTimes(1));
+
+    // The listing still resolves a.txt/b.txt on refetch (server mock unchanged),
+    // so the bar can only close if the selection STORE dropped the deleted keys —
+    // it must not linger requiring a manual X.
+    await waitFor(() =>
+      expect(
+        screen.queryByRole("button", { name: "Move" }),
+      ).not.toBeInTheDocument(),
+    );
+    expect(useSelectionStore.getState().selectedKeys.size).toBe(0);
+  });
+
+  it("a per-row delete prunes only that item, leaving the rest selected", async () => {
+    deleteEntries.mockResolvedValue(undefined);
+    const user = userEvent.setup();
+    renderWithProviders(<StorageBrowser path="" />);
+    await screen.findByText("a.txt");
+
+    await selectFiles(user); // a.txt + b.txt both selected
+    expect(useSelectionStore.getState().selectedKeys).toEqual(
+      new Set(["k/a.txt", "k/b.txt"]),
+    );
+
+    // Delete a.txt from its OWN row menu (not the bulk bar) while both selected.
+    const row = screen.getByText("a.txt").closest<HTMLElement>(".zs-file-row");
+    expect(row).not.toBeNull();
+    await user.click(within(row!).getByRole("button", { name: "Actions" }));
+    await user.click(await screen.findByRole("menuitem", { name: "Delete" }));
+    const dialog = await screen.findByRole("alertdialog");
+    await user.click(within(dialog).getByRole("button", { name: "Delete" }));
+
+    await waitFor(() => expect(deleteEntries).toHaveBeenCalledTimes(1));
+
+    // Only a.txt's key is dropped; b.txt stays selected (partial prune, not a
+    // full clear).
+    await waitFor(() =>
+      expect(useSelectionStore.getState().selectedKeys).toEqual(
+        new Set(["k/b.txt"]),
+      ),
+    );
+  });
+
   it("marks the targeted rows busy in place while the delete is in flight", async () => {
     let release: () => void = () => undefined;
     deleteEntries.mockImplementation(

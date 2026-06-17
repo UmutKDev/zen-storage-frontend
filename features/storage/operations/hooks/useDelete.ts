@@ -11,6 +11,7 @@ import { entryItem } from "../lib/paths";
 import { invalidateFolder } from "../lib/invalidate";
 import { surfacePassthroughError } from "../lib/feedback";
 import { usePendingOpsStore } from "../stores/pendingOps.store";
+import { useSelectionStore } from "../stores/selection.store";
 
 /**
  * Delete one or many entries (files + unencrypted dirs) in a single
@@ -35,6 +36,10 @@ export function useDelete(path: string, onDone: () => void) {
     try {
       await deleteEntries(targets.map(entryItem));
       ok = true;
+      // Drop the just-deleted rows from any active multi-selection so the
+      // bulk-action bar reflects reality (or self-dismisses) without a manual
+      // clear — a partial prune, so a single-row delete leaves the rest selected.
+      useSelectionStore.getState().deselect(keys);
       toast.success(
         targets.length > 1
           ? `${targets.length} ${t("storage.ops.bulk.deletedSuffix")}`
