@@ -24,7 +24,7 @@ const MAX_LAST_ROW_H_FACTOR = 2;
  *  entry tile (image thumbnail or icon). Both carry a `ratio` for justification. */
 type Tile =
   | { pending: PendingEntry; ratio: number }
-  | { entry: FolderEntry; url?: string; ratio: number };
+  | { entry: FolderEntry; url?: string; thumbnails?: string[]; ratio: number };
 
 /**
  * The zen **smart grid**: a Yandex-style justified grid of {@link TileCard}s —
@@ -123,6 +123,7 @@ export function SmartGridView({
                     path={path}
                     selection={selection}
                     thumbnailUrl={tile.url}
+                    thumbnails={tile.thumbnails}
                     ratio={tile.ratio}
                   />
                 ),

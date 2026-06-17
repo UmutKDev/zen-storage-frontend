@@ -1,5 +1,6 @@
 import { isThumbnailable, isVideo } from "@/lib/utils";
 import { getImageCdnUrl, parseDimension } from "@/lib/preview";
+import type { CloudDirectoryModel } from "@/service/models";
 import type { FolderEntry } from "./entries";
 
 /** Aspect-ratio clamp so a panorama / sliver doesn't make a one-tile row look
@@ -11,10 +12,15 @@ const DEFAULT_IMAGE_RATIO = 4 / 3;
 /** Videos carry no stored dimensions — assume landscape 16:9 (object-fit crops). */
 const DEFAULT_VIDEO_RATIO = 16 / 9;
 
+/** Up to this many child thumbnails make up a folder's mosaic tile. */
+const FOLDER_THUMB_LIMIT = 4;
+
 export interface TileMedia {
   /** Thumbnail URL — a CDN-scaled image, or the raw signed URL of a video. */
   url?: string;
-  /** width / height — drives the justified row width (1 for icon tiles). */
+  /** Up to 4 CDN image URLs forming an ordinary folder's 2×2 mosaic tile. */
+  thumbnails?: string[];
+  /** width / height — drives the justified row width (1 for icon/mosaic tiles). */
   ratio: number;
 }
 
@@ -26,20 +32,43 @@ const clampRatio = (w: number, h: number): number =>
 export type VideoDims = Record<string, { w: number; h: number }>;
 
 /**
+ * The CDN-scaled image URLs for a folder's 2×2 mosaic, drawn from the backend's
+ * round-robin `Thumbnails` (folder + sub-folders). **Protected folders return
+ * none** — encrypted content isn't renderable as a plain image, and hidden
+ * folders keep their ghosted icon affordance — so the tile falls back to its icon.
+ */
+function folderThumbnails(dir: CloudDirectoryModel, rowHeight: number): string[] {
+  if (dir.IsEncrypted || dir.IsHidden) return [];
+  // Cells are ~half a tile, so request a touch smaller than the full-bleed image.
+  const height = Math.min(360, Math.round(rowHeight * 1.5));
+  // The backend's folder thumbnails are already images — trust them (don't re-drop
+  // bmp/tiff/heic the narrower `isThumbnailable` set wouldn't recognize); only skip
+  // a stray video poster or an entry without a usable URL.
+  return (dir.Thumbnails ?? [])
+    .filter((o) => Boolean(o.Path?.Url) && !isVideo(o.Name))
+    .slice(0, FOLDER_THUMB_LIMIT)
+    .map((o) => getImageCdnUrl(o.Path.Url, { name: o.Name, height }));
+}
+
+/**
  * Resolve a smart-grid tile's thumbnail + aspect ratio. Images get a CDN-scaled
  * thumbnail from `Metadata.Width/Height`; videos get their raw signed `Path.Url`
  * (the image CDN can't transcode video — {@link FileTile} paints the first frame
  * via a `<video>` poster). A video's ratio uses its real frame size once measured
  * (`videoDims`, captured on `loadedmetadata`), falling back to 16:9 until then.
- * Docs / folders / other files return `ratio: 1` for a square tinted icon tile.
- * `object-fit: cover` crops to the tile.
+ * An ordinary folder with image content returns a square `thumbnails` mosaic;
+ * docs / protected / empty folders / other files return `ratio: 1` for a square
+ * tinted icon tile. `object-fit: cover` crops to the tile.
  */
 export function resolveTileMedia(
   entry: FolderEntry,
   rowHeight: number,
   videoDims?: VideoDims,
 ): TileMedia {
-  if (entry.kind !== "file") return { ratio: 1 };
+  if (entry.kind === "dir") {
+    const thumbnails = folderThumbnails(entry.dir, rowHeight);
+    return thumbnails.length ? { thumbnails, ratio: 1 } : { ratio: 1 };
+  }
   const { name, file } = entry;
   if (!isThumbnailable(name)) return { ratio: 1 };
 

@@ -1459,6 +1459,46 @@
   .zs-tile__play > svg {
     fill: currentColor;
   }
+  /* Folder mosaic: a 2×2 collage of up to 4 child thumbnails, framed as a media
+     tile (scrim + name caption + folder glyph) so it still reads as a folder.
+     The grid TEMPLATE (columns/rows + 3-up span) is set inline by FolderMosaic so
+     the layout never depends on attribute-selector CSS; this rule owns only the
+     frame. Clipped by `.zs-tile__inner { overflow:hidden }`. */
+  .zs-folder-mosaic {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    gap: 2px;
+    border-radius: inherit;
+    overflow: hidden;
+    background: color-mix(in srgb, var(--brand) 8%, var(--surface));
+    transition: transform 200ms var(--ease-standard);
+  }
+  .zs-folder-mosaic__img {
+    width: 100%;
+    height: 100%;
+    /* Grid items default to min-height/width:auto (the image's intrinsic size),
+       which lets a tall portrait stretch its `1fr` track past its fair share.
+       Zeroing the minimums makes the rows/cols truly equal; cover then crops. */
+    min-width: 0;
+    min-height: 0;
+    object-fit: cover;
+    display: block;
+  }
+  .zs-tile--thumb:hover .zs-folder-mosaic {
+    transform: scale(1.04);
+  }
+  .zs-tile--selected.zs-tile--thumb .zs-folder-mosaic {
+    transform: scale(0.93);
+    border-radius: calc(var(--radius-lg) - 4px);
+  }
+  .zs-tile__caption-icon {
+    flex-shrink: 0;
+    width: 14px;
+    height: 14px;
+    color: #fff;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4));
+  }
   /* Plain tiles (folders, docs): square tinted icon tile keyed by type */
   .zs-tile__icon {
     position: relative;
@@ -1519,7 +1559,9 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .zs-tile--thumb:hover .zs-tile__img,
-  .zs-tile--selected.zs-tile--thumb .zs-tile__img {
+  .zs-tile--selected.zs-tile--thumb .zs-tile__img,
+  .zs-tile--thumb:hover .zs-folder-mosaic,
+  .zs-tile--selected.zs-tile--thumb .zs-folder-mosaic {
     transform: none;
   }
 }

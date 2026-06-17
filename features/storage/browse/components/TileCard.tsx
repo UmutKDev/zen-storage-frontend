@@ -27,12 +27,14 @@ export function TileCard({
   path,
   selection,
   thumbnailUrl,
+  thumbnails,
   ratio,
 }: {
   entry: FolderEntry;
   path: string;
   selection: ItemSelection;
   thumbnailUrl?: string;
+  thumbnails?: string[];
   ratio: number;
 }) {
   const {
@@ -55,8 +57,10 @@ export function TileCard({
     buttonOnKeyDown,
     onToggle,
   } = useEntryInteraction(entry, path, selection);
-  const isMedia = Boolean(thumbnailUrl);
-  const content = <FileTile entry={entry} thumbnailUrl={thumbnailUrl} />;
+  const isMedia = Boolean(thumbnailUrl) || Boolean(thumbnails?.length);
+  const content = (
+    <FileTile entry={entry} thumbnailUrl={thumbnailUrl} thumbnails={thumbnails} />
+  );
   // Dimmed in-place while a move/rename for this tile is in flight.
   const busy = usePendingOpsStore((s) => Boolean(s.busyKeys[entry.key]));
 
