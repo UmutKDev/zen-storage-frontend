@@ -1,0 +1,560 @@
+/* Zen Storage — core component styles (vanilla CSS translation of components/ui/*).
+ * Classes are prefixed zs-. Components reference semantic tokens only. */
+
+/* ---------- Button ---------- */
+.zs-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  flex-shrink: 0;
+  height: 36px;
+  padding: 0 var(--space-4);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+  font-weight: var(--weight-medium);
+  white-space: nowrap;
+  cursor: pointer;
+  background: transparent;
+  color: var(--foreground);
+  transition: background-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard),
+    border-color var(--duration-fast) var(--ease-standard),
+    box-shadow var(--duration-fast) var(--ease-standard),
+    transform var(--duration-fast) var(--ease-standard);
+}
+.zs-btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+.zs-btn:focus-visible {
+  outline: none;
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 50%, transparent);
+}
+.zs-btn:disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
+.zs-btn svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  pointer-events: none;
+}
+
+.zs-btn--primary {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--primary) 86%, #ffffff) 0%,
+    var(--primary) 60%,
+    color-mix(in srgb, var(--primary) 94%, #000000) 100%
+  );
+  color: var(--primary-foreground);
+  border-color: color-mix(in srgb, var(--primary) 82%, #000000);
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.25),
+    0 1px 2px 0 rgb(0 0 0 / 0.1),
+    0 3px 10px -3px color-mix(in srgb, var(--primary) 45%, transparent);
+}
+.zs-btn--primary:hover {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--primary) 76%, #ffffff) 0%,
+    color-mix(in srgb, var(--primary) 94%, #ffffff) 60%,
+    var(--primary) 100%
+  );
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.32),
+    0 1px 2px 0 rgb(0 0 0 / 0.1),
+    0 5px 14px -4px color-mix(in srgb, var(--primary) 55%, transparent);
+}
+.zs-btn--destructive {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--destructive) 86%, #ffffff) 0%,
+    var(--destructive) 60%,
+    color-mix(in srgb, var(--destructive) 94%, #000000) 100%
+  );
+  color: #ffffff;
+  border-color: color-mix(in srgb, var(--destructive) 82%, #000000);
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.22),
+    0 1px 2px 0 rgb(0 0 0 / 0.1),
+    0 3px 10px -3px color-mix(in srgb, var(--destructive) 40%, transparent);
+}
+.zs-btn--destructive:hover {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--destructive) 76%, #ffffff) 0%,
+    color-mix(in srgb, var(--destructive) 94%, #ffffff) 60%,
+    var(--destructive) 100%
+  );
+}
+.zs-btn--outline {
+  border-color: color-mix(in srgb, var(--input) 85%, transparent);
+  background: var(--glass-micro-bg);
+  -webkit-backdrop-filter: blur(var(--glass-blur-micro)) saturate(var(--glass-saturate));
+  backdrop-filter: blur(var(--glass-blur-micro)) saturate(var(--glass-saturate));
+  box-shadow: inset 0 1px 0 0 var(--glass-highlight), var(--shadow-e1);
+}
+.zs-btn--outline:hover {
+  background: color-mix(in srgb, var(--accent) 70%, transparent);
+  color: var(--accent-foreground);
+}
+.zs-btn--secondary {
+  background: color-mix(in srgb, var(--secondary) 88%, transparent);
+  color: var(--secondary-foreground);
+  border-color: color-mix(in srgb, var(--foreground) 6%, transparent);
+  box-shadow: inset 0 1px 0 0 var(--glass-highlight);
+}
+.zs-btn--secondary:hover {
+  background: color-mix(in srgb, var(--secondary) 72%, transparent);
+}
+.zs-btn--ghost {
+  color: var(--foreground);
+}
+.zs-btn--ghost:hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+.zs-btn--ghost-destructive {
+  color: var(--destructive);
+}
+.zs-btn--ghost-destructive:hover {
+  background: color-mix(in srgb, var(--destructive) 10%, transparent);
+}
+.zs-btn--link {
+  color: var(--primary);
+  text-underline-offset: 4px;
+}
+.zs-btn--link:hover {
+  text-decoration: underline;
+}
+
+/* Premium upload variant — the hero action of the storage browser.
+ * Heavier than primary: deeper gradient stack, machined inset icon well,
+ * shortcut kbd chip, hover sheen sweep + 1px lift, weighted press.
+ * Same rule as primary: exactly ONE per view. */
+.zs-btn--upload {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  gap: var(--space-2);
+  padding: 0 var(--space-3) 0 6px;
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.01em;
+  color: var(--primary-foreground);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--primary) 70%, #ffffff) 0%,
+    color-mix(in srgb, var(--primary) 90%, #ffffff) 30%,
+    var(--primary) 58%,
+    color-mix(in srgb, var(--primary) 84%, #000000) 100%
+  );
+  border-color: color-mix(in srgb, var(--primary) 70%, #000000);
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.38),
+    inset 0 -1px 0 0 rgba(0, 0, 0, 0.22),
+    0 1px 2px 0 rgb(0 0 0 / 0.12),
+    0 4px 10px -3px color-mix(in srgb, var(--primary) 55%, transparent),
+    0 10px 26px -8px color-mix(in srgb, var(--primary) 40%, transparent);
+}
+.zs-btn--upload::after {
+  content: "";
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  left: -45%;
+  width: 36%;
+  background: linear-gradient(
+    105deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.38) 50%,
+    transparent 100%
+  );
+  transform: skewX(-18deg);
+  opacity: 0;
+  pointer-events: none;
+}
+.zs-btn--upload:hover {
+  transform: translateY(-1px);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--primary) 62%, #ffffff) 0%,
+    color-mix(in srgb, var(--primary) 84%, #ffffff) 30%,
+    color-mix(in srgb, var(--primary) 96%, #ffffff) 58%,
+    var(--primary) 100%
+  );
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.45),
+    inset 0 -1px 0 0 rgba(0, 0, 0, 0.2),
+    0 2px 3px 0 rgb(0 0 0 / 0.12),
+    0 6px 14px -3px color-mix(in srgb, var(--primary) 60%, transparent),
+    0 14px 32px -8px color-mix(in srgb, var(--primary) 45%, transparent);
+}
+.zs-btn--upload:hover::after {
+  animation: zs-upload-sheen 0.7s var(--ease-standard);
+}
+@keyframes zs-upload-sheen {
+  from { left: -45%; opacity: 1; }
+  to { left: 135%; opacity: 1; }
+}
+.zs-btn--upload:active:not(:disabled) {
+  transform: translateY(0.5px) scale(0.99);
+  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 0 rgba(0, 0, 0, 0.1),
+    0 1px 2px 0 rgb(0 0 0 / 0.1);
+}
+
+/* Engraved icon socket inside the upload button */
+.zs-btn__well {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border-radius: calc(var(--radius-md) - 2px);
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.2) 0%,
+    rgba(0, 0, 0, 0.08) 70%,
+    rgba(255, 255, 255, 0.06) 100%
+  );
+  box-shadow: inset 0 1px 2px 0 rgba(0, 0, 0, 0.28),
+    inset 0 -1px 0 0 rgba(255, 255, 255, 0.14),
+    0 1px 0 0 rgba(255, 255, 255, 0.16);
+}
+.zs-btn__well svg {
+  transition: transform var(--duration-fast) var(--ease-standard);
+}
+.zs-btn--upload:hover .zs-btn__well svg {
+  transform: translateY(-1.5px); /* nudge up = the upload gesture */
+}
+
+/* Shortcut chip inside the upload button */
+.zs-btn__kbd {
+  margin-left: 2px;
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  line-height: 1.4;
+  font-weight: var(--weight-medium);
+  color: color-mix(in srgb, var(--primary-foreground) 88%, transparent);
+  background: rgba(0, 0, 0, 0.16);
+  box-shadow: inset 0 1px 1.5px 0 rgba(0, 0, 0, 0.2),
+    inset 0 -1px 0 0 rgba(255, 255, 255, 0.12);
+}
+
+.zs-btn--sm.zs-btn--upload { padding: 0 10px 0 4px; }
+.zs-btn--sm .zs-btn__well { width: 22px; height: 22px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .zs-btn--upload:hover { transform: none; }
+  .zs-btn--upload:hover::after { animation: none; }
+}
+
+.zs-btn--xs {
+  height: 24px;
+  gap: var(--space-1);
+  padding: 0 var(--space-2);
+  font-size: var(--text-xs);
+}
+.zs-btn--xs svg { width: 12px; height: 12px; }
+.zs-btn--sm {
+  height: 32px;
+  gap: 6px;
+  padding: 0 var(--space-3);
+}
+.zs-btn--lg {
+  height: 40px;
+  padding: 0 var(--space-6);
+}
+.zs-btn--icon { width: 36px; padding: 0; }
+.zs-btn--icon-sm { width: 32px; height: 32px; padding: 0; }
+.zs-btn--icon-xs { width: 24px; height: 24px; padding: 0; }
+.zs-btn--icon-xs svg { width: 12px; height: 12px; }
+
+/* ---------- Badge ---------- */
+.zs-badge {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  padding: 2px var(--space-2);
+  border: 1px solid transparent;
+  border-radius: var(--radius-full);
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  line-height: var(--leading-xs);
+  font-weight: var(--weight-medium);
+  white-space: nowrap;
+}
+.zs-badge svg { width: 12px; height: 12px; pointer-events: none; }
+.zs-badge--default {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--primary) 84%, #ffffff) 0%,
+    var(--primary) 100%
+  );
+  color: var(--primary-foreground);
+  border-color: color-mix(in srgb, var(--primary) 84%, #000000);
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.25), 0 1px 2px 0 rgb(0 0 0 / 0.08);
+}
+.zs-badge--secondary {
+  background: color-mix(in srgb, var(--secondary) 85%, transparent);
+  color: var(--secondary-foreground);
+  border-color: color-mix(in srgb, var(--foreground) 7%, transparent);
+  box-shadow: inset 0 1px 0 0 var(--glass-highlight);
+}
+.zs-badge--destructive {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--destructive) 84%, #ffffff) 0%,
+    var(--destructive) 100%
+  );
+  color: var(--destructive-foreground);
+  border-color: color-mix(in srgb, var(--destructive) 84%, #000000);
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.2), 0 1px 2px 0 rgb(0 0 0 / 0.08);
+}
+.zs-badge--success {
+  background: color-mix(in srgb, var(--success) 12%, transparent);
+  color: var(--success);
+  border-color: color-mix(in srgb, var(--success) 28%, transparent);
+}
+.zs-badge--warning {
+  background: color-mix(in srgb, var(--warning) 12%, transparent);
+  color: var(--warning);
+  border-color: color-mix(in srgb, var(--warning) 28%, transparent);
+}
+.zs-badge--info {
+  background: color-mix(in srgb, var(--info) 12%, transparent);
+  color: var(--info);
+  border-color: color-mix(in srgb, var(--info) 28%, transparent);
+}
+.zs-badge--outline {
+  border-color: var(--border);
+  color: var(--foreground);
+  background: color-mix(in srgb, var(--background) 55%, transparent);
+  box-shadow: inset 0 1px 0 0 var(--glass-highlight);
+}
+
+/* ---------- Input ---------- */
+.zs-input {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  height: 36px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--input);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  box-shadow: inset 0 1px 2px 0 rgb(0 0 0 / 0.03), var(--shadow-e1);
+  transition: border-color var(--duration-fast) var(--ease-standard),
+    box-shadow var(--duration-fast) var(--ease-standard);
+}
+.zs-input::placeholder { color: var(--muted-foreground); }
+.zs-input:focus-visible {
+  outline: none;
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 50%, transparent);
+}
+.zs-input:disabled { pointer-events: none; opacity: 0.5; }
+.zs-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--foreground);
+}
+.zs-hint {
+  margin-top: 6px;
+  font-size: var(--text-xs);
+  color: var(--muted-foreground);
+}
+.zs-hint--error { color: var(--destructive); }
+
+/* ---------- Switch ---------- */
+.zs-switch {
+  position: relative;
+  display: inline-flex;
+  width: 36px;
+  height: 20px;
+  flex-shrink: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius-full);
+  background: var(--input);
+  cursor: pointer;
+  padding: 0;
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+.zs-switch {
+  box-shadow: inset 0 1px 2px 0 rgb(0 0 0 / 0.06);
+}
+.zs-switch[aria-checked="true"] {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--primary) 84%, #ffffff) 0%,
+    var(--primary) 100%
+  );
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.25);
+}
+.zs-switch:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 50%, transparent);
+}
+.zs-switch:disabled { pointer-events: none; opacity: 0.5; }
+.zs-switch__thumb {
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--radius-full);
+  background: var(--background);
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.18), 0 0 0 0.5px rgb(0 0 0 / 0.06);
+  transition: transform var(--duration-fast) var(--ease-standard);
+}
+.zs-switch[aria-checked="true"] .zs-switch__thumb { transform: translateX(16px); }
+.dark .zs-switch__thumb { background: var(--foreground); }
+
+/* ---------- Checkbox ---------- */
+.zs-checkbox {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  padding: 0;
+  border: 1.5px solid color-mix(in srgb, var(--muted-foreground) 55%, transparent);
+  border-radius: 4px;
+  background: var(--surface-elevated, var(--background));
+  color: transparent;
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 0 var(--glass-highlight), var(--shadow-e1);
+  transition: background-color var(--duration-fast) var(--ease-standard),
+    border-color var(--duration-fast) var(--ease-standard);
+}
+.zs-checkbox:hover:not([aria-checked="true"]) {
+  border-color: color-mix(in srgb, var(--muted-foreground) 80%, transparent);
+}
+.zs-checkbox[aria-checked="true"] {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--primary) 84%, #ffffff) 0%,
+    var(--primary) 100%
+  );
+  border-color: color-mix(in srgb, var(--primary) 84%, #000000);
+  color: var(--primary-foreground);
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.25), 0 1px 2px 0 rgb(0 0 0 / 0.08);
+}
+.zs-checkbox:focus-visible {
+  outline: none;
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 50%, transparent);
+}
+.zs-checkbox svg { width: 12px; height: 12px; }
+/* ≥40px hit target via pseudo-element */
+.zs-checkbox { position: relative; }
+.zs-checkbox::after {
+  content: "";
+  position: absolute;
+  inset: -12px;
+}
+
+/* ---------- Avatar ---------- */
+.zs-avatar {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--muted) 78%, #ffffff) 0%,
+    var(--muted) 100%
+  );
+  color: var(--muted-foreground);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.02em;
+  user-select: none;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.06);
+}
+/* Glass rim drawn above the image via overlay */
+.zs-avatar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--foreground) 12%, transparent),
+    inset 0 1px 0 0 var(--glass-highlight);
+  pointer-events: none;
+}
+.zs-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.zs-avatar--sm { width: 24px; height: 24px; font-size: 10px; }
+.zs-avatar--lg { width: 40px; height: 40px; font-size: var(--text-sm); }
+
+/* Micro-glass fallback: solid fills under reduced transparency / high contrast */
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  .zs-btn--outline {
+    background: var(--background);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .zs-btn--secondary { background: var(--secondary); }
+}
+
+/* ---------- Skeleton ---------- */
+.zs-skeleton {
+  background: var(--accent);
+  border-radius: var(--radius-md);
+  animation: zs-pulse 2s var(--ease-standard) infinite;
+}
+@keyframes zs-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* ---------- Logo (lettermark tile) ---------- */
+.zs-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-sans);
+}
+.zs-logo__tile {
+  display: flex;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--primary) 84%, #ffffff) 0%,
+    var(--primary) 60%,
+    color-mix(in srgb, var(--primary) 94%, #000000) 100%
+  );
+  color: var(--primary-foreground);
+  font-weight: var(--weight-semibold);
+  font-size: var(--text-base);
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.28),
+    0 1px 2px 0 rgb(0 0 0 / 0.1),
+    0 3px 8px -3px color-mix(in srgb, var(--primary) 40%, transparent);
+}
+.zs-logo__word {
+  font-weight: var(--weight-semibold);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  color: var(--foreground);
+}

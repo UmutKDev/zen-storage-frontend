@@ -1,0 +1,83 @@
+<!-- @dsCard group="Components" viewport="700x420" name="Surfaces" subtitle="Card, GlassPanel tiers, Dialog, Toast, Tabs" -->
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../../styles.css" />
+<script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<style>
+  body { padding: 20px; background: var(--surface); }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+  /* a calm wash so the glass tiers have something to refract */
+  .glass-demo {
+    position: relative;
+    border-radius: var(--radius-lg);
+    background:
+      radial-gradient(circle at 30% 20%, color-mix(in srgb, var(--brand) 14%, transparent), transparent 60%),
+      var(--muted);
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { Card, GlassPanel, Toast, Tabs, Input, Button, Icon } = window.ZenStorageDesignSystem_33e1f8;
+
+function SurfacesCard() {
+  return (
+    <div className="grid">
+      <Card title="Change password" description="Use at least 12 characters.">
+        <Input label="Current password" type="password" />
+        <div style={{ marginTop: 12, display: "flex", justifyContent: "flex-end" }}>
+          <Button size="sm">Save</Button>
+        </div>
+      </Card>
+      <div className="glass-demo">
+        <GlassPanel tier="chrome" style={{ borderRadius: "var(--radius-md)", padding: "10px 14px", display: "flex", alignItems: "center", gap: 8, fontSize: "var(--text-sm)", fontWeight: 500 }}>
+          <Icon name="panel-left" /> glass-chrome — topbar / sidebar
+        </GlassPanel>
+        <GlassPanel tier="overlay" style={{ borderRadius: "var(--radius-lg)", padding: "14px" }}>
+          <p style={{ margin: 0, fontSize: "var(--text-sm)", fontWeight: 500 }}>glass-overlay — modals / popovers</p>
+          <p style={{ margin: "4px 0 0", fontSize: "var(--text-xs)", color: "var(--muted-foreground)" }}>1px top rim · 16px blur · solid fallback</p>
+        </GlassPanel>
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        <Toast variant="success" title="Moved 3 items" onClose={() => {}} />
+        <Toast variant="error" title="Upload failed" description="Couldn't reach the server. Retry." onClose={() => {}} />
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+        <Tabs aria-label="Account" tabs={[
+          { value: "profile", label: "Profile" },
+          { value: "security", label: "Security" },
+          { value: "subscription", label: "Subscription" },
+        ]} defaultValue="security" />
+        <Tabs aria-label="View" tabs={[
+          { value: "list", icon: <Icon name="list" /> },
+          { value: "grid", icon: <Icon name="layout-grid" /> },
+        ]} defaultValue="list" />
+        <div style={{ borderRadius: "var(--radius-lg)", overflow: "hidden", border: "1px solid var(--border)", position: "relative", height: 150, background: "var(--muted)" }}>
+          <div className="zs-dialog glass-overlay" style={{ position: "absolute", inset: 16, maxWidth: "none", padding: 16 }}>
+            <h2 className="zs-dialog__title">Delete 3 items?</h2>
+            <p className="zs-dialog__description">This can't be undone.</p>
+            <div className="zs-dialog__footer" style={{ marginTop: 8 }}>
+              <Button variant="outline" size="sm">Cancel</Button>
+              <Button variant="destructive" size="sm">Delete</Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById("root")).render(<SurfacesCard />);
+</script>
+</body>
+</html>

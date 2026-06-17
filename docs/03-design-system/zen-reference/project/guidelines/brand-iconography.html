@@ -1,0 +1,48 @@
+<!-- @dsCard group="Brand" viewport="700x190" name="Iconography" subtitle="Lucide · 1.5–2px stroke · currentColor · folders tint --brand" -->
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../styles.css" />
+<script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+<style>
+  body { padding: 20px 24px; }
+  .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 14px 8px; }
+  .ic { display: flex; flex-direction: column; align-items: center; gap: 6px; color: var(--foreground); }
+  .ic svg { width: 20px; height: 20px; }
+  .ic span { font-size: 9px; font-family: var(--font-mono); color: var(--muted-foreground); }
+  .brand { color: var(--brand); }
+  .note { font-size: var(--text-xs); color: var(--muted-foreground); margin: 14px 0 0; }
+</style>
+</head>
+<body>
+  <div class="grid">
+    <div class="ic brand"><i data-lucide="folder"></i><span>folder</span></div>
+    <div class="ic"><i data-lucide="file"></i><span>file</span></div>
+    <div class="ic"><i data-lucide="lock"></i><span>lock</span></div>
+    <div class="ic"><i data-lucide="eye-off"></i><span>eye-off</span></div>
+    <div class="ic"><i data-lucide="search"></i><span>search</span></div>
+    <div class="ic"><i data-lucide="upload"></i><span>upload</span></div>
+    <div class="ic"><i data-lucide="download"></i><span>download</span></div>
+    <div class="ic"><i data-lucide="trash-2"></i><span>trash-2</span></div>
+    <div class="ic"><i data-lucide="folder-input"></i><span>fldr-input</span></div>
+    <div class="ic"><i data-lucide="more-vertical"></i><span>more-v</span></div>
+    <div class="ic"><i data-lucide="chevron-right"></i><span>chevron</span></div>
+    <div class="ic"><i data-lucide="hard-drive"></i><span>hard-drive</span></div>
+    <div class="ic"><i data-lucide="user"></i><span>user</span></div>
+    <div class="ic"><i data-lucide="key-round"></i><span>key-round</span></div>
+    <div class="ic"><i data-lucide="bell"></i><span>bell</span></div>
+    <div class="ic"><i data-lucide="sun"></i><span>sun</span></div>
+    <div class="ic"><i data-lucide="moon"></i><span>moon</span></div>
+    <div class="ic"><i data-lucide="plus"></i><span>plus</span></div>
+    <div class="ic"><i data-lucide="x"></i><span>x</span></div>
+    <div class="ic"><i data-lucide="check"></i><span>check</span></div>
+    <div class="ic"><i data-lucide="list"></i><span>list</span></div>
+    <div class="ic"><i data-lucide="layout-grid"></i><span>grid</span></div>
+    <div class="ic"><i data-lucide="panel-left"></i><span>panel-left</span></div>
+    <div class="ic"><i data-lucide="command"></i><span>command</span></div>
+  </div>
+  <p class="note">No icon font, no PNGs, no emoji. SVG via lucide CDN or assets/icons/.</p>
+  <script>lucide.createIcons();</script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+/* Zen Storage — base resets. Hairline borders by default, theme-aware surface/type,
+ * visible focus by construction. */
+
+* {
+  border-color: var(--border);
+}
+
+body {
+  margin: 0;
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: var(--leading-base);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--brand) 25%, transparent);
+}
+
+code, pre, kbd {
+  font-family: var(--font-mono);
+}
+
+/* Tabular numerals helper — sizes, usage %, counts, dates in tables */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}

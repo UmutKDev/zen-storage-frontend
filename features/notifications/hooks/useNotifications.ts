@@ -1,86 +1,39 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { io, Socket } from "socket.io-client";
-import { API_URL } from "@/Constants/API.constant";
-import type {
-  NotificationPayload,
-  UseNotificationsOptions,
-  UseNotificationsReturn,
-} from "../types/notification.types";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { firstPage, nextPage } from "@/lib/api";
+import { getNotifications, notificationKeys } from "../api";
 
-export function useNotifications(
-  options: UseNotificationsOptions,
-): UseNotificationsReturn {
-  const { enabled = true, sessionId, subscribersRef } = options;
-  const socketRef = useRef<Socket | null>(null);
-  const [isConnected, setIsConnected] = useState(false);
+/** Page size for the inbox list. Small — the panel shows the most recent;
+ *  "Load more" fetches the next page when there are older ones. */
+const PAGE = 20;
 
-  useEffect(() => {
-    if (!enabled || !sessionId) {
-      if (socketRef.current) {
-        socketRef.current.disconnect();
-        socketRef.current = null;
-        setIsConnected(false);
-      }
-      return;
-    }
+/**
+ * The notification inbox list. Fetches on panel open (`enabled`), paginates via
+ * the shared `firstPage`/`nextPage` cursor helpers, and flattens pages to a flat
+ * newest-first array. The query key is stable (no page param) so the optimistic
+ * mark-read updates in `useNotificationActions` target one cache entry.
+ */
+export function useNotifications(open: boolean) {
+  const query = useInfiniteQuery({
+    queryKey: notificationKeys.list(),
+    queryFn: ({ pageParam, signal }) => getNotifications(pageParam, signal),
+    initialPageParam: firstPage(PAGE),
+    getNextPageParam: (lastPage, _allPages, lastPageParam) =>
+      nextPage(lastPageParam, lastPage),
+    enabled: open,
+    staleTime: 30_000,
+  });
 
-    const socket = io(`${API_URL}/notifications`, {
-      auth: { SessionId: sessionId },
-      withCredentials: true,
-      transports: ["websocket"],
-      reconnection: true,
-      reconnectionAttempts: Infinity,
-      reconnectionDelay: 1000,
-      reconnectionDelayMax: 30000,
-    });
-
-    socketRef.current = socket;
-
-    socket.on("connect", () => {
-      setIsConnected(true);
-      if (process.env.NODE_ENV === "development") {
-        console.log("[Notifications] Connected:", socket.id);
-      }
-    });
-
-    socket.on("disconnect", (reason) => {
-      setIsConnected(false);
-      if (process.env.NODE_ENV === "development") {
-        console.log("[Notifications] Disconnected:", reason);
-      }
-    });
-
-    socket.on("connect_error", (error) => {
-      if (process.env.NODE_ENV === "development") {
-        console.error("[Notifications] Connection error:", error.message);
-      }
-    });
-
-    socket.on("notification", (payload: NotificationPayload) => {
-      subscribersRef.current.forEach((fn) => {
-        try {
-          fn(payload);
-        } catch (e) {
-          console.error("[Notifications] Subscriber error:", e);
-        }
-      });
-    });
-
-    socket.io.on("reconnect", (attemptNumber) => {
-      if (process.env.NODE_ENV === "development") {
-        console.log(
-          `[Notifications] Reconnected after ${attemptNumber} attempts`,
-        );
-      }
-    });
-
-    return () => {
-      socket.disconnect();
-      socketRef.current = null;
-    };
-  }, [enabled, sessionId]);
-
-  return { isConnected };
+  return {
+    items: query.data?.pages.flatMap((page) => page.items) ?? [],
+    /** True total across all pages (any page carries it) — drives "Load more". */
+    count: query.data?.pages[0]?.count ?? 0,
+    isLoading: query.isLoading,
+    isError: query.isError,
+    refetch: query.refetch,
+    hasMore: query.hasNextPage,
+    loadMore: query.fetchNextPage,
+    isLoadingMore: query.isFetchingNextPage,
+  };
 }

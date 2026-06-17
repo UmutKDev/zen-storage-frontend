@@ -1,0 +1,71 @@
+import type { AxiosError, AxiosResponse } from "axios";
+import {
+  ApiError,
+  unwrapEnvelope,
+  extractEnvelopeMessages,
+  toastApiError,
+  type ResultEnvelope,
+} from "@/lib/api";
+import { t } from "@/lib/i18n";
+import { getSignOut } from "../token-sources";
+
+function hasResultEnvelope(data: unknown): data is ResultEnvelope<unknown> {
+  return typeof data === "object" && data !== null && "Result" in data;
+}
+
+/**
+ * Success path: unwrap `{ Result, Status }` → bare `Result` (or `{ items, count }`
+ * for lists) so feature code never sees the wrapper. Non-enveloped bodies
+ * (binary/health) pass through untouched.
+ */
+export function envelopeResponseFulfilled(
+  response: AxiosResponse,
+): AxiosResponse {
+  if (hasResultEnvelope(response.data)) {
+    response.data = unwrapEnvelope(response.data);
+  }
+  return response;
+}
+
+/**
+ * Error path: map HTTP/network failures to a typed `ApiError`. `401` triggers
+ * central sign-out; `403`/`409` pass through silently for feature handlers;
+ * everything else toasts once. Never retries (that is TanStack Query's job).
+ */
+export async function envelopeResponseRejected(
+  error: AxiosError,
+): Promise<never> {
+  // Request cancellation (TanStack Query aborting on navigation / unmount /
+  // refetch via the threaded AbortSignal) is intentional, not a real error —
+  // rethrow silently so it is never toasted. TanStack ignores aborted results.
+  if (error.code === "ERR_CANCELED" || error.name === "CanceledError") {
+    throw error;
+  }
+  const status = error.response?.status;
+  const messages = extractEnvelopeMessages(error.response?.data);
+  const retryAfterRaw = error.response?.headers?.["retry-after"];
+  const retryAfter =
+    typeof retryAfterRaw === "string" && /^\d+$/.test(retryAfterRaw)
+      ? Number(retryAfterRaw)
+      : undefined;
+  const apiError = ApiError.fromHttp(
+    status,
+    messages.length > 0 ? messages : [t("common.errorGeneric")],
+    error.response?.data,
+    retryAfter,
+  );
+
+  if (apiError.code === "UNAUTHORIZED") {
+    await getSignOut()();
+  } else if (
+    apiError.code !== "FORBIDDEN" &&
+    apiError.code !== "CONFLICT" &&
+    // Queue-managed calls (upload engine) own their error presentation — the
+    // tray shows per-file state; a central toast per part retry would storm.
+    !error.config?.suppressErrorToast
+  ) {
+    toastApiError(apiError);
+  }
+
+  throw apiError;
+}

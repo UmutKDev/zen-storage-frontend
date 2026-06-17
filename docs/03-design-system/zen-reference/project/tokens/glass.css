@@ -1,0 +1,57 @@
+/* Zen Storage — glass tokens + the two glass utilities (signature surface treatment).
+ * THE RULE: glass on chrome & overlays only (topbar, sidebar, modals, popovers,
+ * command palette, upload tray, toasts). Content, cards, tables, data rows stay SOLID.
+ * Never nest glass. Never animate the blur. */
+
+:root {
+  --glass-chrome-bg: rgba(255, 255, 255, 0.62);
+  --glass-overlay-bg: rgba(255, 255, 255, 0.72);
+  --glass-border: rgba(255, 255, 255, 0.18);
+  --glass-blur-chrome: 12px;
+  --glass-blur-overlay: 16px;
+  --glass-blur-micro: 8px;
+  --glass-saturate: 140%;
+  /* Tier 3 — micro-glass: translucent control fills (outline/secondary buttons).
+   * Highlight rim + faint blur only; never on repeated data rows or badges. */
+  --glass-micro-bg: rgba(255, 255, 255, 0.55);
+  --glass-highlight: rgba(255, 255, 255, 0.35);
+}
+
+.dark {
+  /* Darker fill; the 1px highlight rim does more of the work in dark. */
+  --glass-chrome-bg: rgba(20, 20, 22, 0.55);
+  --glass-overlay-bg: rgba(24, 24, 27, 0.66);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-micro-bg: rgba(255, 255, 255, 0.06);
+  --glass-highlight: rgba(255, 255, 255, 0.14);
+}
+
+/* Tier 1 — bars & sidebar */
+.glass-chrome {
+  background: var(--glass-chrome-bg);
+  -webkit-backdrop-filter: blur(var(--glass-blur-chrome)) saturate(var(--glass-saturate));
+  backdrop-filter: blur(var(--glass-blur-chrome)) saturate(var(--glass-saturate));
+  border: 1px solid var(--glass-border);
+  /* 1px top highlight rim + soft elevation (e2) */
+  box-shadow: 0 1px 0 0 var(--glass-border) inset, var(--shadow-e2);
+}
+
+/* Tier 2 — modals, popovers, palette, tray */
+.glass-overlay {
+  background: var(--glass-overlay-bg);
+  -webkit-backdrop-filter: blur(var(--glass-blur-overlay)) saturate(var(--glass-saturate));
+  backdrop-filter: blur(var(--glass-blur-overlay)) saturate(var(--glass-saturate));
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 1px 0 0 var(--glass-border) inset, var(--shadow-e3);
+}
+
+/* REQUIRED fallback: reduced transparency / more contrast → solid elevated surface.
+ * Layout identical; only the fill changes. */
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  .glass-chrome,
+  .glass-overlay {
+    background: var(--surface-elevated);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}

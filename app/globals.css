@@ -1,135 +1,1525 @@
 @import "tailwindcss";
+/* Enter/exit animation utilities used by the shadcn/Radix primitives
+ * (animate-in, fade-in-0, zoom-in-95, slide-in-from-*). Reduced-motion is
+ * honored by the global reset at the bottom of this file. */
 @import "tw-animate-css";
 
-@custom-variant dark (&:where(.dark, .dark *));
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
-  --color-card: var(--card);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-}
+/*
+ * SINGLE TOKEN SOURCE for the whole app (Tailwind v4).
+ * Design system: docs/03-design-system/**. Premium, monochrome base + ONE warm
+ * accent (Claude-style orange) + state colors; glass on chrome/overlays only.
+ *
+ * Dark mode is CLASS-BASED (next-themes sets `.dark` on <html>), so we register
+ * the `dark` variant against that class — NOT prefers-color-scheme. Without this
+ * line, `dark:` utilities and the theme toggle silently break.
+ */
+@custom-variant dark (&:is(.dark *));
 
 :root {
-  --radius: 0.625rem;
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  color-scheme: light;
+
+  /* Base + surfaces */
+  --background: #ffffff;
+  --foreground: #171717;
+  --surface: #fafafa;
+  --surface-elevated: #ffffff;
+
+  /* shadcn primitive bridge (so pulled primitives render correctly) */
+  --card: #ffffff;
+  --card-foreground: #171717;
+  --popover: #ffffff;
+  --popover-foreground: #171717;
+  --secondary: #f4f4f5;
+  --secondary-foreground: #171717;
+
+  /* Brand = the single primary action (orange). Deepened for AA on white text. */
+  --primary: #c2410c;
+  --primary-foreground: #ffffff;
+  /* The lighter brand tint, for focus ring + accents on neutral surfaces. */
+  --brand: #d97757;
+
+  /* Neutral hover surface (shadcn `accent` semantics — NOT the brand). */
+  --accent: #f4f4f5;
+  --accent-foreground: #171717;
+
+  --muted: #f4f4f5;
+  --muted-foreground: #71717a;
+
+  --border: #e4e4e7;
+  --input: #e4e4e7;
+  --ring: #d97757;
+
+  /* State colors (meaning, never decoration) */
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --success: #16a34a;
+  --warning: #d97706;
+  --danger: #dc2626;
+  --info: #2563eb;
+
+  /* Radius base (derived scale lives in @theme) */
+  --radius: 0.5rem;
+
+  /* Glass — signature chrome/overlay treatment (light) */
+  --glass-chrome-bg: rgba(255, 255, 255, 0.62);
+  --glass-overlay-bg: rgba(255, 255, 255, 0.72);
+  --glass-border: rgba(255, 255, 255, 0.18);
+  --glass-blur-chrome: 12px;
+  --glass-blur-overlay: 16px;
+  --glass-saturate: 140%;
+
+  /* Tier 3 — micro-glass: translucent control fills (outline/secondary buttons)
+   * + the 1px highlight rim used across the machined treatments below. Faint
+   * blur only; NEVER on repeated data rows or badges. */
+  --glass-micro-bg: rgba(255, 255, 255, 0.55);
+  --glass-blur-micro: 8px;
+  --glass-highlight: rgba(255, 255, 255, 0.35);
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  color-scheme: dark;
+
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --surface: #141414;
+  --surface-elevated: #1c1c1c;
+
+  --card: #141414;
+  --card-foreground: #ededed;
+  --popover: #1c1c1c;
+  --popover-foreground: #ededed;
+  --secondary: #1a1a1a;
+  --secondary-foreground: #ededed;
+
+  --primary: #e0937a;
+  --primary-foreground: #1a1410;
+  --brand: #e0937a;
+
+  --accent: #1f1f1f;
+  --accent-foreground: #ededed;
+
+  --muted: #1a1a1a;
+  --muted-foreground: #a1a1aa;
+
+  --border: #262626;
+  --input: #2a2a2a;
+  --ring: #e0937a;
+
+  --destructive: #ef4444;
+  --destructive-foreground: #fafafa;
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --info: #3b82f6;
+
+  /* Glass (dark): darker fill; the highlight rim does more of the work. */
+  --glass-chrome-bg: rgba(20, 20, 22, 0.55);
+  --glass-overlay-bg: rgba(24, 24, 27, 0.66);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-micro-bg: rgba(255, 255, 255, 0.06);
+  --glass-highlight: rgba(255, 255, 255, 0.14);
+}
+
+/*
+ * Map every token → a Tailwind utility. `inline` keeps the value referencing the
+ * CSS var so the `.dark` overrides above flow through automatically. This is
+ * what makes `bg-surface`, `text-muted-foreground`, `bg-primary`, `border-input`,
+ * `ring-ring`, `text-success`, `rounded-md`, `shadow-e2`, … resolve.
+ */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-brand: var(--brand);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-info: var(--info);
+
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+
+  /* Radius scale (elevation-borders.md: sm 6 · md 8 · lg 12 · xl 16) */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+
+  /* Elevation tiers (premium = hairline + soft shadow, not heavy drops) */
+  --shadow-e1: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-e2: 0 4px 12px -2px rgb(0 0 0 / 0.1);
+  --shadow-e3: 0 16px 32px -8px rgb(0 0 0 / 0.18);
+  --shadow-e4: 0 20px 40px -12px rgb(0 0 0 / 0.22);
+
+  /* Motion easing token (mirrors lib/motion/tokens.ts `easing.standard`) so
+   * CSS transitions can share the design-system curve via `ease-standard`. */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  /* Decelerate curve (mirrors `easing.decelerate`) for emphasised entrances. */
+  --ease-decelerate: cubic-bezier(0, 0, 0, 1);
+  /* Duration tokens (mirror lib/motion/tokens.ts `duration.base/slow`). */
+  --duration-base: 200ms;
+  --duration-slow: 320ms;
+}
+
+/*
+ * Glass utilities — two tiers only. Each = translucent fill + saturated blur +
+ * a 1px top highlight rim + (the wrapper adds) a soft shadow. Chrome/overlays
+ * ONLY; content/cards/data stay solid. Never animate the blur.
+ */
+@utility glass-chrome {
+  background: var(--glass-chrome-bg);
+  -webkit-backdrop-filter: blur(var(--glass-blur-chrome))
+    saturate(var(--glass-saturate));
+  backdrop-filter: blur(var(--glass-blur-chrome))
+    saturate(var(--glass-saturate));
+  border: 1px solid var(--glass-border);
+  /* 1px top highlight rim + soft elevation (e2). */
+  box-shadow:
+    0 1px 0 0 var(--glass-border) inset,
+    var(--shadow-e2);
+}
+
+@utility glass-overlay {
+  background: var(--glass-overlay-bg);
+  -webkit-backdrop-filter: blur(var(--glass-blur-overlay))
+    saturate(var(--glass-saturate));
+  backdrop-filter: blur(var(--glass-blur-overlay))
+    saturate(var(--glass-saturate));
+  border: 1px solid var(--glass-border);
+  /* 1px top highlight rim + larger soft elevation (e3). */
+  box-shadow:
+    0 1px 0 0 var(--glass-border) inset,
+    var(--shadow-e3);
+}
+
+/*
+ * Required accessibility fallback: when the user reduces transparency (or asks
+ * for more contrast), drop blur/translucency and fall back to a solid elevated
+ * surface. Layout is identical; only the fill changes.
+ */
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  .glass-chrome,
+  .glass-overlay {
+    background: var(--surface-elevated);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
 }
 
 @layer base {
+  /* Default hairline border color + theme-aware base surface/type. */
   * {
-    @apply border-border outline-ring/50;
+    border-color: var(--border);
   }
+
   body {
-    @apply bg-background text-foreground;
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family:
+      var(--font-sans),
+      system-ui,
+      -apple-system,
+      sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Visible focus by construction (shadcn primitives set their own ring + */
+  /* outline-none; this covers plain links / non-primitive interactives). */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
   }
 }
 
-@keyframes indeterminate {
-  0% {
-    transform: translateX(-100%);
+/*
+ * Honor prefers-reduced-motion app-wide. framer-motion is gated via
+ * `MotionConfig reducedMotion="user"`; this neutralizes CSS-driven animation
+ * (the Radix/tw-animate-css enter/exit on dialogs, menus, tooltips, etc.) so
+ * EVERY animation degrades, not just the JS ones.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
+}
+
+/* =====================================================================
+ * ZEN — machined component layer
+ * ---------------------------------------------------------------------
+ * The "premium, not decorated" treatments from the design system that are
+ * too verbose (multi-stop gradients with color-mix(#fff/#000), multi-layer
+ * inset rims/wells, sheen sweeps, oklch tone vars) to express as inline
+ * Tailwind. Realized as `.zs-*` classes consumed by the shadcn wrappers in
+ * components/ui/* and the storage feature components. Semantic tokens only.
+ * Source of truth: docs/03-design-system/zen-reference/project/components/**.
+ * In `@layer components` so single-property Tailwind utilities can still
+ * override (radius, size, color). Keyframes + reduced-motion neutralizers
+ * are unlayered below so they reliably win.
+ * ===================================================================== */
+@layer components {
+  /* ---------- Buttons: gradient + inset rim fills ---------- */
+  .zs-btn-grad-primary {
+    border: 1px solid color-mix(in srgb, var(--primary) 82%, #000000);
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--primary) 86%, #ffffff) 0%,
+      var(--primary) 60%,
+      color-mix(in srgb, var(--primary) 94%, #000000) 100%
+    );
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.25),
+      0 1px 2px 0 rgb(0 0 0 / 0.1),
+      0 3px 10px -3px color-mix(in srgb, var(--primary) 45%, transparent);
+  }
+  .zs-btn-grad-primary:hover {
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--primary) 76%, #ffffff) 0%,
+      color-mix(in srgb, var(--primary) 94%, #ffffff) 60%,
+      var(--primary) 100%
+    );
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.32),
+      0 1px 2px 0 rgb(0 0 0 / 0.1),
+      0 5px 14px -4px color-mix(in srgb, var(--primary) 55%, transparent);
+  }
+  .zs-btn-grad-destructive {
+    border: 1px solid color-mix(in srgb, var(--destructive) 82%, #000000);
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--destructive) 86%, #ffffff) 0%,
+      var(--destructive) 60%,
+      color-mix(in srgb, var(--destructive) 94%, #000000) 100%
+    );
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.22),
+      0 1px 2px 0 rgb(0 0 0 / 0.1),
+      0 3px 10px -3px color-mix(in srgb, var(--destructive) 40%, transparent);
+  }
+  .zs-btn-grad-destructive:hover {
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--destructive) 76%, #ffffff) 0%,
+      color-mix(in srgb, var(--destructive) 94%, #ffffff) 60%,
+      var(--destructive) 100%
+    );
+  }
+  /* Outline → micro-glass fill (the disciplined third tier). */
+  .zs-btn-micro {
+    border: 1px solid color-mix(in srgb, var(--input) 85%, transparent);
+    background: var(--glass-micro-bg);
+    -webkit-backdrop-filter: blur(var(--glass-blur-micro))
+      saturate(var(--glass-saturate));
+    backdrop-filter: blur(var(--glass-blur-micro))
+      saturate(var(--glass-saturate));
+    box-shadow:
+      inset 0 1px 0 0 var(--glass-highlight),
+      var(--shadow-e1);
+  }
+  .zs-btn-micro:hover {
+    background: color-mix(in srgb, var(--accent) 70%, transparent);
+    color: var(--accent-foreground);
+  }
+  .zs-btn-secondary-glass {
+    border: 1px solid color-mix(in srgb, var(--foreground) 6%, transparent);
+    background: color-mix(in srgb, var(--secondary) 88%, transparent);
+    box-shadow: inset 0 1px 0 0 var(--glass-highlight);
+  }
+  .zs-btn-secondary-glass:hover {
+    background: color-mix(in srgb, var(--secondary) 72%, transparent);
+  }
+
+  /* ---------- Upload hero button (exactly ONE per view) ----------
+   * Heavier than primary: deeper gradient, engraved icon well, ⌘U chip,
+   * hover sheen sweep + 1px lift. */
+  .zs-btn-upload {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    color: var(--primary-foreground);
+    border: 1px solid color-mix(in srgb, var(--primary) 70%, #000000);
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--primary) 70%, #ffffff) 0%,
+      color-mix(in srgb, var(--primary) 90%, #ffffff) 30%,
+      var(--primary) 58%,
+      color-mix(in srgb, var(--primary) 84%, #000000) 100%
+    );
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.38),
+      inset 0 -1px 0 0 rgba(0, 0, 0, 0.22),
+      0 1px 2px 0 rgb(0 0 0 / 0.12),
+      0 4px 10px -3px color-mix(in srgb, var(--primary) 55%, transparent),
+      0 10px 26px -8px color-mix(in srgb, var(--primary) 40%, transparent);
+  }
+  /* Doubled class beats any Tailwind size px utility so the well sits flush. */
+  .zs-btn-upload.zs-btn-upload {
+    padding-left: 6px;
+    padding-right: 12px;
+  }
+  .zs-btn-upload::after {
+    content: "";
+    position: absolute;
+    inset-block: -2px;
+    left: -45%;
+    width: 36%;
+    background: linear-gradient(
+      105deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.38) 50%,
+      transparent 100%
+    );
+    transform: skewX(-18deg);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .zs-btn-upload:hover {
+    transform: translateY(-1px);
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--primary) 62%, #ffffff) 0%,
+      color-mix(in srgb, var(--primary) 84%, #ffffff) 30%,
+      color-mix(in srgb, var(--primary) 96%, #ffffff) 58%,
+      var(--primary) 100%
+    );
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.45),
+      inset 0 -1px 0 0 rgba(0, 0, 0, 0.2),
+      0 2px 3px 0 rgb(0 0 0 / 0.12),
+      0 6px 14px -3px color-mix(in srgb, var(--primary) 60%, transparent),
+      0 14px 32px -8px color-mix(in srgb, var(--primary) 45%, transparent);
+  }
+  .zs-btn-upload:hover::after {
+    animation: zs-upload-sheen 0.7s var(--ease-standard);
+  }
+  .zs-btn-upload:active:not(:disabled) {
+    transform: translateY(0.5px) scale(0.99);
+    box-shadow:
+      inset 0 2px 4px 0 rgba(0, 0, 0, 0.22),
+      inset 0 1px 0 0 rgba(0, 0, 0, 0.1),
+      0 1px 2px 0 rgb(0 0 0 / 0.1);
+  }
+  .zs-btn-upload__well {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    border-radius: calc(var(--radius-md) - 2px);
+    background: linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.2) 0%,
+      rgba(0, 0, 0, 0.08) 70%,
+      rgba(255, 255, 255, 0.06) 100%
+    );
+    box-shadow:
+      inset 0 1px 2px 0 rgba(0, 0, 0, 0.28),
+      inset 0 -1px 0 0 rgba(255, 255, 255, 0.14),
+      0 1px 0 0 rgba(255, 255, 255, 0.16);
+  }
+  .zs-btn-upload__well > svg {
+    transition: transform 120ms var(--ease-standard);
+  }
+  .zs-btn-upload:hover .zs-btn-upload__well > svg {
+    transform: translateY(-1.5px);
+  }
+  .zs-btn-upload__kbd {
+    margin-left: 2px;
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    line-height: 1.4;
+    font-weight: 500;
+    color: color-mix(in srgb, var(--primary-foreground) 88%, transparent);
+    background: rgba(0, 0, 0, 0.16);
+    box-shadow:
+      inset 0 1px 1.5px 0 rgba(0, 0, 0, 0.2),
+      inset 0 -1px 0 0 rgba(255, 255, 255, 0.12);
+  }
+
+  /* ---------- Badge: gradient fills ---------- */
+  .zs-badge-grad-default {
+    border-color: color-mix(in srgb, var(--primary) 84%, #000000);
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--primary) 84%, #ffffff) 0%,
+      var(--primary) 100%
+    );
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.25),
+      0 1px 2px 0 rgb(0 0 0 / 0.08);
+  }
+  .zs-badge-grad-destructive {
+    border-color: color-mix(in srgb, var(--destructive) 84%, #000000);
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--destructive) 84%, #ffffff) 0%,
+      var(--destructive) 100%
+    );
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.2),
+      0 1px 2px 0 rgb(0 0 0 / 0.08);
+  }
+
+  /* ---------- Switch / Checkbox: gradient when checked ---------- */
+  .zs-switch-on[data-state="checked"] {
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--primary) 84%, #ffffff) 0%,
+      var(--primary) 100%
+    );
+    box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.25);
+  }
+  .zs-checkbox-on[data-state="checked"],
+  .zs-checkbox-on[data-state="indeterminate"] {
+    border-color: color-mix(in srgb, var(--primary) 84%, #000000);
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--primary) 84%, #ffffff) 0%,
+      var(--primary) 100%
+    );
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.25),
+      0 1px 2px 0 rgb(0 0 0 / 0.08);
+  }
+
+  /* ---------- Avatar: glass rim ---------- */
+  .zs-avatar-rim::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow:
+      inset 0 0 0 1px color-mix(in srgb, var(--foreground) 12%, transparent),
+      inset 0 1px 0 0 var(--glass-highlight);
+    pointer-events: none;
+  }
+
+  /* ---------- Logo lettermark tile ---------- */
+  .zs-logo-tile {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border-radius: var(--radius-md);
+    color: var(--primary-foreground);
+    font-weight: 600;
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--primary) 84%, #ffffff) 0%,
+      var(--primary) 60%,
+      color-mix(in srgb, var(--primary) 94%, #000000) 100%
+    );
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.28),
+      0 1px 2px 0 rgb(0 0 0 / 0.1),
+      0 3px 8px -3px color-mix(in srgb, var(--primary) 40%, transparent);
+  }
+
+  /* ---------- Rich dropdown-menu item: icon tile + kbd chip ---------- */
+  .zs-menu-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    border-radius: var(--radius-sm);
+    color: var(--muted-foreground);
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--foreground) 7%, transparent),
+      color-mix(in srgb, var(--foreground) 4%, transparent)
+    );
+    box-shadow:
+      inset 0 0 0 1px color-mix(in srgb, var(--foreground) 10%, transparent),
+      inset 0 1px 0 0 var(--glass-highlight);
+    transition: color 120ms var(--ease-standard);
+  }
+  .zs-menu-kbd {
+    flex-shrink: 0;
+    padding: 0 5px;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    line-height: 1.6;
+    color: var(--muted-foreground);
+    background: color-mix(in srgb, var(--foreground) 5%, transparent);
+    box-shadow: inset 0 0 0 1px
+      color-mix(in srgb, var(--foreground) 10%, transparent);
+  }
+
+  /* ---------- Tinted type tiles (file/folder icon socket) ----------
+   * `--tile` is set by a `.zs-tone-*` class; consumer sets size + radius. */
+  .zs-tile-icon {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border-radius: var(--radius-md);
+    color: var(--tile, var(--brand));
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--tile, var(--brand)) 15%, transparent),
+      color-mix(in srgb, var(--tile, var(--brand)) 8%, transparent)
+    );
+    box-shadow:
+      inset 0 0 0 1px
+        color-mix(in srgb, var(--tile, var(--brand)) 18%, transparent),
+      inset 0 1px 0 0 var(--glass-highlight);
+  }
+  .zs-tile-icon--folder > svg {
+    fill: color-mix(in srgb, var(--tile, var(--brand)) 14%, transparent);
+  }
+  /* Hidden = ghosted dashed tile */
+  .zs-tile-icon--ghost {
+    background: color-mix(in srgb, var(--tile, var(--brand)) 6%, transparent);
+    box-shadow: none;
+    outline: 1.5px dashed
+      color-mix(in srgb, var(--tile, var(--brand)) 50%, transparent);
+    outline-offset: -1.5px;
+  }
+  .zs-tone-brand {
+    --tile: var(--brand);
+  }
+  .zs-tone-red {
+    --tile: oklch(0.6 0.19 25);
+  }
+  .zs-tone-blue {
+    --tile: oklch(0.58 0.14 250);
+  }
+  .zs-tone-green {
+    --tile: oklch(0.58 0.14 155);
+  }
+  .zs-tone-amber {
+    --tile: oklch(0.68 0.14 75);
+  }
+  .zs-tone-teal {
+    --tile: oklch(0.6 0.12 195);
+  }
+  .zs-tone-violet {
+    --tile: oklch(0.58 0.16 295);
+  }
+  .zs-tone-slate {
+    --tile: var(--muted-foreground);
+  }
+
+  /* ---------- Protected-state corner chip (on the tile) ---------- */
+  .zs-status-chip {
+    position: absolute;
+    right: -6px;
+    bottom: -6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 9999px;
+    color: var(--muted-foreground);
+    background: var(--surface-elevated);
+    box-shadow:
+      0 0 0 2px var(--surface),
+      inset 0 0 0 1px color-mix(in srgb, var(--foreground) 14%, transparent),
+      inset 0 1px 0 0 var(--glass-highlight),
+      0 1px 2px rgb(0 0 0 / 0.1);
+  }
+  .zs-status-chip > svg {
+    width: 11px;
+    height: 11px;
+    display: block;
+  }
+  /* Locked encrypted folder — amber closed padlock ("needs the passphrase"). */
+  .zs-status-chip--lock {
+    color: var(--warning);
+    background: color-mix(in srgb, var(--warning) 12%, var(--surface-elevated));
+    box-shadow:
+      0 0 0 2px var(--surface),
+      inset 0 0 0 1px color-mix(in srgb, var(--warning) 34%, transparent),
+      inset 0 1px 0 0 var(--glass-highlight),
+      0 1px 2px rgb(0 0 0 / 0.1);
+  }
+  /* Unlocked encrypted folder — green open padlock ("you have access"). */
+  .zs-status-chip--unlock {
+    color: var(--success);
+    background: color-mix(in srgb, var(--success) 10%, var(--surface-elevated));
+    box-shadow:
+      0 0 0 2px var(--surface),
+      inset 0 0 0 1px color-mix(in srgb, var(--success) 32%, transparent),
+      inset 0 1px 0 0 var(--glass-highlight),
+      0 1px 2px rgb(0 0 0 / 0.1);
+  }
+
+  /* ---------- Contained file-list panel + sticky column header ---------- */
+  .zs-file-panel {
+    box-sizing: border-box;
+    border: 1px solid color-mix(in srgb, var(--foreground) 8%, transparent);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    box-shadow:
+      inset 0 1px 0 0 var(--glass-highlight),
+      var(--shadow-e1);
+    overflow: hidden;
+  }
+  .zs-file-panel__head {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 8px 8px 12px;
+    border-bottom: 1px solid
+      color-mix(in srgb, var(--foreground) 6%, transparent);
+    background: color-mix(in srgb, var(--muted) 35%, var(--surface));
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--muted-foreground) 80%, transparent);
+    user-select: none;
+  }
+
+  /* ---------- Progress / task rails ---------- */
+  .zs-rail {
+    display: block;
+    height: 3px;
+    border-radius: 9999px;
+    background: color-mix(in srgb, var(--foreground) 7%, transparent);
+    overflow: hidden;
+  }
+  .zs-rail__fill {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--brand), var(--primary));
+    transition: width 0.18s linear;
+  }
+  .zs-rail__fill--done {
+    background: var(--success);
+  }
+  .zs-rail__fill--wait {
+    width: 32%;
+    opacity: 0.4;
+    animation: zs-rail-wait 1.4s var(--ease-standard) infinite;
+  }
+
+  /* ---------- Sidebar storage-usage card ---------- */
+  .zs-usage-card {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px;
+    border: 1px solid color-mix(in srgb, var(--foreground) 7%, transparent);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    box-shadow:
+      inset 0 1px 0 0 var(--glass-highlight),
+      var(--shadow-e1);
+  }
+  .zs-usage-card[data-collapsed="true"] {
+    padding: 10px 8px;
+  }
+  .zs-usage-track {
+    height: 5px;
+    border-radius: 9999px;
+    background: color-mix(in srgb, var(--foreground) 8%, transparent);
+    overflow: hidden;
+  }
+  .zs-usage-fill {
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--primary) 80%, #ffffff),
+      var(--primary)
+    );
+    box-shadow: 0 0 6px 0 color-mix(in srgb, var(--primary) 45%, transparent);
+    transition: width 0.18s linear;
+  }
+  .zs-usage-fill--warning {
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--warning) 82%, #ffffff),
+      var(--warning)
+    );
+    box-shadow: 0 0 6px 0 color-mix(in srgb, var(--warning) 45%, transparent);
+  }
+  .zs-usage-fill--danger {
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--danger) 82%, #ffffff),
+      var(--danger)
+    );
+    box-shadow: 0 0 6px 0 color-mix(in srgb, var(--danger) 45%, transparent);
+  }
+
+  /* ---------- Breadcrumb pills ---------- */
+  .zs-crumb-sep {
+    display: flex;
+    flex-shrink: 0;
+    color: color-mix(in srgb, var(--muted-foreground) 50%, transparent);
+  }
+  .zs-crumb-glyph {
+    display: flex;
+    flex-shrink: 0;
+    color: var(--muted-foreground);
+    transition: color 120ms var(--ease-standard);
+  }
+  .zs-crumb-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 26px;
+    padding: 0 10px;
+    border-radius: 9999px;
+    background: transparent;
+    color: var(--muted-foreground);
+    white-space: nowrap;
+    cursor: pointer;
+    transition:
+      color 120ms var(--ease-standard),
+      background-color 120ms var(--ease-standard);
+  }
+  .zs-crumb-link:hover {
+    color: var(--foreground);
+    background: color-mix(in srgb, var(--accent) 70%, transparent);
+  }
+  .zs-crumb-link:hover .zs-crumb-glyph {
+    color: var(--foreground);
+  }
+  .zs-crumb-link:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--ring);
+  }
+  .zs-crumb-current {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 26px;
+    padding: 0 11px;
+    border-radius: 9999px;
+    background: var(--surface-elevated);
+    font-weight: 500;
+    color: var(--foreground);
+    white-space: nowrap;
+    box-shadow:
+      inset 0 0 0 1px color-mix(in srgb, var(--foreground) 10%, transparent),
+      inset 0 1px 0 0 var(--glass-highlight),
+      0 1px 2px rgb(0 0 0 / 0.06);
+  }
+  .zs-crumb-current .zs-crumb-glyph {
+    color: var(--primary);
+  }
+
+  /* ---------- Sectioned dialog chrome (emblem head + recessed foot) ---------- */
+  .zs-section-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 16px 16px 20px;
+    border-bottom: 1px solid
+      color-mix(in srgb, var(--foreground) 6%, transparent);
+  }
+  .zs-section-emblem {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    border-radius: var(--radius-md);
+    color: var(--foreground);
+    background: linear-gradient(
+      180deg,
+      var(--surface-elevated) 0%,
+      color-mix(in srgb, var(--surface-elevated) 94%, var(--foreground)) 100%
+    );
+    box-shadow:
+      inset 0 1px 0 0 var(--glass-highlight),
+      inset 0 -1px 0 0 color-mix(in srgb, var(--foreground) 10%, transparent),
+      0 1px 2px 0 rgb(0 0 0 / 0.08),
+      0 4px 12px -3px rgb(0 0 0 / 0.18),
+      0 0 0 5px color-mix(in srgb, var(--foreground) 3%, transparent);
+  }
+  .zs-section-emblem--armed {
+    color: var(--primary-foreground);
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--primary) 70%, #ffffff) 0%,
+      color-mix(in srgb, var(--primary) 90%, #ffffff) 30%,
+      var(--primary) 58%,
+      color-mix(in srgb, var(--primary) 84%, #000000) 100%
+    );
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.38),
+      inset 0 -1px 0 0 rgba(0, 0, 0, 0.22),
+      0 1px 2px 0 rgb(0 0 0 / 0.12),
+      0 4px 12px -3px color-mix(in srgb, var(--primary) 50%, transparent),
+      0 0 0 5px color-mix(in srgb, var(--primary) 7%, transparent);
+  }
+  .zs-section-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 16px 12px 20px;
+    border-top: 1px solid color-mix(in srgb, var(--foreground) 6%, transparent);
+    background: color-mix(in srgb, var(--muted) 30%, transparent);
+  }
+  .zs-section-cipher {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+    white-space: nowrap;
+  }
+
+  /* ---------- Upload dropzone (dashed field + engraved disc) ---------- */
+  .zs-dropzone {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 32px 16px;
+    border: 1.5px dashed color-mix(in srgb, var(--foreground) 18%, transparent);
+    border-radius: var(--radius-lg);
+    text-align: center;
+    cursor: pointer;
+    background:
+      radial-gradient(
+        420px 150px at 50% 0%,
+        color-mix(in srgb, var(--brand) 5%, transparent),
+        transparent 70%
+      ),
+      color-mix(in srgb, var(--muted) 26%, transparent);
+    transition:
+      border-color 120ms var(--ease-standard),
+      background-color 120ms var(--ease-standard),
+      box-shadow 120ms var(--ease-standard);
+  }
+  .zs-dropzone:hover {
+    border-color: color-mix(in srgb, var(--brand) 55%, var(--border));
+  }
+  .zs-dropzone:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--ring);
+  }
+  .zs-dropzone--over {
+    border-color: var(--brand);
+    background:
+      radial-gradient(
+        420px 150px at 50% 0%,
+        color-mix(in srgb, var(--brand) 12%, transparent),
+        transparent 75%
+      ),
+      color-mix(in srgb, var(--brand) 5%, transparent);
+    box-shadow: inset 0 0 0 1px
+      color-mix(in srgb, var(--brand) 30%, transparent);
+  }
+  .zs-dropzone__disc {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 9999px;
+    color: var(--foreground);
+    background: linear-gradient(
+      180deg,
+      var(--surface-elevated) 0%,
+      color-mix(in srgb, var(--surface-elevated) 94%, var(--foreground)) 100%
+    );
+    box-shadow:
+      inset 0 1px 0 0 var(--glass-highlight),
+      inset 0 -1px 0 0 color-mix(in srgb, var(--foreground) 10%, transparent),
+      0 1px 2px 0 rgb(0 0 0 / 0.08),
+      0 5px 14px -4px rgb(0 0 0 / 0.18),
+      0 0 0 7px color-mix(in srgb, var(--foreground) 3%, transparent);
+    transition:
+      transform 120ms var(--ease-standard),
+      color 120ms var(--ease-standard),
+      box-shadow 120ms var(--ease-standard);
+  }
+  .zs-dropzone__disc > svg {
+    transition: transform 120ms var(--ease-standard);
+  }
+  .zs-dropzone:hover .zs-dropzone__disc > svg {
+    transform: translateY(-2px);
+  }
+  .zs-dropzone--over .zs-dropzone__disc {
+    transform: translateY(-3px);
+    color: var(--primary);
+    box-shadow:
+      inset 0 1px 0 0 var(--glass-highlight),
+      inset 0 -1px 0 0 color-mix(in srgb, var(--foreground) 10%, transparent),
+      0 1px 2px 0 rgb(0 0 0 / 0.08),
+      0 8px 18px -4px rgb(0 0 0 / 0.2),
+      0 0 0 7px color-mix(in srgb, var(--brand) 14%, transparent);
+  }
+
+  /* ---------- Create-dialog option row + format chips ---------- */
+  .zs-create-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border: 1px solid color-mix(in srgb, var(--foreground) 10%, transparent);
+    border-radius: var(--radius-md);
+    background: color-mix(in srgb, var(--muted) 30%, transparent);
+    cursor: pointer;
+    user-select: none;
+    transition:
+      border-color 120ms var(--ease-standard),
+      background-color 120ms var(--ease-standard);
+  }
+  .zs-create-option:hover {
+    border-color: color-mix(in srgb, var(--foreground) 18%, transparent);
+  }
+  .zs-create-option--on {
+    border-color: color-mix(in srgb, var(--success) 40%, var(--border));
+    background: color-mix(in srgb, var(--success) 5%, transparent);
+  }
+  .zs-create-option--on .zs-create-option-glyph {
+    color: var(--success);
+  }
+  .zs-create-option-glyph {
+    display: flex;
+    flex-shrink: 0;
+    color: color-mix(in srgb, var(--muted-foreground) 70%, transparent);
+    transition: color 120ms var(--ease-standard);
+  }
+  .zs-format-chip {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1px;
+    padding: 8px 10px;
+    border: 1px solid color-mix(in srgb, var(--foreground) 10%, transparent);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    text-align: left;
+    cursor: pointer;
+    box-shadow: inset 0 1px 0 0 var(--glass-highlight);
+    transition:
+      border-color 120ms var(--ease-standard),
+      background-color 120ms var(--ease-standard),
+      box-shadow 120ms var(--ease-standard);
+  }
+  .zs-format-chip:hover {
+    border-color: color-mix(in srgb, var(--foreground) 20%, transparent);
+  }
+  .zs-format-chip:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--ring);
+  }
+  .zs-format-chip--on {
+    border-color: var(--ring);
+    background: color-mix(in srgb, var(--accent) 80%, var(--surface));
+    box-shadow:
+      0 0 0 1px var(--ring),
+      inset 0 1px 0 0 var(--glass-highlight);
+  }
+
+  /* ── File preview lightbox (Zen) ─────────────────────────────────────────
+   * A near-fullscreen glass lightbox: dark blurred backdrop, slow decelerate
+   * slide-in, a dark media stage, a collapsible details rail, and a floating
+   * image zoom pill. These classes intentionally override the generic dialog
+   * chrome (the dialog primitive hard-codes bg-black/50 + a zoom entrance), so
+   * a couple of `!important`s are scoped to this one premium surface. */
+
+  /* Dark, blurred backdrop — beats the dialog's default `bg-black/50`. */
+  .zs-preview-backdrop {
+    background-color: rgba(8, 8, 11, 0.64) !important;
+    -webkit-backdrop-filter: blur(8px) saturate(120%);
+    backdrop-filter: blur(8px) saturate(120%);
+  }
+
+  /* Near-fullscreen shell. Size/radius/glass come from utilities + the
+   * `glass-overlay` base; this adds the slide-in entrance + a smooth morph
+   * between windowed and fullscreen layouts. */
+  .zs-preview-shell {
+    transition:
+      width var(--duration-base) var(--ease-standard),
+      height var(--duration-base) var(--ease-standard),
+      border-radius var(--duration-base) var(--ease-standard);
+  }
+  .zs-preview-shell[data-state="open"] {
+    animation: zs-preview-shell-in var(--duration-slow) var(--ease-decelerate)
+      both !important;
+  }
+
+  /* Dark media stage — media floats on a true dark backdrop with a soft wash. */
+  .zs-preview-stage {
+    background:
+      radial-gradient(
+        110% 90% at 50% 0%,
+        rgba(255, 255, 255, 0.07),
+        transparent 55%
+      ),
+      #0b0b0d;
+  }
+
+  /* Collapsible right details rail. */
+  .zs-preview-rail {
+    width: 300px;
+    flex-shrink: 0;
+    border-left: 1px solid var(--border);
+    transition: width var(--duration-base) var(--ease-standard);
+  }
+  .zs-preview-rail--collapsed {
+    width: 0;
+    border-left: none;
+  }
+  .zs-preview-rail-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+  }
+
+  /* Floating image zoom controls — micro-glass dark pill on the stage. */
+  .zs-preview-zoom-pill {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 4px 6px;
+    border-radius: 9999px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(20, 20, 22, 0.66);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    box-shadow: var(--shadow-e2);
+  }
+
+  /* Details rail label↔value row. */
+  .zs-preview-detail-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 7px 0;
+  }
+
+  /* The zoomable image — transition kept in CSS so reduced-motion can zero it
+   * (the dynamic `transform: scale()` + load `opacity` stay inline). */
+  .zs-preview-zoomable {
+    transition:
+      transform var(--duration-base) var(--ease-standard),
+      opacity var(--duration-base) var(--ease-standard);
+  }
+
+  /* Full-stage diff overlay (document versions). Darkens + blurs the stage
+   * beneath; the chrome colors stay inline (always over this dark surface). */
+  .zs-preview-diff-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    background: rgba(8, 8, 11, 0.7);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+  }
+
+  /* Thin indeterminate load-bar pinned to the top of the preview body — shown
+   * while the next file resolves (the previous stays via placeholderData). */
+  .zs-preview-loadbar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    overflow: hidden;
+    z-index: 20;
+    pointer-events: none;
+  }
+  .zs-preview-loadbar::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    height: 100%;
+    width: 40%;
+    border-radius: 9999px;
+    background: var(--primary);
+    animation: zs-preview-loadbar 1.1s var(--ease-standard) infinite;
+  }
+}
+
+/* Keyframes + reduced-motion neutralizers — unlayered so they reliably win. */
+@keyframes zs-upload-sheen {
+  from {
+    left: -45%;
+    opacity: 1;
+  }
+  to {
+    left: 135%;
+    opacity: 1;
+  }
+}
+@keyframes zs-rail-wait {
+  from {
+    transform: translateX(-110%);
+  }
+  to {
+    transform: translateX(340%);
+  }
+}
+@keyframes zs-shake {
+  0%,
   100% {
-    transform: translateX(400%);
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-8px);
+  }
+  40% {
+    transform: translateX(7px);
+  }
+  60% {
+    transform: translateX(-4px);
+  }
+  80% {
+    transform: translateX(2px);
+  }
+}
+.zs-shake {
+  animation: zs-shake 0.4s var(--ease-standard);
+}
+
+/* Preview lightbox shell entrance — slow decelerate rise. */
+@keyframes zs-preview-shell-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.975);
+  }
+  to {
+    opacity: 1;
+    transform: none;
   }
 }
 
-@utility animate-indeterminate {
-  animation: indeterminate 1.5s ease-in-out infinite;
+/* Indeterminate sweep for the preview load-bar. */
+@keyframes zs-preview-loadbar {
+  from {
+    left: -40%;
+  }
+  to {
+    left: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .zs-btn-upload:hover {
+    transform: none;
+  }
+  .zs-btn-upload:hover::after,
+  .zs-rail__fill--wait,
+  .zs-shake {
+    animation: none;
+  }
+  .zs-preview-shell[data-state="open"] {
+    animation: none !important;
+  }
+  .zs-preview-shell,
+  .zs-preview-rail,
+  .zs-preview-zoomable {
+    transition: none;
+  }
+  /* Static full-width bar still signals "loading" without the sweep. */
+  .zs-preview-loadbar::after {
+    animation: none;
+    left: 0;
+    width: 100%;
+  }
+}
+
+/* Micro-glass solid fallback under reduced transparency / more contrast. */
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  .zs-btn-micro {
+    background: var(--background);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .zs-btn-secondary-glass {
+    background: var(--secondary);
+  }
+  /* Drop the backdrop blur; keep it opaque-dark so the lightbox still reads. */
+  .zs-preview-backdrop {
+    background-color: rgba(8, 8, 11, 0.92) !important;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  /* The on-stage controls fall back to solid dark fills (no blur). */
+  .zs-preview-zoom-pill {
+    background: rgb(20, 20, 22);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .zs-preview-diff-overlay {
+    background: rgba(8, 8, 11, 0.95);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+/* =====================================================================
+ * ZEN — SmartGrid (justified media grid) + FileTile
+ * Yandex-Disk-style browsing: each tile advertises its aspect ratio via
+ * --zs-ratio; flex-grow proportional to the ratio justifies each row to the
+ * container width at a uniform row height (--zs-row-h). Media tiles render
+ * thumbnails full-bleed; folders/docs are square tinted icon tiles. Pure CSS,
+ * no measurement code. (Reusable DS primitive — wired with real thumbnails in
+ * the media-grid phase.)
+ * ===================================================================== */
+@layer components {
+  .zs-smartgrid {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .zs-smartgrid__spacer {
+    flex-grow: 1000000;
+    flex-basis: 0;
+    min-width: 0;
+    height: 0;
+  }
+  .zs-tile {
+    position: relative;
+    flex-grow: calc(var(--zs-ratio, 1) * 100);
+    flex-basis: calc(var(--zs-ratio, 1) * var(--zs-row-h, 168px));
+    aspect-ratio: var(--zs-ratio, 1);
+    min-width: 0;
+    border-radius: var(--radius-lg);
+  }
+  .zs-tile--locked {
+    opacity: 0.7;
+  }
+  .zs-tile__inner {
+    position: absolute;
+    inset: 0;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--foreground) 8%, transparent);
+    border-radius: inherit;
+    background: var(--surface);
+    cursor: pointer;
+    box-shadow:
+      inset 0 1px 0 0 var(--glass-highlight),
+      var(--shadow-e1);
+    transition:
+      border-color 120ms var(--ease-standard),
+      box-shadow 120ms var(--ease-standard),
+      background-color 120ms var(--ease-standard);
+  }
+  .zs-tile__inner:hover {
+    border-color: color-mix(in srgb, var(--foreground) 14%, transparent);
+    box-shadow:
+      inset 0 1px 0 0 var(--glass-highlight),
+      var(--shadow-e2);
+  }
+  .zs-tile__inner:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--ring);
+  }
+  .zs-tile--selected .zs-tile__inner {
+    border-color: var(--ring);
+    background: color-mix(in srgb, var(--accent) 80%, var(--surface));
+    box-shadow:
+      0 0 0 1px var(--ring),
+      var(--shadow-e1);
+  }
+  /* Media tiles: full-bleed thumbnail + bottom name scrim + play chip */
+  .zs-tile__img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: inherit;
+    transition:
+      transform 200ms var(--ease-standard),
+      border-radius 200ms var(--ease-standard);
+  }
+  .zs-tile--thumb:hover .zs-tile__img {
+    transform: scale(1.04);
+  }
+  .zs-tile--selected.zs-tile--thumb .zs-tile__img {
+    transform: scale(0.93);
+    border-radius: calc(var(--radius-lg) - 4px);
+  }
+  .zs-tile__scrim {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    height: 56px;
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    background: linear-gradient(
+      180deg,
+      transparent,
+      color-mix(in srgb, #000 58%, transparent)
+    );
+    pointer-events: none;
+    transition: opacity 120ms var(--ease-standard);
+  }
+  .zs-tile__caption {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    padding: 0 10px 8px;
+    pointer-events: none;
+    transition: opacity 120ms var(--ease-standard);
+  }
+  .zs-tile--selected.zs-tile--thumb .zs-tile__scrim,
+  .zs-tile--selected.zs-tile--thumb .zs-tile__caption {
+    opacity: 0;
+  }
+  .zs-tile__name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  }
+  .zs-tile__duration {
+    flex-shrink: 0;
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+    color: rgba(255, 255, 255, 0.85);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  }
+  .zs-tile__play {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    translate: -50% -50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 9999px;
+    color: #fff;
+    background: color-mix(in srgb, #000 38%, transparent);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+    pointer-events: none;
+  }
+  .zs-tile__play > svg {
+    fill: currentColor;
+  }
+  /* Plain tiles (folders, docs): square tinted icon tile keyed by type */
+  .zs-tile__icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 2px;
+    border-radius: var(--radius-lg);
+    color: var(--tile, var(--brand));
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--tile, var(--brand)) 15%, transparent),
+      color-mix(in srgb, var(--tile, var(--brand)) 8%, transparent)
+    );
+    box-shadow:
+      inset 0 0 0 1px
+        color-mix(in srgb, var(--tile, var(--brand)) 18%, transparent),
+      inset 0 1px 0 0 var(--glass-highlight);
+  }
+  .zs-tile__icon--folder > svg {
+    fill: color-mix(in srgb, var(--tile, var(--brand)) 14%, transparent);
+  }
+  .zs-tile__label {
+    max-width: calc(100% - 16px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.875rem;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: var(--foreground);
+  }
+  .zs-tile__meta {
+    max-width: calc(100% - 16px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.75rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--muted-foreground);
+  }
+  .zs-tile--hidden .zs-tile__icon {
+    background: color-mix(in srgb, var(--tile, var(--brand)) 6%, transparent);
+    box-shadow: none;
+    outline: 1.5px dashed
+      color-mix(in srgb, var(--tile, var(--brand)) 50%, transparent);
+    outline-offset: -1.5px;
+  }
+  .zs-tile--hidden .zs-tile__inner {
+    border-style: dashed;
+  }
+  .zs-tile--hidden .zs-tile__label,
+  .zs-tile--hidden .zs-tile__meta {
+    opacity: 0.65;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .zs-tile--thumb:hover .zs-tile__img,
+  .zs-tile--selected.zs-tile--thumb .zs-tile__img {
+    transform: none;
+  }
 }

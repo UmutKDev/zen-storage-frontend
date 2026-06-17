@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Navbar } from "@/components/Navbar";
-import Providers from "./providers";
-import { Toaster } from "sonner";
+import { buildMetadata } from "@/lib/seo";
+import { Providers } from "./providers";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,32 +14,19 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "Cloud Storage",
-  description: "Manage and preview your cloud storage files with ease.",
-};
+export const metadata: Metadata = buildMetadata();
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className="dark">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <Providers>
-          <Navbar />
-          {children}
-        </Providers>
-        <Toaster
-          position="top-right"
-          richColors
-          theme="dark"
-          closeButton
-          toastOptions={{ duration: 5000 }}
-        />
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`${geistSans.variable} ${geistMono.variable}`}
+    >
+      <body className="min-h-dvh antialiased">
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

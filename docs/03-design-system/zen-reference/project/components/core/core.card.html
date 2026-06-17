@@ -1,0 +1,84 @@
+<!-- @dsCard group="Components" viewport="700x430" name="Core" subtitle="Button, Badge, Input, Switch, Checkbox, Avatar, Logo, Icon, Skeleton" -->
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../../styles.css" />
+<script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<style>
+  body { padding: 20px; }
+  .row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { Button, Badge, Input, Switch, Checkbox, Avatar, Logo, Icon, Skeleton } = window.ZenStorageDesignSystem_33e1f8;
+
+function CoreCard() {
+  return (
+    <div>
+      <div className="row">
+        <Button variant="upload" title="Upload files (⌘U)">
+          <span className="zs-btn__well"><Icon name="upload" /></span>
+          Upload
+          <kbd className="zs-btn__kbd">⌘U</kbd>
+        </Button>
+        <Button>Sign in</Button>
+        <Button variant="secondary">Duplicate scan</Button>
+        <Button variant="outline"><Icon name="folder-plus" /> New folder</Button>
+        <Button variant="ghost">Cancel</Button>
+        <Button variant="ghost-destructive"><Icon name="trash-2" /> Delete</Button>
+        <Button variant="destructive">Delete account</Button>
+        <Button variant="link">Forgot password?</Button>
+      </div>
+      <div className="row">
+        <Button variant="upload" size="sm" title="Upload files (⌘U)">
+          <span className="zs-btn__well"><Icon name="upload" /></span>
+          Upload
+        </Button>
+        <Button size="sm" variant="outline">Move</Button>
+        <Button size="xs" variant="secondary">Copy link</Button>
+        <Button size="icon" variant="ghost" aria-label="More"><Icon name="more-vertical" /></Button>
+        <Button size="icon-sm" variant="outline" aria-label="Search"><Icon name="search" /></Button>
+        <Button disabled>Uploading…</Button>
+      </div>
+      <div className="row">
+        <Badge><Icon name="lock" /> Encrypted</Badge>
+        <Badge><Icon name="eye-off" /> Hidden</Badge>
+        <Badge variant="success">Clean</Badge>
+        <Badge variant="warning">Scan pending</Badge>
+        <Badge variant="destructive">Infected</Badge>
+        <Badge variant="info">Shared</Badge>
+        <Badge variant="outline">v3</Badge>
+        <Badge variant="default">Pro</Badge>
+      </div>
+      <div className="row" style={{ alignItems: "flex-start" }}>
+        <Input label="Email" placeholder="you@example.com" style={{ width: 220 }} />
+        <Input label="Folder name" error="A folder with this name already exists." style={{ width: 220 }} defaultValue="Documents" />
+        <Input label="Passphrase" type="password" hint="Never stored — in-memory only." style={{ width: 200 }} />
+      </div>
+      <div className="row">
+        <Switch defaultChecked aria-label="On" />
+        <Switch aria-label="Off" />
+        <Switch defaultChecked disabled aria-label="On, disabled" />
+        <Checkbox defaultChecked aria-label="Checked" />
+        <Checkbox aria-label="Unchecked" />
+        <Avatar initials="UK" />
+        <Avatar initials="ZT" size="lg" />
+        <Avatar initials="A" size="sm" />
+        <Logo />
+        <Logo wordmark={false} />
+        <Skeleton style={{ width: 140, height: 20 }} />
+      </div>
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById("root")).render(<CoreCard />);
+</script>
+</body>
+</html>

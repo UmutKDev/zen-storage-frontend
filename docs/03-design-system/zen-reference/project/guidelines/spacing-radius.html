@@ -1,0 +1,22 @@
+<!-- @dsCard group="Spacing" viewport="700x190" name="Radius" subtitle="sm 6 controls-inner · md 8 controls · lg 12 cards · xl 16 large surfaces" -->
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../styles.css" />
+<style>
+  body { padding: 20px 24px; display: flex; gap: 20px; align-items: flex-end; }
+  .r { text-align: center; }
+  .box { width: 96px; height: 96px; background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow-e1); }
+  .nm { font-size: var(--text-xs); color: var(--muted-foreground); margin: 8px 0 0; font-family: var(--font-mono); }
+  .pill { width: 120px; height: 32px; background: var(--muted); border: 1px solid var(--border); border-radius: var(--radius-full); display: flex; align-items: center; justify-content: center; font-size: var(--text-xs); color: var(--muted-foreground); }
+</style>
+</head>
+<body>
+  <div class="r"><div class="box" style="border-radius: var(--radius-sm);"></div><p class="nm">sm · 6</p></div>
+  <div class="r"><div class="box" style="border-radius: var(--radius-md);"></div><p class="nm">md · 8</p></div>
+  <div class="r"><div class="box" style="border-radius: var(--radius-lg);"></div><p class="nm">lg · 12</p></div>
+  <div class="r"><div class="box" style="border-radius: var(--radius-xl);"></div><p class="nm">xl · 16</p></div>
+  <div class="r"><div class="pill">badges only</div><p class="nm">full</p></div>
+</body>
+</html>

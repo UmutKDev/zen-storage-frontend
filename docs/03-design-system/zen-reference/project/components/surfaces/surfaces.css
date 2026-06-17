@@ -1,0 +1,285 @@
+/* Zen Storage — surface component styles (Card, GlassPanel, Dialog, Toast, Tabs, Progress).
+ * Glass goes on chrome & overlays only; cards/content stay solid. */
+
+/* ---------- Card (solid — never glass) ---------- */
+.zs-card {
+  box-sizing: border-box;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface-elevated);
+  box-shadow: var(--shadow-e1);
+  color: var(--card-foreground);
+}
+.zs-card__header { padding: var(--space-6) var(--space-6) 0; }
+.zs-card__title {
+  margin: 0;
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  letter-spacing: -0.01em;
+  color: var(--foreground);
+}
+.zs-card__description {
+  margin: var(--space-1) 0 0;
+  font-size: var(--text-sm);
+  color: var(--muted-foreground);
+}
+.zs-card__content { padding: var(--space-6); }
+
+/* ---------- Dialog ---------- */
+.zs-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  animation: zs-backdrop-in var(--duration-base) var(--ease-decelerate);
+}
+.zs-dialog {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 480px;
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  animation: zs-rise-in var(--duration-base) var(--ease-decelerate);
+}
+.zs-dialog__title {
+  margin: 0 0 var(--space-1);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  letter-spacing: -0.01em;
+  color: var(--foreground);
+}
+.zs-dialog__description {
+  margin: 0 0 var(--space-4);
+  font-size: var(--text-sm);
+  color: var(--muted-foreground);
+}
+.zs-dialog__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  margin-top: var(--space-6);
+}
+
+/* ---------- Menu (anchored dropdown — overlay tier, glass) ----------
+ * Render inside a position:relative wrapper that also holds the trigger. */
+.zs-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 40;
+  box-sizing: border-box;
+  min-width: 268px;
+  padding: 5px;
+  border-radius: var(--radius-md);
+  box-shadow: inset 0 1px 0 0 var(--glass-highlight),
+    0 1px 2px 0 rgb(0 0 0 / 0.08),
+    0 12px 32px -8px rgb(0 0 0 / 0.25);
+  animation: zs-menu-in var(--duration-fast) var(--ease-decelerate);
+}
+.zs-menu--end { left: auto; right: 0; }
+.zs-menu__item {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 7px 9px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: none;
+  font-family: inherit;
+  text-align: left;
+  color: var(--foreground);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+.zs-menu__item:hover,
+.zs-menu__item:focus-visible {
+  outline: none;
+  background: color-mix(in srgb, var(--accent) 80%, transparent);
+}
+.zs-menu__item:disabled { opacity: 0.5; pointer-events: none; }
+.zs-menu__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  color: var(--muted-foreground);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--foreground) 7%, transparent),
+    color-mix(in srgb, var(--foreground) 4%, transparent)
+  );
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--foreground) 10%, transparent),
+    inset 0 1px 0 0 var(--glass-highlight);
+  transition: color var(--duration-fast) var(--ease-standard);
+}
+.zs-menu__item:hover .zs-menu__icon,
+.zs-menu__item:focus-visible .zs-menu__icon { color: var(--primary); }
+.zs-menu__text { display: flex; flex: 1; min-width: 0; flex-direction: column; gap: 1px; }
+.zs-menu__label {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.zs-menu__desc {
+  font-size: var(--text-xs);
+  color: var(--muted-foreground);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.zs-menu__kbd {
+  flex-shrink: 0;
+  padding: 0 5px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  line-height: 1.6;
+  color: var(--muted-foreground);
+  background: color-mix(in srgb, var(--foreground) 5%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--foreground) 10%, transparent);
+}
+.zs-menu__item--danger { color: var(--danger); }
+.zs-menu__item--danger:hover,
+.zs-menu__item--danger:focus-visible { background: color-mix(in srgb, var(--danger) 10%, transparent); }
+.zs-menu__item--danger .zs-menu__icon { color: var(--danger); }
+.zs-menu__sep {
+  height: 1px;
+  margin: 4px 6px;
+  background: color-mix(in srgb, var(--foreground) 8%, transparent);
+}
+@keyframes zs-menu-in {
+  from { transform: translateY(-4px); }
+  to { transform: translateY(0); }
+}
+
+/* ---------- Toast ---------- */
+.zs-toast {
+  box-sizing: border-box;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  width: 360px;
+  max-width: 100%;
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  animation: zs-rise-in var(--duration-base) var(--ease-decelerate);
+}
+.zs-toast__icon { flex-shrink: 0; margin-top: 1px; }
+.zs-toast__icon svg { width: 16px; height: 16px; }
+.zs-toast--success .zs-toast__icon { color: var(--success); }
+.zs-toast--error .zs-toast__icon { color: var(--danger); }
+.zs-toast--info .zs-toast__icon { color: var(--info); }
+.zs-toast__title {
+  margin: 0;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--foreground);
+}
+.zs-toast__description {
+  margin: 2px 0 0;
+  font-size: var(--text-xs);
+  color: var(--muted-foreground);
+}
+
+/* ---------- Tabs ---------- */
+.zs-tabs__list {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border-radius: var(--radius-md);
+  background: var(--muted);
+}
+.zs-tabs__trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 var(--space-3);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--muted-foreground);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
+}
+.zs-tabs__trigger:hover { color: var(--foreground); }
+.zs-tabs__trigger[aria-selected="true"] {
+  background: var(--background);
+  color: var(--foreground);
+  box-shadow: var(--shadow-e1);
+}
+.zs-tabs__trigger:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--ring);
+}
+/* Underline variant: text labels on a hairline, accent bar under the active tab. */
+.zs-tabs__list--underline {
+  display: flex;
+  gap: var(--space-6);
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: inset 0 -1px 0 var(--border);
+}
+.zs-tabs__list--underline .zs-tabs__trigger {
+  height: 40px;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: inset 0 -2px 0 transparent;
+  transition: color var(--duration-fast) var(--ease-standard),
+    box-shadow var(--duration-fast) var(--ease-standard);
+}
+.zs-tabs__list--underline .zs-tabs__trigger[aria-selected="true"] {
+  background: transparent;
+  color: var(--foreground);
+  box-shadow: inset 0 -2px 0 var(--primary);
+}
+.zs-tabs__list--underline .zs-tabs__trigger:focus-visible {
+  box-shadow: inset 0 -2px 0 var(--primary), 0 0 0 2px var(--ring);
+}
+
+/* ---------- Progress ---------- */
+.zs-progress {
+  width: 100%;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--muted);
+  overflow: hidden;
+}
+.zs-progress__fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: var(--brand);
+  transition: width var(--duration-base) var(--ease-standard);
+}
+.zs-progress__fill--warning { background: var(--warning); }
+.zs-progress__fill--danger { background: var(--danger); }
+
+/* ---------- Shared entrance keyframes (entrances decelerate, rise 8px) ----------
+ * Capture-safe: animate transform/background only, never opacity — a frozen first
+ * frame (thumbnails, print, paused-animation captures) must still show the element. */
+@keyframes zs-backdrop-in {
+  from { background-color: rgba(0, 0, 0, 0); }
+  to { background-color: rgba(0, 0, 0, 0.5); }
+}
+@keyframes zs-rise-in {
+  from { transform: translateY(var(--distance-rise)); }
+  to { transform: translateY(0); }
+}

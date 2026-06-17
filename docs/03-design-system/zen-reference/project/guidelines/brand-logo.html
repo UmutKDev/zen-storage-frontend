@@ -1,0 +1,40 @@
+<!-- @dsCard group="Brand" viewport="700x180" name="Logo" subtitle="Lettermark tile — the 'S' on the primary square IS the logo" -->
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../styles.css" />
+<style>
+  body { padding: 24px; display: flex; align-items: center; gap: 40px; }
+  .v { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+  .lbl { font-size: var(--text-xs); color: var(--muted-foreground); margin: 0; }
+  .dark-chip { background: #0a0a0a; padding: 14px 18px; border-radius: var(--radius-lg); }
+</style>
+</head>
+<body>
+  <div class="v">
+    <p class="lbl">Default — tile + wordmark</p>
+    <span class="zs-logo">
+      <span class="zs-logo__tile">S</span>
+      <span class="zs-logo__word">Zen Storage</span>
+    </span>
+  </div>
+  <div class="v">
+    <p class="lbl">Collapsed chrome — tile only</p>
+    <span class="zs-logo"><span class="zs-logo__tile">S</span></span>
+  </div>
+  <div class="v">
+    <p class="lbl">Large — 48px, font scales ×0.5</p>
+    <span class="zs-logo"><span class="zs-logo__tile" style="width: 48px; height: 48px; font-size: 24px;">S</span></span>
+  </div>
+  <div class="v">
+    <p class="lbl">On dark</p>
+    <div class="dark-chip">
+      <span class="zs-logo">
+        <span class="zs-logo__tile" style="background: #e0937a; color: #1a1410;">S</span>
+        <span class="zs-logo__word" style="color: #ededed;">Zen Storage</span>
+      </span>
+    </div>
+  </div>
+</body>
+</html>

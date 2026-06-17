@@ -1,0 +1,845 @@
+{
+  "common": {
+    "appName": "Storage",
+    "errorGeneric": "Something went wrong. Please try again.",
+    "retry": "Try again",
+    "loading": "Loading…",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "selected": "selected"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "description": "The page you’re looking for doesn’t exist or has moved.",
+    "back": "Back to home"
+  },
+  "error": {
+    "title": "Something went wrong",
+    "description": "An unexpected error occurred. You can try again.",
+    "retry": "Try again"
+  },
+  "legal": {
+    "lastUpdated": "Last updated: 6 June 2026",
+    "placeholderNote": "This is placeholder copy. The final legal text is reviewed before MVP.",
+    "contact": "Questions? Contact privacy@storage.example.",
+    "nav": {
+      "privacy": "Privacy",
+      "terms": "Terms",
+      "cookies": "Cookies",
+      "dataProcessing": "Data processing"
+    },
+    "privacy": {
+      "heading": "Privacy Policy",
+      "body": "We process your data to provide cloud storage (contract), to keep the service secure (legitimate interest), and — only with your consent — for analytics. We never sell your data. You can access, export, or delete your account from Account → Privacy."
+    },
+    "terms": {
+      "heading": "Terms of Service",
+      "body": "By using the service you agree to these terms. You are responsible for the content you upload and for keeping your credentials secure. The service is provided as-is during the MVP period."
+    },
+    "cookies": {
+      "heading": "Cookie Policy",
+      "body": "Essential cookies (session, security, locale) are always on. Functional and analytics cookies are optional and off by default — manage them anytime from the cookie banner or this page."
+    },
+    "dataProcessing": {
+      "heading": "Data Processing",
+      "body": "We use a limited set of sub-processors (storage backend, email, error monitoring) under data-processing agreements. International transfers rely on standard contractual clauses where applicable."
+    },
+    "banner": {
+      "title": "We value your privacy",
+      "description": "Essential cookies keep the app running. Optional cookies help us improve it — the choice is yours.",
+      "acceptAll": "Accept all",
+      "rejectOptional": "Reject optional",
+      "managePreferences": "Manage preferences"
+    },
+    "consent": {
+      "essential": "Essential",
+      "functional": "Functional",
+      "analytics": "Analytics"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Sign in",
+      "subtitle": "Welcome back",
+      "emailLabel": "Email",
+      "emailPlaceholder": "you@example.com",
+      "continue": "Continue",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Your password",
+      "signIn": "Sign in",
+      "back": "Back",
+      "forgot": "Forgot password?",
+      "noAccount": "Don’t have an account?",
+      "signUp": "Sign up",
+      "twoFactorTitle": "Two-factor authentication",
+      "twoFactorDescription": "Enter the 6-digit code from your authenticator app.",
+      "verify": "Verify",
+      "or": "or",
+      "usePasskey": "Use a passkey"
+    },
+    "register": {
+      "title": "Create account",
+      "subtitle": "Start storing in seconds",
+      "passwordConfirmLabel": "Confirm password",
+      "create": "Create account",
+      "haveAccount": "Already have an account?",
+      "signIn": "Sign in"
+    },
+    "reset": {
+      "title": "Reset password",
+      "description": "Enter your email and we’ll send a reset link.",
+      "send": "Send reset link",
+      "sentTitle": "Check your email",
+      "sentDescription": "If an account exists for that email, a reset link is on its way.",
+      "backToLogin": "Back to sign in"
+    },
+    "errors": {
+      "passwordRequired": "Password is required.",
+      "otpLength": "Enter the 6-digit code.",
+      "passwordMismatch": "Passwords do not match.",
+      "invalidCredentials": "Invalid email or password.",
+      "generic": "Something went wrong. Please try again.",
+      "rateLimitedPrefix": "Too many attempts. Retry in"
+    }
+  },
+  "storage": {
+    "title": "Storage",
+    "breadcrumb": { "home": "Home", "label": "Folder path" },
+    "view": { "list": "List view", "grid": "Grid view", "tileSize": "Tile size" },
+    "more": { "label": "More actions" },
+    "sort": {
+      "label": "Sort",
+      "name": "Name",
+      "size": "Size",
+      "modified": "Modified",
+      "type": "Type",
+      "ascending": "Ascending",
+      "descending": "Descending"
+    },
+    "columns": { "name": "Name", "size": "Size", "modified": "Modified" },
+    "usage": {
+      "label": "Storage",
+      "of": "of",
+      "usedSuffix": "used",
+      "nearLimit": "Almost full",
+      "exceeded": "Storage full"
+    },
+    "quota": {
+      "warningTitle": "Storage almost full",
+      "warningBody": "You’re running low on space. Free up files or upgrade to keep uploading.",
+      "exceededTitle": "Storage full",
+      "exceededBody": "You’ve reached your storage limit. Free up space or upgrade to upload more.",
+      "upgrade": "Upgrade plan",
+      "dismiss": "Dismiss"
+    },
+    "archive": {
+      "create": {
+        "title": "Create archive",
+        "itemsSuffix": "items selected",
+        "format": "Format",
+        "name": "Name (optional)",
+        "namePlaceholder": "archive",
+        "cancel": "Cancel",
+        "submit": "Create archive",
+        "jobTitle": "Creating archive",
+        "failed": "Couldn't start the archive."
+      },
+      "extract": {
+        "into": "Extracts into",
+        "intoThisFolder": "Extracts into this folder",
+        "newFolder": "Extract into a new folder",
+        "loading": "Reading archive…",
+        "previewError": "Couldn't read this archive.",
+        "retry": "Try again",
+        "empty": "This archive is empty.",
+        "selectAll": "Select all",
+        "selectNone": "Select none",
+        "selectedSuffix": "selected",
+        "entriesLabel": "Archive entries",
+        "onConflict": "If files already exist",
+        "keepBoth": "Keep both",
+        "skip": "Skip",
+        "replace": "Replace",
+        "cancel": "Cancel",
+        "submit": "Extract",
+        "jobTitle": "Extracting archive"
+      }
+    },
+    "duplicate": {
+      "button": "Find duplicates",
+      "menuDesc": "Scan this folder for identical or similar files.",
+      "title": "Find duplicate files",
+      "subtitle": "Scan this folder for identical and visually similar files, then free up space.",
+      "recursive": "Scan subfolders",
+      "recursiveHint": "Include every folder inside this one.",
+      "similarity": "Image matching",
+      "similarityHint": "How alike two images must look to be grouped (exact file copies are always matched).",
+      "presetStrict": "Strict",
+      "presetBalanced": "Balanced",
+      "presetLoose": "Loose",
+      "start": "Start scan",
+      "scanning": "Scanning…",
+      "cancel": "Cancel scan",
+      "jobTitle": "Scanning for duplicates",
+      "alreadyRunning": "A duplicate scan is already running.",
+      "failedBody": "The scan failed. Please try again.",
+      "cancelledBody": "The scan was cancelled.",
+      "retry": "Start over",
+      "loadingResult": "Loading results…",
+      "resultError": "Couldn’t load the scan results.",
+      "emptyTitle": "No duplicates found",
+      "emptyBody": "Every file in this folder is unique.",
+      "foundSuffix": "duplicate groups found",
+      "resultsLabel": "Duplicate file groups",
+      "matchExact": "Identical",
+      "matchSimilar": "Similar",
+      "savable": "savable",
+      "filesSuffix": "files",
+      "statGroups": "Groups",
+      "statReclaimable": "Reclaimable",
+      "statToRemove": "To remove",
+      "keepFile": "Keep",
+      "deleteFile": "Delete",
+      "selectHint": "Select the copies to delete.",
+      "selectedSuffix": "selected",
+      "deleteSelected": "Delete selected",
+      "freed": "Freed",
+      "confirmTitle": "Delete duplicates?",
+      "confirmBody": "selected files will be permanently deleted, freeing",
+      "confirmCancel": "Cancel",
+      "confirmDelete": "Delete"
+    },
+    "list": { "label": "Files and folders" },
+    "empty": {
+      "title": "This folder is empty",
+      "description": "Upload files or create a folder to get started."
+    },
+    "pending": {
+      "inProgress": "In progress…",
+      "creatingFolder": "Creating folder…",
+      "creatingFile": "Creating file…"
+    },
+    "error": { "title": "Couldn’t load this folder" },
+    "badge": { "encrypted": "Encrypted", "hidden": "Hidden", "locked": "Locked" },
+    "status": {
+      "encrypted": "Encrypted",
+      "unlocked": "Unlocked",
+      "hidden": "Hidden",
+      "encryptedLabel": "Encrypted folder",
+      "unlockedLabel": "Unlocked folder",
+      "hiddenLabel": "Hidden folder"
+    },
+    "fileType": {
+      "folder": "Folder",
+      "pdf": "PDF document",
+      "word": "Word document",
+      "text": "Plain text",
+      "markdown": "Markdown",
+      "spreadsheet": "Spreadsheet",
+      "archive": "Archive",
+      "image": "Image",
+      "vector": "Vector image",
+      "video": "Video",
+      "audio": "Audio",
+      "generic": "File",
+      "fileSuffix": "file"
+    },
+    "search": {
+      "placeholder": "Search files…",
+      "shortcut": "⌘K",
+      "label": "Search",
+      "scopeLabel": "Search scope",
+      "currentScope": "This folder",
+      "globalScope": "Everywhere",
+      "clear": "Clear search",
+      "broaden": "Search everywhere",
+      "resultsSuffix": "results",
+      "oneResult": "1 result",
+      "noResultsTitle": "No matches",
+      "noResultsDescription": "No files match your search.",
+      "errorTitle": "Search failed"
+    },
+    "filter": {
+      "label": "Filter",
+      "all": "All items",
+      "folder": "Folders",
+      "image": "Images",
+      "video": "Videos",
+      "audio": "Audio",
+      "doc": "Documents",
+      "text": "Text",
+      "archive": "Archives",
+      "active": "Filtered",
+      "clear": "Clear filter",
+      "noMatchTitle": "No matching items",
+      "noMatchDescription": "Nothing in this folder matches the current filter."
+    },
+    "sheet": {
+      "title": "Actions",
+      "description": "Choose an action for this item.",
+      "move": "Move to…",
+      "addFiles": "Add files",
+      "delete": "Delete"
+    },
+    "item": { "folder": "Folder", "openFolder": "Open folder" },
+    "ops": {
+      "new": "New",
+      "menu": {
+        "actions": "Actions",
+        "preview": "Preview",
+        "rename": "Rename",
+        "move": "Move",
+        "download": "Download",
+        "archive": "Create zip",
+        "extract": "Extract",
+        "delete": "Delete"
+      },
+      "create": {
+        "folder": "New folder",
+        "file": "New file",
+        "folderTitle": "Create folder",
+        "fileTitle": "Create file",
+        "folderName": "Folder name",
+        "fileName": "File name",
+        "namePlaceholder": "Untitled",
+        "submit": "Create",
+        "createdFolder": "Folder created.",
+        "createdFile": "File created.",
+        "in": "in",
+        "directory": "Directory",
+        "directoryDesc": "A new folder",
+        "document": "Document",
+        "documentDesc": "A new text document",
+        "documentTitle": "New document",
+        "documentName": "Document name",
+        "format": "Format",
+        "encrypt": "Encrypt this folder",
+        "encryptSoon": "Coming soon",
+        "encryptHint": "Set a password — you’ll need it to open this folder.",
+        "cipher": "AES-256"
+      },
+      "secure": {
+        "unlock": {
+          "title": "Unlock folder",
+          "titleHidden": "Show hidden items",
+          "subtitle": "Enter the folder password",
+          "subtitleHidden": "Enter your password to reveal hidden items",
+          "password": "Password",
+          "show": "Show password",
+          "hide": "Hide password",
+          "cipher": "AES-256 encrypted",
+          "submit": "Unlock",
+          "reveal": "Reveal",
+          "error": "Incorrect password"
+        },
+        "lock": {
+          "action": "Lock",
+          "done": "Folder locked."
+        },
+        "encrypt": {
+          "action": "Encrypt",
+          "title": "Encrypt folder",
+          "subtitle": "Set a password. You’ll need it to open this folder.",
+          "submit": "Encrypt",
+          "done": "Folder encrypted.",
+          "error": "Couldn’t encrypt this folder."
+        },
+        "decrypt": {
+          "action": "Remove encryption",
+          "title": "Remove encryption?",
+          "subtitle": "Enter the folder password to decrypt it.",
+          "submit": "Decrypt",
+          "done": "Encryption removed.",
+          "error": "Couldn’t decrypt this folder."
+        },
+        "hide": {
+          "action": "Hide",
+          "title": "Hide folder",
+          "subtitle": "Set a password. You’ll need it to unhide this folder.",
+          "submit": "Hide",
+          "done": "Folder hidden.",
+          "error": "Couldn’t hide this folder."
+        },
+        "unhide": {
+          "action": "Unhide",
+          "title": "Unhide folder",
+          "subtitle": "Enter the folder password to unhide it.",
+          "submit": "Unhide",
+          "done": "Folder unhidden.",
+          "error": "Couldn’t unhide this folder."
+        },
+        "conceal": {
+          "action": "Conceal",
+          "done": "Folder concealed.",
+          "retry": "Couldn’t conceal — try again.",
+          "maybeIncomplete": "Conceal may not have completed. Re-check from another device if needed."
+        },
+        "passphraseMin": "Use at least 8 characters.",
+        "expired": {
+          "hidden": "Session expired — hidden items concealed."
+        },
+        "lockedFolder": {
+          "title": "This folder is locked",
+          "body": "Enter the folder password to view its contents.",
+          "action": "Unlock"
+        }
+      },
+      "rename": {
+        "title": "Rename",
+        "label": "New name",
+        "submit": "Rename",
+        "done": "Renamed."
+      },
+      "delete": {
+        "title": "Delete this item?",
+        "titleFolder": "Delete this folder?",
+        "description": "This can’t be undone. The item is permanently removed.",
+        "descriptionFolder": "This permanently deletes the folder and everything inside it. This can’t be undone.",
+        "confirm": "Delete",
+        "done": "Deleted."
+      },
+      "move": {
+        "title": "Move",
+        "pickDestination": "Choose a destination folder",
+        "here": "Move here",
+        "root": "Home",
+        "done": "Moved.",
+        "noSubfolders": "No subfolders here."
+      },
+      "download": { "preparing": "Preparing download…" },
+      "selection": {
+        "select": "Select",
+        "selectedSuffix": "selected",
+        "selectAll": "Select all",
+        "clear": "Clear selection",
+        "cleared": "Selection cleared."
+      },
+      "bulk": {
+        "deletePrefix": "Delete",
+        "deleteTitleSuffix": "items?",
+        "deleteDescription": "This permanently deletes the selected items — folders include everything inside them. This can’t be undone.",
+        "movePrefix": "Move",
+        "itemsSuffix": "items",
+        "downloadNone": "No files in the selection to download",
+        "deletedSuffix": "items deleted.",
+        "movedSuffix": "items moved."
+      },
+      "dnd": { "overlayMoveSuffix": "items" },
+      "conflict": {
+        "title": "Name already in use",
+        "description": "An item named “{name}” already exists here. How should we resolve it?",
+        "descriptionGeneric": "An item with that name already exists here. How should we resolve it?",
+        "of": "of",
+        "existSuffix": "items already exist here.",
+        "replace": "Replace",
+        "replaceHint": "Overwrite the existing item.",
+        "replaceHintMany": "Overwrite the existing items.",
+        "keepBoth": "Keep both",
+        "keepBothHint": "Add this one under a new name.",
+        "keepBothHintMany": "Add the conflicting ones under new names.",
+        "skip": "Skip",
+        "skipHint": "Keep the existing item, cancel this one.",
+        "skipHintMany": "Keep the existing items; move the rest."
+      },
+      "errors": {
+        "nameRequired": "A name is required.",
+        "invalidName": "Names can’t contain slashes."
+      }
+    },
+    "upload": {
+      "menu": {
+        "button": "Upload",
+        "files": "Upload files",
+        "folder": "Upload folder"
+      },
+      "dialog": {
+        "title": "Upload files",
+        "to": "to",
+        "cta": "Drop files here or",
+        "browse": "browse",
+        "hint": "Any file type · uploads run in the background",
+        "folder": "Upload a folder",
+        "cipher": "Encrypted in transit",
+        "hide": "Hide",
+        "empty": "Files you add appear here while they upload."
+      },
+      "folder": {
+        "fileSuffix": "file",
+        "filesSuffix": "files",
+        "failedSuffix": "failed"
+      },
+      "tray": {
+        "title": "Uploads",
+        "collapse": "Collapse uploads",
+        "expand": "Expand uploads",
+        "activeSuffix": "uploading",
+        "progressLabel": "Upload progress",
+        "allComplete": "All uploads complete."
+      },
+      "status": {
+        "queued": "Queued",
+        "presigning": "Preparing…",
+        "uploading": "Uploading…",
+        "completing": "Finishing…",
+        "done": "Done",
+        "error": "Failed",
+        "paused": "Paused",
+        "canceled": "Canceled",
+        "conflict": "Name conflict",
+        "blocked": "Blocked"
+      },
+      "actions": {
+        "pause": "Pause",
+        "resume": "Resume",
+        "retry": "Retry",
+        "cancel": "Cancel",
+        "dismiss": "Dismiss"
+      },
+      "drop": { "hint": "Drop files to upload" },
+      "conflict": { "applyToAll": "Apply to all in this batch" },
+      "errors": {
+        "maxSize": "exceeds the maximum upload size of",
+        "quota": "Not enough storage space for this upload.",
+        "upgradeHint": "Upgrade your plan for more space.",
+        "quotaBatch": "Blocked — storage limit reached."
+      }
+    }
+  },
+  "command": {
+    "placeholder": "Type a command or search…",
+    "empty": "No matching commands.",
+    "for": "for",
+    "groups": {
+      "navigation": "Navigate",
+      "actions": "Actions",
+      "selection": "Selection",
+      "search": "Search"
+    },
+    "nav": {
+      "storage": "Go to Storage",
+      "account": "Account",
+      "security": "Security",
+      "subscription": "Subscription"
+    },
+    "actions": {
+      "uploadHere": "Upload files",
+      "newFolder": "New folder",
+      "newFile": "New file",
+      "searchInFolder": "Search this folder",
+      "searchEverywhere": "Search everywhere",
+      "revealHidden": "Reveal hidden folders",
+      "scanDuplicates": "Find duplicate files"
+    },
+    "selection": {
+      "deleteSelected": "Delete selected",
+      "moveSelected": "Move selected"
+    }
+  },
+  "shortcuts": {
+    "helpTitle": "Keyboard shortcuts",
+    "helpDescription": "Keyboard shortcuts grouped by where they apply.",
+    "trigger": "Keyboard shortcuts",
+    "scopes": {
+      "global": "Global",
+      "storage": "Storage",
+      "preview": "Preview"
+    },
+    "openPalette": "Open command palette",
+    "focusSearch": "Search this folder",
+    "showHelp": "Show keyboard shortcuts",
+    "toggleSidebar": "Toggle sidebar",
+    "uploadFiles": "Upload files",
+    "revealHidden": "Reveal hidden folders"
+  },
+  "account": {
+    "shell": {
+      "nav": {
+        "storage": "Storage",
+        "account": "Account",
+        "apiKeys": "API keys"
+      },
+      "collapse": "Collapse sidebar",
+      "expand": "Expand sidebar",
+      "openMenu": "Open menu",
+      "closeMenu": "Close menu",
+      "workspace": {
+        "personal": "Personal",
+        "label": "Workspace"
+      },
+      "theme": {
+        "toggle": "Toggle theme",
+        "light": "Light",
+        "dark": "Dark",
+        "system": "System"
+      },
+      "profileMenu": {
+        "account": "Account",
+        "profile": "Profile",
+        "security": "Security",
+        "subscription": "Subscription",
+        "signOut": "Sign out"
+      },
+      "notifications": {
+        "label": "Notifications",
+        "none": "You’re all caught up.",
+        "unreadSuffix": "unread",
+        "newSuffix": "new",
+        "markAllRead": "Mark all read",
+        "loadMore": "Load more",
+        "error": "Couldn’t load notifications."
+      }
+    },
+    "nav": {
+      "title": "Account",
+      "profile": "Profile",
+      "security": "Security",
+      "subscription": "Subscription",
+      "apiKeys": "API keys"
+    },
+    "profile": {
+      "title": "Profile",
+      "subtitle": "Your personal information.",
+      "fullNameLabel": "Full name",
+      "fullNamePlaceholder": "Your name",
+      "phoneLabel": "Phone number",
+      "phonePlaceholder": "+1 555 000 0000",
+      "emailLabel": "Email",
+      "emailHint": "Your email is used to sign in and can’t be changed here.",
+      "save": "Save changes",
+      "saved": "Profile updated.",
+      "avatarAlt": "Profile photo",
+      "avatarUpload": "Change photo",
+      "avatarUploadHint": "Photo upload is coming soon."
+    },
+    "security": {
+      "title": "Security",
+      "subtitle": "Manage your password, two-factor authentication, passkeys, and sessions.",
+      "tabs": {
+        "password": "Password",
+        "twoFactor": "Two-factor",
+        "passkeys": "Passkeys",
+        "sessions": "Sessions"
+      },
+      "password": {
+        "title": "Change password",
+        "description": "Use a strong password you don’t reuse elsewhere.",
+        "currentLabel": "Current password",
+        "newLabel": "New password",
+        "confirmLabel": "Confirm new password",
+        "submit": "Update password",
+        "changed": "Password updated."
+      },
+      "twoFactor": {
+        "title": "Two-factor authentication",
+        "description": "Add a second step to your sign-in for stronger protection.",
+        "statusEnabled": "Two-factor authentication is on.",
+        "statusDisabled": "Two-factor authentication is off.",
+        "backupRemaining": "backup codes remaining",
+        "enable": "Enable two-factor",
+        "disable": "Disable two-factor",
+        "setupTitle": "Scan the QR code",
+        "setupDescription": "Scan this with your authenticator app, or enter the key manually.",
+        "secretLabel": "Setup key",
+        "copySecret": "Copy key",
+        "copied": "Copied.",
+        "continue": "Continue",
+        "verifyTitle": "Enter the code",
+        "verifyDescription": "Enter the 6-digit code from your authenticator app.",
+        "otpLabel": "One-time code",
+        "verify": "Verify & enable",
+        "enabled": "Two-factor authentication enabled.",
+        "disabled": "Two-factor authentication disabled.",
+        "disableTitle": "Disable two-factor?",
+        "disableDescription": "Enter a current code to confirm. Your account will be less protected.",
+        "backupTitle": "Save your backup codes",
+        "backupDescription": "Store these somewhere safe. Each code works once and they won’t be shown again.",
+        "download": "Download codes",
+        "savedConfirm": "I’ve saved my codes",
+        "regenerate": "Regenerate backup codes",
+        "regenerateTitle": "Regenerate backup codes?",
+        "regenerateDescription": "Enter a current code. Your previous backup codes will stop working.",
+        "regenerated": "New backup codes generated."
+      },
+      "passkeys": {
+        "title": "Passkeys",
+        "description": "Sign in without a password using your device or a security key.",
+        "add": "Add passkey",
+        "deviceNameLabel": "Passkey name",
+        "deviceNamePlaceholder": "e.g. MacBook Touch ID",
+        "empty": "No passkeys yet.",
+        "unsupported": "This browser doesn’t support passkeys.",
+        "registered": "Passkey added.",
+        "delete": "Remove",
+        "deleteTitle": "Remove this passkey?",
+        "deleteDescription": "You won’t be able to sign in with it anymore.",
+        "deleted": "Passkey removed.",
+        "lastUsed": "Last used",
+        "added": "Added"
+      },
+      "sessions": {
+        "title": "Active sessions",
+        "description": "Devices currently signed in to your account.",
+        "current": "This device",
+        "device": "Device",
+        "ip": "IP address",
+        "lastActive": "Last active",
+        "revoke": "Revoke",
+        "revokeTitle": "Revoke this session?",
+        "revokeDescription": "That device will be signed out.",
+        "revoked": "Session revoked.",
+        "logoutOthers": "Sign out other sessions",
+        "logoutOthersTitle": "Sign out everywhere else?",
+        "logoutOthersDescription": "All other devices will be signed out. This device stays signed in.",
+        "logoutAll": "Sign out everywhere",
+        "logoutAllTitle": "Sign out everywhere?",
+        "logoutAllDescription": "Every device, including this one, will be signed out.",
+        "empty": "No active sessions."
+      }
+    },
+    "subscription": {
+      "title": "Subscription",
+      "subtitle": "Your current plan and limits.",
+      "currentPlan": "Current plan",
+      "trial": "Trial",
+      "active": "Active",
+      "renews": "Renews",
+      "expires": "Expires",
+      "storage": "Storage",
+      "unlimited": "Unlimited",
+      "objects": "Files",
+      "billingCycle": "Billing",
+      "noPlan": "You don’t have an active plan.",
+      "comingSoon": "Plan changes are coming soon."
+    },
+    "apiKeys": {
+      "title": "API keys",
+      "comingSoon": "API key management is coming soon."
+    },
+    "errors": {
+      "fullNameRequired": "Name is required.",
+      "currentPasswordRequired": "Current password is required.",
+      "passwordMismatch": "Passwords do not match.",
+      "deviceNameRequired": "Give this passkey a name.",
+      "generic": "Something went wrong. Please try again.",
+      "rateLimitedPrefix": "Too many attempts. Retry in"
+    }
+  },
+  "preview": {
+    "title": "File preview",
+    "loading": "Loading preview…",
+    "error": "Couldn’t load this file",
+    "close": "Close preview",
+    "download": "Download",
+    "fullscreen": "Enter fullscreen",
+    "exitFullscreen": "Exit fullscreen",
+    "prev": "Previous file",
+    "next": "Next file",
+    "navHint": "Use the left and right arrow keys to move between files.",
+    "moreActions": "More actions",
+    "showDetails": "Show details",
+    "hideDetails": "Hide details",
+    "zoom": {
+      "in": "Zoom in",
+      "out": "Zoom out",
+      "fit": "Fit to screen"
+    },
+    "rail": {
+      "details": "Details",
+      "versions": "Versions",
+      "detailsLabel": "Details",
+      "type": "Type",
+      "size": "Size",
+      "modified": "Modified",
+      "ownerLabel": "Owner",
+      "owner": "You",
+      "copyShareLink": "Copy share link"
+    },
+    "unsupported": "No preview available",
+    "downloadToView": "Download the file to view it.",
+    "openInNewTab": "Open in new tab",
+    "video": {
+      "codecUnsupported": "This video format can’t be played here. Download it to view."
+    },
+    "audio": {
+      "codecUnsupported": "This audio format can’t be played here. Download it to view."
+    },
+    "office": {
+      "loading": "Loading document…",
+      "externalNote": "Opened in Microsoft’s online viewer.",
+      "downloadFallback": "Download instead",
+      "error": "Couldn’t open this document"
+    },
+    "versions": {
+      "title": "Version history",
+      "current": "Current",
+      "empty": "No previous versions.",
+      "error": "Couldn’t load versions",
+      "restore": "Restore",
+      "restoreTitle": "Restore this version?",
+      "restoreConfirm": "This makes the selected version the current one. The existing current version is kept in history.",
+      "restored": "Version restored",
+      "restoreReplacesBody": "This makes the selected version the current content and reloads the editor. Any unsaved edits will be lost.",
+      "delete": "Delete",
+      "deleteTitle": "Delete this version?",
+      "deleteConfirm": "This permanently removes the selected version. It cannot be undone.",
+      "deleted": "Version deleted"
+    },
+    "diff": {
+      "title": "Changes vs current",
+      "viewDiff": "View changes",
+      "noChanges": "No changes from the current content.",
+      "loading": "Loading changes…",
+      "error": "Couldn’t load the changes"
+    },
+    "editor": {
+      "lockedBy": "Locked by",
+      "readOnly": "Read-only",
+      "lockLost": "Your edit lock expired — read-only",
+      "save": "Save",
+      "saving": "Saving…",
+      "saved": "Saved",
+      "draftRestored": "Unsaved draft restored",
+      "conflictReload": "This document changed elsewhere. Reload to get the latest — your edits are kept as a draft.",
+      "unsavedTitle": "Unsaved changes",
+      "unsavedBody": "You have unsaved changes. Save them before closing?",
+      "discard": "Discard"
+    }
+  },
+  "share": {
+    "button": "Share",
+    "webShareTitle": "Shared file",
+    "copied": "Link copied",
+    "ttlNote": "This link is valid for a limited time.",
+    "copyFailed": "Couldn’t copy the link.",
+    "forbidden": "You don’t have permission to share this file."
+  },
+  "jobs": {
+    "progressLabel": "Task progress",
+    "tray": {
+      "title": "Background tasks",
+      "activeSuffix": "active",
+      "cancel": "Cancel task",
+      "dismiss": "Dismiss",
+      "clearFinished": "Clear finished"
+    },
+    "kind": {
+      "archiveCreate": "Creating archive",
+      "archiveExtract": "Extracting archive",
+      "duplicateScan": "Scanning for duplicates",
+      "folderCreate": "Creating folder"
+    },
+    "status": {
+      "running": "In progress",
+      "complete": "Completed",
+      "failed": "Failed",
+      "cancelled": "Cancelled"
+    },
+    "phase": {
+      "LISTING": "Listing files",
+      "SIZE_GROUPING": "Grouping by size",
+      "CONTENT_HASHING": "Comparing contents",
+      "PERCEPTUAL_HASHING": "Comparing images",
+      "FINALIZING": "Finalizing"
+    }
+  }
+}

@@ -1,0 +1,1539 @@
+/* Zen Storage — storage browser component styles (FileRow, FileCard, Breadcrumb, UsageBar, BulkActionBar).
+ * Data surfaces are SOLID — never glass. */
+
+/* ---------- FileList (contained panel around FileRows) ----------
+ * Fills the browser's full content height (the strip the usage bar once
+ * occupied now belongs to the list); rows stack at the top. */
+.zs-file-list {
+  box-sizing: border-box;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-content: flex-start;
+  border: 1px solid color-mix(in srgb, var(--foreground) 8%, transparent);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: inset 0 1px 0 0 var(--glass-highlight), var(--shadow-e1);
+  overflow: hidden;
+}
+.zs-file-list > * { flex-shrink: 0; }
+.zs-file-list__head {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 8px var(--space-1) 8px var(--space-2);
+  border-bottom: 1px solid color-mix(in srgb, var(--foreground) 6%, transparent);
+  background: color-mix(in srgb, var(--muted) 35%, var(--surface));
+  font-size: 11px;
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--muted-foreground) 80%, transparent);
+  user-select: none;
+}
+.zs-file-list__head-spacer { width: 16px; flex-shrink: 0; }
+.zs-file-list__head-main {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 0 var(--space-2);
+}
+.zs-file-list__head-name { flex: 1; min-width: 0; padding-left: calc(36px + var(--space-3)); }
+.zs-file-list__head-size { width: 80px; flex-shrink: 0; text-align: right; }
+.zs-file-list__head-date { width: 160px; flex-shrink: 0; text-align: right; }
+.zs-file-list__head-actions { width: 60px; flex-shrink: 0; }
+
+/* ---------- Type tones (tinted icon tiles) ----------
+ * Harmonized in oklch around the warm brand palette. --tile drives
+ * the tile's text color, wash, and hairline ring below. */
+.zs-tone-brand { --tile: var(--brand); }
+.zs-tone-red { --tile: oklch(0.6 0.19 25); }
+.zs-tone-blue { --tile: oklch(0.58 0.14 250); }
+.zs-tone-green { --tile: oklch(0.58 0.14 155); }
+.zs-tone-amber { --tile: oklch(0.68 0.14 75); }
+.zs-tone-teal { --tile: oklch(0.6 0.12 195); }
+.zs-tone-violet { --tile: oklch(0.58 0.16 295); }
+.zs-tone-slate { --tile: var(--muted-foreground); }
+
+/* ---------- FileRow (list view) ---------- */
+.zs-file-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding-left: var(--space-2);
+  padding-right: var(--space-1);
+  border-radius: var(--radius-md);
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+.zs-file-row:hover { background: color-mix(in srgb, var(--accent) 60%, transparent); }
+.zs-file-row--selected {
+  background: color-mix(in srgb, var(--accent) 90%, transparent);
+  box-shadow: inset 0 1px 0 0 var(--glass-highlight),
+    inset 0 0 0 1px color-mix(in srgb, var(--foreground) 5%, transparent);
+}
+.zs-file-row--locked { opacity: 0.7; }
+.zs-file-row--drop { box-shadow: 0 0 0 2px var(--ring); }
+/* Inside the contained list: square rows + hairline separators */
+.zs-file-list .zs-file-row { border-radius: 0; }
+.zs-file-list .zs-file-row + .zs-file-row {
+  border-top: 1px solid color-mix(in srgb, var(--foreground) 5%, transparent);
+}
+.zs-file-row__main {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 10px var(--space-2);
+  border-radius: var(--radius-md);
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+.zs-file-row__main:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--ring);
+}
+/* Icon sits in a tinted gradient tile keyed by file type (--tile from .zs-tone-*) */
+.zs-file-row__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: var(--radius-md);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--tile) 15%, transparent),
+    color-mix(in srgb, var(--tile) 8%, transparent)
+  );
+  color: var(--tile);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tile) 18%, transparent),
+    inset 0 1px 0 0 var(--glass-highlight);
+}
+.zs-file-row__icon--folder svg { fill: color-mix(in srgb, var(--tile) 14%, transparent); }
+.zs-file-row__icon svg { width: 18px; height: 18px; display: block; }
+.zs-file-row__text {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: 1px;
+}
+/* Name line (protected state rides on the icon tile as a corner chip) */
+.zs-file-row__nameline {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: var(--space-2);
+}
+.zs-file-row__name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  letter-spacing: -0.01em;
+  color: var(--foreground);
+}
+.zs-file-row__kind {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--text-xs);
+  color: color-mix(in srgb, var(--muted-foreground) 85%, transparent);
+}
+/* Inline row task (extract queue): the kind line swaps to a label + tabular
+ * percent over a thin brand rail. progress == null renders the queued state —
+ * a dimmed sweeping segment (static under reduced motion). */
+.zs-file-row__task {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 320px;
+}
+.zs-file-row__task-line {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: var(--text-xs);
+  white-space: nowrap;
+}
+.zs-file-row__task-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--muted-foreground);
+}
+.zs-file-row__task-pct {
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--weight-medium);
+  color: var(--foreground);
+}
+.zs-file-row__rail {
+  display: block;
+  height: 3px;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--foreground) 7%, transparent);
+  overflow: hidden;
+}
+.zs-file-row__fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--brand), var(--primary));
+  transition: width 0.18s linear;
+}
+.zs-file-row__fill--wait {
+  width: 32%;
+  opacity: 0.4;
+  animation: zs-rail-wait 1.4s var(--ease-standard) infinite;
+}
+@keyframes zs-rail-wait {
+  from { transform: translateX(-110%); }
+  to { transform: translateX(340%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .zs-file-row__fill--wait { animation: none; }
+}
+
+/* ---------- ExtractDialog (zs-create chrome) ---------- */
+/* Destination line, optional contents disclosure + checklist (single mode),
+ * numbered order list (bulk mode). */
+.zs-extract__dest {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--text-sm);
+  color: var(--foreground);
+}
+.zs-extract__dest svg { color: var(--brand); flex-shrink: 0; }
+.zs-extract__dest-name {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--muted) 70%, transparent);
+  border: 1px solid var(--border);
+}
+.zs-extract__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  margin-left: -8px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: transparent;
+  font: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--foreground);
+  cursor: pointer;
+}
+.zs-extract__toggle:hover { background: var(--accent); }
+.zs-extract__toggle:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--ring); }
+.zs-extract__toggle-count {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-regular, 400);
+  font-variant-numeric: tabular-nums;
+  color: var(--muted-foreground);
+}
+.zs-extract__panel {
+  margin-top: 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  overflow: hidden;
+}
+.zs-extract__list-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--muted-foreground);
+  border-bottom: 1px solid var(--border);
+  background: color-mix(in srgb, var(--muted) 50%, transparent);
+}
+.zs-extract__list,
+.zs-extract__order {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.zs-extract__list {
+  max-height: 208px;
+  overflow-y: auto;
+}
+.zs-extract__order {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  overflow: hidden;
+}
+.zs-extract__row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  font-size: var(--text-sm);
+}
+.zs-extract__row + .zs-extract__row {
+  border-top: 1px solid color-mix(in srgb, var(--foreground) 5%, transparent);
+}
+.zs-extract__row svg { color: var(--muted-foreground); flex-shrink: 0; }
+.zs-extract__row .zs-extract__row-folder,
+.zs-extract__row svg.zs-extract__row-folder { color: var(--brand); }
+.zs-extract__row-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.zs-extract__row-size {
+  flex-shrink: 0;
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--muted-foreground);
+}
+.zs-extract__num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--muted) 60%, transparent);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--weight-medium);
+  color: var(--muted-foreground);
+}
+.zs-extract__note {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--muted-foreground);
+}
+.zs-file-row__size {
+  width: 80px;
+  flex-shrink: 0;
+  text-align: right;
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--muted-foreground);
+}
+.zs-file-row__date {
+  width: 160px;
+  flex-shrink: 0;
+  text-align: right;
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--muted-foreground);
+}
+/* Checkbox fades in on row hover (or stays visible while a selection exists) */
+.zs-file-row .zs-checkbox {
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-standard);
+}
+.zs-file-row:hover .zs-checkbox,
+.zs-file-row .zs-checkbox:focus-visible,
+.zs-file-row--selecting .zs-checkbox,
+.zs-file-row--selected .zs-checkbox { opacity: 1; }
+/* Row actions buttons mirror the checkbox reveal. Fixed width so rows with
+ * differing action counts (or none, when locked) keep column alignment. */
+.zs-file-row__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 2px;
+  width: 60px;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-standard);
+}
+.zs-file-row:hover .zs-file-row__actions,
+.zs-file-row__actions:focus-within { opacity: 1; }
+
+/* ---------- FileCard (grid view) ---------- */
+.zs-file-card {
+  position: relative;
+  height: 100%;
+  border-radius: var(--radius-lg);
+}
+.zs-file-card--locked { opacity: 0.7; }
+.zs-file-card--drop { box-shadow: 0 0 0 2px var(--ring); border-radius: var(--radius-lg); }
+.zs-file-card__inner {
+  box-sizing: border-box;
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  border: 1px solid color-mix(in srgb, var(--foreground) 8%, transparent);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  padding: var(--space-4);
+  text-align: center;
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 0 var(--glass-highlight), var(--shadow-e1);
+  transition: background-color var(--duration-fast) var(--ease-standard),
+    border-color var(--duration-fast) var(--ease-standard),
+    box-shadow var(--duration-fast) var(--ease-standard),
+    transform var(--duration-fast) var(--ease-standard);
+}
+.zs-file-card__inner:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--foreground) 14%, transparent);
+  box-shadow: inset 0 1px 0 0 var(--glass-highlight), var(--shadow-e2);
+}
+.zs-file-card--selected .zs-file-card__inner {
+  border-color: var(--ring);
+  background: color-mix(in srgb, var(--accent) 80%, transparent);
+}
+/* Big tinted icon tile keyed by file type */
+.zs-file-card__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--tile) 15%, transparent),
+    color-mix(in srgb, var(--tile) 8%, transparent)
+  );
+  color: var(--tile);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tile) 18%, transparent),
+    inset 0 1px 0 0 var(--glass-highlight);
+  margin-bottom: var(--space-1);
+}
+.zs-file-card__icon--folder svg { fill: color-mix(in srgb, var(--tile) 14%, transparent); }
+.zs-file-card__icon svg { width: 26px; height: 26px; display: block; }
+.zs-file-card__name {
+  width: 100%;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  letter-spacing: -0.01em;
+  color: var(--foreground);
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.zs-file-card__meta {
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: var(--muted-foreground);
+}
+.zs-file-card > .zs-checkbox {
+  position: absolute;
+  left: var(--space-2);
+  top: var(--space-2);
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-standard);
+}
+/* unchecked box gets a solid backing so it reads over the icon */
+.zs-file-card > .zs-checkbox:not([aria-checked="true"]) { background: var(--surface); }
+.zs-file-card:hover > .zs-checkbox,
+.zs-file-card > .zs-checkbox:focus-visible,
+.zs-file-card--selecting > .zs-checkbox,
+.zs-file-card--selected > .zs-checkbox { opacity: 1; }
+.zs-file-card__actions {
+  position: absolute;
+  right: var(--space-1);
+  top: var(--space-1);
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-standard);
+}
+.zs-file-card:hover .zs-file-card__actions,
+.zs-file-card__actions:focus-within { opacity: 1; }
+
+/* ---------- Breadcrumb ----------
+ * Pill crumbs: ancestors are quiet ghost pills that fill on hover, the
+ * current location is a raised machined chip with a brand-tinted glyph
+ * (drive at root, folder inside). Separators are faded chevrons. */
+.zs-breadcrumb {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 2px;
+  overflow-x: auto;
+  font-size: var(--text-sm);
+}
+.zs-breadcrumb__sep {
+  display: flex;
+  flex-shrink: 0;
+  color: color-mix(in srgb, var(--muted-foreground) 50%, transparent);
+}
+.zs-breadcrumb__sep svg { display: block; }
+.zs-breadcrumb__glyph {
+  display: flex;
+  flex-shrink: 0;
+  color: var(--muted-foreground);
+  transition: color var(--duration-fast) var(--ease-standard);
+}
+.zs-breadcrumb__glyph svg { display: block; }
+.zs-breadcrumb__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 10px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: transparent;
+  font: inherit;
+  color: var(--muted-foreground);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color var(--duration-fast) var(--ease-standard),
+    background-color var(--duration-fast) var(--ease-standard);
+}
+.zs-breadcrumb__link:hover {
+  color: var(--foreground);
+  background: color-mix(in srgb, var(--accent) 70%, transparent);
+}
+.zs-breadcrumb__link:hover .zs-breadcrumb__glyph { color: var(--foreground); }
+.zs-breadcrumb__link:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--ring);
+}
+.zs-breadcrumb__current {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 11px;
+  border-radius: var(--radius-full);
+  background: var(--surface-elevated);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--foreground) 10%, transparent),
+    inset 0 1px 0 0 var(--glass-highlight),
+    0 1px 2px rgb(0 0 0 / 0.06);
+  font-weight: var(--weight-medium);
+  color: var(--foreground);
+  white-space: nowrap;
+}
+.zs-breadcrumb__current .zs-breadcrumb__glyph { color: var(--primary); }
+
+/* ---------- UsageBar ---------- */
+.zs-usage { flex-shrink: 0; }
+.zs-usage__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  font-size: var(--text-xs);
+}
+.zs-usage__label { font-weight: var(--weight-medium); color: var(--foreground); }
+.zs-usage__meta { color: var(--muted-foreground); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* ---------- BulkActionBar (solid elevated pill, floats bottom-center) ---------- */
+.zs-bulkbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  align-self: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface-elevated);
+  padding: 6px var(--space-3);
+  box-shadow: var(--shadow-e2);
+  animation: zs-rise-in var(--duration-base) var(--ease-decelerate);
+}
+.zs-bulkbar__count {
+  padding: 0 var(--space-1);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: var(--foreground);
+}
+.zs-bulkbar__sep {
+  width: 1px;
+  height: 20px;
+  margin: 0 var(--space-1);
+  background: var(--border);
+}
+
+/* ---------- SmartGrid (justified grid) + FileTile ----------
+ * Yandex-Disk-style media browsing: every tile advertises its aspect ratio
+ * via --zs-ratio; flex-grow proportional to the ratio justifies each row to
+ * the container width at a uniform row height (--zs-row-h on the grid).
+ * Media tiles render thumbnails full-bleed; folders/docs are square icon
+ * tiles that mix into the same rows. Pure CSS — no measurement code. */
+.zs-smartgrid {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+/* huge-grow spacer keeps the last row at natural size instead of stretching */
+.zs-smartgrid__spacer {
+  flex-grow: 1000000;
+  flex-basis: 0;
+  min-width: 0;
+  height: 0;
+}
+.zs-tile {
+  position: relative;
+  flex-grow: calc(var(--zs-ratio, 1) * 100);
+  flex-basis: calc(var(--zs-ratio, 1) * var(--zs-row-h, 168px));
+  aspect-ratio: var(--zs-ratio, 1);
+  min-width: 0;
+  border-radius: var(--radius-lg);
+}
+.zs-tile--locked { opacity: 0.7; }
+.zs-tile__inner {
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--foreground) 8%, transparent);
+  border-radius: inherit;
+  background: var(--surface);
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 0 var(--glass-highlight), var(--shadow-e1);
+  transition: border-color var(--duration-fast) var(--ease-standard),
+    box-shadow var(--duration-fast) var(--ease-standard),
+    background-color var(--duration-fast) var(--ease-standard);
+}
+.zs-tile__inner:hover {
+  border-color: color-mix(in srgb, var(--foreground) 14%, transparent);
+  box-shadow: inset 0 1px 0 0 var(--glass-highlight), var(--shadow-e2);
+}
+.zs-tile__inner:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--ring);
+}
+.zs-tile--selected .zs-tile__inner {
+  border-color: var(--ring);
+  background: color-mix(in srgb, var(--accent) 80%, var(--surface));
+  box-shadow: 0 0 0 1px var(--ring), var(--shadow-e1);
+}
+
+/* Media tiles: full-bleed thumbnail + bottom name scrim */
+.zs-tile__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+  transition: transform var(--duration-base) var(--ease-standard),
+    border-radius var(--duration-base) var(--ease-standard);
+}
+.zs-tile--thumb:hover .zs-tile__img { transform: scale(1.04); }
+/* selected media shrinks inside the accent ring (Yandex-style) */
+.zs-tile--selected.zs-tile--thumb .zs-tile__img {
+  transform: scale(0.93);
+  border-radius: calc(var(--radius-lg) - 4px);
+}
+.zs-tile__scrim {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 56px;
+  background: linear-gradient(180deg, transparent, color-mix(in srgb, #000 58%, transparent));
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  pointer-events: none;
+  transition: opacity var(--duration-fast) var(--ease-standard);
+}
+.zs-tile__caption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-2);
+  padding: 0 10px 8px;
+  pointer-events: none;
+  transition: opacity var(--duration-fast) var(--ease-standard);
+}
+.zs-tile--selected.zs-tile--thumb .zs-tile__scrim,
+.zs-tile--selected.zs-tile--thumb .zs-tile__caption { opacity: 0; }
+.zs-tile__name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  letter-spacing: -0.01em;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+.zs-tile__duration {
+  flex-shrink: 0;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: rgba(255, 255, 255, 0.85);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+.zs-tile__play {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  background: color-mix(in srgb, #000 38%, transparent);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  color: #fff;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+  pointer-events: none;
+}
+.zs-tile__play svg { fill: currentColor; }
+
+/* Plain tiles (folders, docs): square, tinted icon tile keyed by type */
+.zs-tile__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--tile) 15%, transparent),
+    color-mix(in srgb, var(--tile) 8%, transparent)
+  );
+  color: var(--tile);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tile) 18%, transparent),
+    inset 0 1px 0 0 var(--glass-highlight);
+  margin-bottom: 2px;
+}
+.zs-tile__icon--folder svg { fill: color-mix(in srgb, var(--tile) 14%, transparent); }
+.zs-tile__icon svg { width: 22px; height: 22px; display: block; }
+.zs-tile__label {
+  max-width: calc(100% - var(--space-4));
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  letter-spacing: -0.01em;
+  color: var(--foreground);
+}
+.zs-tile__meta {
+  max-width: calc(100% - var(--space-4));
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--muted-foreground);
+}
+
+/* Checkbox top-left + actions top-right reveal on hover (FileCard pattern) */
+.zs-tile > .zs-checkbox {
+  position: absolute;
+  left: var(--space-2);
+  top: var(--space-2);
+  z-index: 2;
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-standard);
+}
+.zs-tile > .zs-checkbox:not([aria-checked="true"]) { background: var(--surface); }
+.zs-tile:hover > .zs-checkbox,
+.zs-tile > .zs-checkbox:focus-visible,
+.zs-tile--selecting > .zs-checkbox,
+.zs-tile--selected > .zs-checkbox { opacity: 1; }
+.zs-tile__actions {
+  position: absolute;
+  right: var(--space-1);
+  top: var(--space-1);
+  z-index: 2;
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-standard);
+}
+.zs-tile:hover .zs-tile__actions,
+.zs-tile__actions:focus-within { opacity: 1; }
+/* action button needs a glass backing to read over thumbnails */
+.zs-tile--thumb .zs-tile__actions .zs-btn {
+  color: #fff;
+  background: color-mix(in srgb, #000 35%, transparent);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+.zs-tile--thumb .zs-tile__actions .zs-btn:hover {
+  background: color-mix(in srgb, #000 50%, transparent);
+}
+
+/* ---------- UploadDialog (premium upload surface) ----------
+ * The design function behind the upload Button variant. Heavier than the
+ * generic Dialog: sectioned chrome, machined emblem, engraved dropzone disc,
+ * encrypt → upload queue, encrypted footer. */
+.zs-upload {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 560px;
+  padding: 0;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  animation: zs-rise-in var(--duration-base) var(--ease-decelerate);
+  box-shadow: inset 0 1px 0 0 var(--glass-highlight),
+    0 1px 2px 0 rgb(0 0 0 / 0.08),
+    0 16px 40px -12px rgb(0 0 0 / 0.28),
+    0 48px 100px -24px rgb(0 0 0 / 0.4);
+}
+
+/* Head: machined emblem mirrors the upload button's gradient language */
+.zs-upload__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-4) var(--space-4) var(--space-5);
+  border-bottom: 1px solid color-mix(in srgb, var(--foreground) 6%, transparent);
+}
+.zs-upload__emblem {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: var(--radius-md);
+  color: var(--primary-foreground);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--primary) 70%, #ffffff) 0%,
+    color-mix(in srgb, var(--primary) 90%, #ffffff) 30%,
+    var(--primary) 58%,
+    color-mix(in srgb, var(--primary) 84%, #000000) 100%
+  );
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.38),
+    inset 0 -1px 0 0 rgba(0, 0, 0, 0.22),
+    0 1px 2px 0 rgb(0 0 0 / 0.12),
+    0 4px 12px -3px color-mix(in srgb, var(--primary) 50%, transparent),
+    0 0 0 5px color-mix(in srgb, var(--primary) 7%, transparent);
+}
+.zs-upload__heading { flex: 1; min-width: 0; }
+.zs-upload__title {
+  margin: 0;
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  letter-spacing: -0.01em;
+  color: var(--foreground);
+}
+.zs-upload__dest {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 2px 0 0;
+  font-size: var(--text-xs);
+  color: var(--muted-foreground);
+  white-space: nowrap;
+  overflow: hidden;
+}
+.zs-upload__dest strong {
+  font-weight: var(--weight-medium);
+  color: var(--foreground);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.zs-upload__dot {
+  width: 3px;
+  height: 3px;
+  flex-shrink: 0;
+  border-radius: var(--radius-full);
+  background: currentColor;
+  opacity: 0.5;
+}
+.zs-upload__key {
+  padding: 0 5px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  line-height: 1.6;
+  color: var(--muted-foreground);
+  background: color-mix(in srgb, var(--foreground) 5%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--foreground) 10%, transparent),
+    inset 0 -1px 0 0 color-mix(in srgb, var(--foreground) 14%, transparent);
+}
+
+.zs-upload__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-5);
+}
+
+/* Dropzone: dashed field with an engraved machined disc */
+.zs-upload__drop {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-8) var(--space-4);
+  border: 1.5px dashed color-mix(in srgb, var(--foreground) 18%, transparent);
+  border-radius: var(--radius-lg);
+  background: radial-gradient(
+      420px 150px at 50% 0%,
+      color-mix(in srgb, var(--brand) 5%, transparent),
+      transparent 70%
+    ),
+    color-mix(in srgb, var(--muted) 26%, transparent);
+  text-align: center;
+  cursor: pointer;
+  transition: border-color var(--duration-fast) var(--ease-standard),
+    background-color var(--duration-fast) var(--ease-standard),
+    box-shadow var(--duration-fast) var(--ease-standard);
+}
+.zs-upload__drop:hover {
+  border-color: color-mix(in srgb, var(--brand) 55%, var(--border));
+}
+.zs-upload__drop:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--ring);
+}
+.zs-upload__drop--over {
+  border-color: var(--brand);
+  background: radial-gradient(
+      420px 150px at 50% 0%,
+      color-mix(in srgb, var(--brand) 12%, transparent),
+      transparent 75%
+    ),
+    color-mix(in srgb, var(--brand) 5%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brand) 30%, transparent);
+}
+.zs-upload__disc {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-full);
+  color: var(--foreground);
+  background: linear-gradient(
+    180deg,
+    var(--surface-elevated) 0%,
+    color-mix(in srgb, var(--surface-elevated) 94%, var(--foreground)) 100%
+  );
+  box-shadow: inset 0 1px 0 0 var(--glass-highlight),
+    inset 0 -1px 0 0 color-mix(in srgb, var(--foreground) 10%, transparent),
+    0 1px 2px 0 rgb(0 0 0 / 0.08),
+    0 5px 14px -4px rgb(0 0 0 / 0.18),
+    0 0 0 7px color-mix(in srgb, var(--foreground) 3%, transparent);
+  transition: transform var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard),
+    box-shadow var(--duration-fast) var(--ease-standard);
+}
+.zs-upload__disc svg { transition: transform var(--duration-fast) var(--ease-standard); }
+.zs-upload__drop:hover .zs-upload__disc svg { transform: translateY(-2px); }
+.zs-upload__drop--over .zs-upload__disc {
+  transform: translateY(-3px);
+  color: var(--primary);
+  box-shadow: inset 0 1px 0 0 var(--glass-highlight),
+    inset 0 -1px 0 0 color-mix(in srgb, var(--foreground) 10%, transparent),
+    0 1px 2px 0 rgb(0 0 0 / 0.08),
+    0 8px 18px -4px rgb(0 0 0 / 0.2),
+    0 0 0 7px color-mix(in srgb, var(--brand) 14%, transparent);
+}
+.zs-upload__cta {
+  margin: var(--space-1) 0 0;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--foreground);
+}
+.zs-upload__browse {
+  color: var(--primary);
+  font-weight: var(--weight-semibold);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: color-mix(in srgb, var(--primary) 40%, transparent);
+}
+.zs-upload__hint {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: color-mix(in srgb, var(--muted-foreground) 85%, transparent);
+}
+
+/* Secondary affordance inside the dropzone — picks a whole folder */
+.zs-upload__folder-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: var(--space-2);
+  padding: 5px 12px;
+  border: 1px solid color-mix(in srgb, var(--foreground) 12%, transparent);
+  border-radius: var(--radius-full);
+  font-family: inherit;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  color: var(--foreground);
+  background: var(--surface-elevated);
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 0 var(--glass-highlight), 0 1px 2px 0 rgb(0 0 0 / 0.06);
+  transition: border-color var(--duration-fast) var(--ease-standard),
+    box-shadow var(--duration-fast) var(--ease-standard),
+    transform var(--duration-fast) var(--ease-standard);
+}
+.zs-upload__folder-link svg { display: block; color: var(--muted-foreground); }
+.zs-upload__folder-link:hover {
+  border-color: color-mix(in srgb, var(--brand) 45%, var(--border));
+  transform: translateY(-0.5px);
+  box-shadow: inset 0 1px 0 0 var(--glass-highlight), 0 2px 5px -1px rgb(0 0 0 / 0.1);
+}
+.zs-upload__folder-link:hover svg { color: var(--primary); }
+.zs-upload__folder-link:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--ring);
+}
+
+/* Queue: contained list, tinted type tiles, thin brand rail per file */
+.zs-upload__queue {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 232px;
+  overflow-y: auto;
+  border: 1px solid color-mix(in srgb, var(--foreground) 8%, transparent);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: inset 0 1px 0 0 var(--glass-highlight);
+}
+.zs-upload__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 10px var(--space-2) 10px var(--space-3);
+}
+.zs-upload__item + .zs-upload__item {
+  border-top: 1px solid color-mix(in srgb, var(--foreground) 5%, transparent);
+}
+.zs-upload__file-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: var(--radius-md);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--tile) 15%, transparent),
+    color-mix(in srgb, var(--tile) 8%, transparent)
+  );
+  color: var(--tile);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tile) 18%, transparent),
+    inset 0 1px 0 0 var(--glass-highlight);
+}
+.zs-upload__file-icon svg { width: 16px; height: 16px; display: block; }
+.zs-upload__file-text {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: 5px;
+}
+.zs-upload__file-top {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.zs-upload__file-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  letter-spacing: -0.01em;
+  color: var(--foreground);
+}
+.zs-upload__file-meta {
+  flex-shrink: 0;
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--muted-foreground);
+}
+.zs-upload__rail {
+  display: block;
+  height: 3px;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--foreground) 7%, transparent);
+  overflow: hidden;
+}
+.zs-upload__fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--brand), var(--primary));
+  transition: width 0.18s linear;
+}
+.zs-upload__fill--done { background: var(--success); }
+.zs-upload__file-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  flex-shrink: 0;
+}
+.zs-upload__check {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-full);
+  color: var(--success);
+  background: color-mix(in srgb, var(--success) 12%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--success) 25%, transparent);
+}
+
+/* Foot: encrypted note + running summary on a recessed strip */
+.zs-upload__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4) var(--space-3) var(--space-5);
+  border-top: 1px solid color-mix(in srgb, var(--foreground) 6%, transparent);
+  background: color-mix(in srgb, var(--muted) 30%, transparent);
+}
+.zs-upload__cipher {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: var(--weight-medium);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+  white-space: nowrap;
+}
+.zs-upload__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.zs-upload__summary {
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--muted-foreground);
+  white-space: nowrap;
+}
+
+/* ---------- Protected-state chips (encrypted / hidden) ----------
+ * Status rides on the icon tile, never name-line badges: a small glyph
+ * chip docked on the tile corner. Encrypted = lock chip (open lock once
+ * unlocked); hidden = ghosted dashed tile + eye-off chip. */
+.zs-file-row__icon,
+.zs-file-card__icon,
+.zs-tile__icon { position: relative; }
+.zs-status-chip {
+  position: absolute;
+  right: -6px;
+  bottom: -6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-full);
+  color: var(--muted-foreground);
+  background: var(--surface-elevated);
+  box-shadow: 0 0 0 2px var(--surface),
+    inset 0 0 0 1px color-mix(in srgb, var(--foreground) 14%, transparent),
+    inset 0 1px 0 0 var(--glass-highlight),
+    0 1px 2px rgb(0 0 0 / 0.1);
+}
+.zs-status-chip svg { display: block; }
+.zs-status-chip--lock {
+  color: var(--success);
+  background: color-mix(in srgb, var(--success) 10%, var(--surface-elevated));
+  box-shadow: 0 0 0 2px var(--surface),
+    inset 0 0 0 1px color-mix(in srgb, var(--success) 32%, transparent),
+    inset 0 1px 0 0 var(--glass-highlight),
+    0 1px 2px rgb(0 0 0 / 0.1);
+}
+
+/* Hidden = ghost treatment: dimmed content + dashed tile */
+.zs-file-row--hidden .zs-file-row__main { opacity: 0.62; }
+.zs-file-row--hidden .zs-file-row__icon,
+.zs-file-card--hidden .zs-file-card__icon,
+.zs-tile--hidden .zs-tile__icon {
+  background: color-mix(in srgb, var(--tile) 6%, transparent);
+  box-shadow: none;
+  outline: 1.5px dashed color-mix(in srgb, var(--tile) 50%, transparent);
+  outline-offset: -1.5px;
+}
+.zs-file-card--hidden .zs-file-card__inner,
+.zs-tile--hidden .zs-tile__inner { border-style: dashed; }
+.zs-file-card--hidden .zs-file-card__name,
+.zs-file-card--hidden .zs-file-card__meta,
+.zs-tile--hidden .zs-tile__label,
+.zs-tile--hidden .zs-tile__meta { opacity: 0.65; }
+
+/* ---------- UnlockDialog (password gate) ----------
+ * Gate for encrypted folders (click) and hidden items (double-Shift ⇧⇧).
+ * Same sectioned chrome as the upload surface. */
+.zs-unlock {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 420px;
+  padding: 0;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  animation: zs-rise-in var(--duration-base) var(--ease-decelerate);
+  box-shadow: inset 0 1px 0 0 var(--glass-highlight),
+    0 1px 2px 0 rgb(0 0 0 / 0.08),
+    0 16px 40px -12px rgb(0 0 0 / 0.28),
+    0 48px 100px -24px rgb(0 0 0 / 0.4);
+}
+.zs-unlock--shake { animation: zs-unlock-shake 0.4s var(--ease-standard); }
+@keyframes zs-unlock-shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-8px); }
+  40% { transform: translateX(7px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(2px); }
+}
+.zs-unlock__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-4) var(--space-4) var(--space-5);
+  border-bottom: 1px solid color-mix(in srgb, var(--foreground) 6%, transparent);
+}
+.zs-unlock__emblem {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: var(--radius-md);
+  color: var(--primary-foreground);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--primary) 70%, #ffffff) 0%,
+    color-mix(in srgb, var(--primary) 90%, #ffffff) 30%,
+    var(--primary) 58%,
+    color-mix(in srgb, var(--primary) 84%, #000000) 100%
+  );
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.38),
+    inset 0 -1px 0 0 rgba(0, 0, 0, 0.22),
+    0 1px 2px 0 rgb(0 0 0 / 0.12),
+    0 4px 12px -3px color-mix(in srgb, var(--primary) 50%, transparent),
+    0 0 0 5px color-mix(in srgb, var(--primary) 7%, transparent);
+}
+/* hidden-items gate: machined neutral disc instead of the orange emblem */
+.zs-unlock__emblem--hidden {
+  color: var(--foreground);
+  background: linear-gradient(
+    180deg,
+    var(--surface-elevated) 0%,
+    color-mix(in srgb, var(--surface-elevated) 94%, var(--foreground)) 100%
+  );
+  box-shadow: inset 0 1px 0 0 var(--glass-highlight),
+    inset 0 -1px 0 0 color-mix(in srgb, var(--foreground) 10%, transparent),
+    0 1px 2px 0 rgb(0 0 0 / 0.08),
+    0 4px 12px -3px rgb(0 0 0 / 0.18),
+    0 0 0 5px color-mix(in srgb, var(--foreground) 3%, transparent);
+}
+.zs-unlock__heading { flex: 1; min-width: 0; }
+.zs-unlock__title {
+  margin: 0;
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  letter-spacing: -0.01em;
+  color: var(--foreground);
+}
+.zs-unlock__sub {
+  margin: 2px 0 0;
+  font-size: var(--text-xs);
+  color: var(--muted-foreground);
+}
+.zs-unlock__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-5);
+}
+.zs-unlock__field { position: relative; }
+.zs-unlock__field .zs-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding-right: 42px;
+}
+.zs-unlock__field .zs-input[aria-invalid="true"] {
+  border-color: color-mix(in srgb, var(--danger) 60%, var(--border));
+}
+.zs-unlock__eye {
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  translate: 0 -50%;
+  display: flex;
+}
+.zs-unlock__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4) var(--space-3) var(--space-5);
+  border-top: 1px solid color-mix(in srgb, var(--foreground) 6%, transparent);
+  background: color-mix(in srgb, var(--muted) 30%, transparent);
+}
+.zs-unlock__cipher {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: var(--weight-medium);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+  white-space: nowrap;
+}
+.zs-unlock__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* ---------- NewFolderDialog / NewDocumentDialog ("New" create surfaces) ----------
+ * Sectioned chrome shared with the unlock gate: emblem head, form body,
+ * recessed foot. The folder dialog's emblem flips neutral → orange lock when
+ * encryption is armed; the document dialog previews the final filename. */
+.zs-create {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 440px;
+  padding: 0;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  animation: zs-rise-in var(--duration-base) var(--ease-decelerate);
+  box-shadow: inset 0 1px 0 0 var(--glass-highlight),
+    0 1px 2px 0 rgb(0 0 0 / 0.08),
+    0 16px 40px -12px rgb(0 0 0 / 0.28),
+    0 48px 100px -24px rgb(0 0 0 / 0.4);
+}
+.zs-create__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-4) var(--space-4) var(--space-5);
+  border-bottom: 1px solid color-mix(in srgb, var(--foreground) 6%, transparent);
+}
+.zs-create__emblem {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: var(--radius-md);
+  color: var(--foreground);
+  background: linear-gradient(
+    180deg,
+    var(--surface-elevated) 0%,
+    color-mix(in srgb, var(--surface-elevated) 94%, var(--foreground)) 100%
+  );
+  box-shadow: inset 0 1px 0 0 var(--glass-highlight),
+    inset 0 -1px 0 0 color-mix(in srgb, var(--foreground) 10%, transparent),
+    0 1px 2px 0 rgb(0 0 0 / 0.08),
+    0 4px 12px -3px rgb(0 0 0 / 0.18),
+    0 0 0 5px color-mix(in srgb, var(--foreground) 3%, transparent);
+}
+.zs-create__emblem--armed {
+  color: var(--primary-foreground);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--primary) 70%, #ffffff) 0%,
+    color-mix(in srgb, var(--primary) 90%, #ffffff) 30%,
+    var(--primary) 58%,
+    color-mix(in srgb, var(--primary) 84%, #000000) 100%
+  );
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.38),
+    inset 0 -1px 0 0 rgba(0, 0, 0, 0.22),
+    0 1px 2px 0 rgb(0 0 0 / 0.12),
+    0 4px 12px -3px color-mix(in srgb, var(--primary) 50%, transparent),
+    0 0 0 5px color-mix(in srgb, var(--primary) 7%, transparent);
+}
+.zs-create__heading { flex: 1; min-width: 0; }
+.zs-create__title {
+  margin: 0;
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  letter-spacing: -0.01em;
+  color: var(--foreground);
+}
+.zs-create__sub {
+  margin: 2px 0 0;
+  font-size: var(--text-xs);
+  color: var(--muted-foreground);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.zs-create__sub strong { font-weight: var(--weight-medium); color: var(--foreground); }
+.zs-create__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin: 0;
+  padding: var(--space-5);
+}
+.zs-create__body .zs-input {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Encrypt option — contained row, arms to a success-tinted lock */
+.zs-create__option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid color-mix(in srgb, var(--foreground) 10%, transparent);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--muted) 30%, transparent);
+  cursor: pointer;
+  user-select: none;
+  transition: border-color var(--duration-fast) var(--ease-standard),
+    background-color var(--duration-fast) var(--ease-standard);
+}
+.zs-create__option:hover { border-color: color-mix(in srgb, var(--foreground) 18%, transparent); }
+.zs-create__option--on {
+  border-color: color-mix(in srgb, var(--success) 40%, var(--border));
+  background: color-mix(in srgb, var(--success) 5%, transparent);
+}
+.zs-create__option-text { display: flex; flex: 1; min-width: 0; flex-direction: column; gap: 1px; }
+.zs-create__option-label { font-size: var(--text-sm); font-weight: var(--weight-medium); color: var(--foreground); }
+.zs-create__option-sub { font-size: var(--text-xs); color: var(--muted-foreground); }
+.zs-create__option-glyph {
+  display: flex;
+  flex-shrink: 0;
+  color: color-mix(in srgb, var(--muted-foreground) 70%, transparent);
+  transition: color var(--duration-fast) var(--ease-standard);
+}
+.zs-create__option--on .zs-create__option-glyph { color: var(--success); }
+
+.zs-create__reveal { animation: zs-rise-in var(--duration-base) var(--ease-decelerate); }
+.zs-create__field { position: relative; }
+.zs-create__field .zs-input { padding-right: 44px; }
+.zs-create__field--suffix .zs-input { padding-right: 64px; }
+.zs-create__eye {
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  translate: 0 -50%;
+  display: flex;
+}
+.zs-create__suffix {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  translate: 0 -50%;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--muted-foreground);
+  pointer-events: none;
+}
+
+/* Format chips (document dialog) */
+.zs-create__formats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-2);
+}
+.zs-create__chip {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  padding: 8px 10px;
+  border: 1px solid color-mix(in srgb, var(--foreground) 10%, transparent);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 0 var(--glass-highlight);
+  transition: border-color var(--duration-fast) var(--ease-standard),
+    background-color var(--duration-fast) var(--ease-standard),
+    box-shadow var(--duration-fast) var(--ease-standard);
+}
+.zs-create__chip:hover { border-color: color-mix(in srgb, var(--foreground) 20%, transparent); }
+.zs-create__chip:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--ring); }
+.zs-create__chip--on {
+  border-color: var(--ring);
+  background: color-mix(in srgb, var(--accent) 80%, var(--surface));
+  box-shadow: 0 0 0 1px var(--ring), inset 0 1px 0 0 var(--glass-highlight);
+}
+.zs-create__chip-ext {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  color: var(--foreground);
+}
+.zs-create__chip-name { font-size: var(--text-xs); color: var(--muted-foreground); }
+
+.zs-create__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4) var(--space-3) var(--space-5);
+  border-top: 1px solid color-mix(in srgb, var(--foreground) 6%, transparent);
+  background: color-mix(in srgb, var(--muted) 30%, transparent);
+}
+.zs-create__cipher {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: var(--weight-medium);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+  white-space: nowrap;
+}
+.zs-create__preview {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--muted-foreground);
+}
+.zs-create__preview svg { flex-shrink: 0; }
+.zs-create__actions { display: flex; align-items: center; gap: var(--space-2); }

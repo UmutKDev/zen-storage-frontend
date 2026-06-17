@@ -1,0 +1,40 @@
+name: supply-chain
+
+on:
+  pull_request:
+  push:
+    branches: [main, v2]
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+
+      # Fail on high/critical advisories in the SHIPPED (production) surface.
+      # Dev-tool advisories (e.g. handlebars via eslint-plugin-boundaries) are
+      # tracked + bumped by Renovate, not shipped to users.
+      - name: Vulnerability audit
+        run: bun audit --audit-level=high --production
+
+      # License allowlist — fail on (strong) copyleft / unknown. LGPL-3.0 is
+      # allow-listed for sharp/libvips only (Next image optimizer; weak copyleft,
+      # dynamically linked, not shipped to the client) — see DECISIONS D-P0.10.
+      - name: License allowlist
+        run: >
+          bunx license-checker --production --summary --excludePrivatePackages
+          --onlyAllow
+          "MIT;Apache-2.0;BSD-2-Clause;BSD-3-Clause;ISC;CC0-1.0;0BSD;Unlicense;BlueOak-1.0.0;Python-2.0;CC-BY-4.0;LGPL-3.0-or-later"
+
+      # SBOM (CycloneDX). cyclonedx-npm needs an npm lockfile; generate one
+      # (metadata only, no install) from package.json first.
+      - name: Generate SBOM
+        run: |
+          npm install --package-lock-only --ignore-scripts
+          bunx @cyclonedx/cyclonedx-npm --omit dev --output-file sbom.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: sbom.json

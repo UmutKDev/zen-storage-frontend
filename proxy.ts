@@ -1,39 +1,19 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
-import { getToken } from "next-auth/jwt";
-
-/**
- * Middleware: redirect authenticated users away from the authentication page.
- *
- * - When a request targets `/authentication` (or any sub-path) and the user
- *   already has a valid next-auth token, redirect to `/`.
- * - Keep the middleware small and limited via `matcher` below.
- *
- * Note: this requires NEXTAUTH_SECRET to be set in environment variables.
- */
-export async function proxy(req: NextRequest) {
-  const { pathname } = req.nextUrl;
-
-  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-
-  // only act for the authentication page route(s)
-  if (!token && pathname.startsWith("/storage")) {
-    // getToken checks the request cookies for a valid next-auth JWT
-    return NextResponse.redirect(new URL("/authentication", req.url));
-  } else if (token && pathname.startsWith("/authentication")) {
-    const url = req.nextUrl.clone();
-    url.pathname = "/";
-    return NextResponse.redirect(url);
-  }
-
-  return NextResponse.next();
-}
+// Next 16.2 rename of `middleware.ts` (exports `proxy`, Node runtime only).
+// Thin shim — real logic lives in lib/auth/proxy. `config` must be a static
+// literal in THIS file (Next can't statically parse a re-exported config).
+export { proxy } from "@/lib/auth/proxy";
 
 export const config = {
   matcher: [
-    "/authentication",
-    "/authentication/:path*",
-    "/storage",
-    "/storage/:path*",
+    {
+      // All routes except API, static assets, and metadata files. `missing`
+      // skips next/link prefetches — they don't need security headers/nonce.
+      source:
+        "/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|manifest.webmanifest|opengraph-image).*)",
+      missing: [
+        { type: "header", key: "next-router-prefetch" },
+        { type: "header", key: "purpose", value: "prefetch" },
+      ],
+    },
   ],
 };

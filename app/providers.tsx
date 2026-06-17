@@ -1,59 +1,82 @@
 "use client";
 
-import React from "react";
-import { SessionProvider, useSession } from "next-auth/react";
-import { useEffect } from "react";
-import { useRouter, usePathname } from "next/navigation";
-import { setClientToken } from "@/Service/Instance";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { getDefaultQueryClient } from "@/lib/queryClient";
-import { accountSecurityApiFactory } from "@/Service/Factories";
+import { useEffect, useState, type ReactNode } from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ThemeProvider } from "next-themes";
+import { MotionConfig } from "framer-motion";
+import { SessionProvider } from "@/lib/auth/client";
+import { SessionSync } from "@/features/auth";
 import { NotificationProvider } from "@/features/notifications";
+import { JobProgressPoller } from "@/features/jobs";
+import { CookieConsentBanner } from "@/features/account";
+import { secureFolderTokenGetter } from "@/features/secure-folders";
+import { Toaster, TooltipProvider } from "@/components/ui";
+import { isApiError } from "@/lib/api";
+import {
+  registerTeamSource,
+  registerSecureFolderTokenSource,
+} from "@/service/token-sources";
+import { useWorkspaceStore } from "@/stores";
 
-export default function Providers({ children }: { children: React.ReactNode }) {
-  // SessionProvider enables useSession/useSession hooks in client components
-  const queryClient = getDefaultQueryClient();
+function makeQueryClient(): QueryClient {
+  return new QueryClient({
+    defaultOptions: {
+      // Retry policy per data-layer §2.9: queries retry only transient failures
+      // (5xx / network) up to 2×, never 4xx (auth/validation/conflict/etc.).
+      queries: {
+        retry: (failureCount, error) => {
+          if (
+            isApiError(error) &&
+            error.code !== "SERVER_ERROR" &&
+            error.code !== "NETWORK"
+          ) {
+            return false;
+          }
+          return failureCount < 2;
+        },
+        staleTime: 30_000,
+        refetchOnWindowFocus: false,
+      },
+      mutations: { retry: 0 },
+    },
+  });
+}
+
+/**
+ * Client provider tree. `SessionSync` registers the session token-source +
+ * sign-out handler (it needs the Session + QueryClient contexts); team +
+ * secure-folder sources are registered here (no React context needed).
+ */
+export function Providers({ children }: { children: ReactNode }) {
+  const [queryClient] = useState(makeQueryClient);
+
+  useEffect(() => {
+    registerTeamSource(() => useWorkspaceStore.getState().teamId);
+    // Secure-folder tokens persist to sessionStorage (tab-scoped, expiry-pruned,
+    // cleared on sign-out) — the store rehydrates itself, no lifecycle hook needed.
+    registerSecureFolderTokenSource(secureFolderTokenGetter);
+  }, []);
+
   return (
     <SessionProvider>
       <QueryClientProvider client={queryClient}>
-        <NotificationProvider>{children}</NotificationProvider>
-        <AuthTokenSync />
-        <ReactQueryDevtools initialIsOpen={false} />
+        <SessionSync />
+        <JobProgressPoller />
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <MotionConfig reducedMotion="user">
+            <NotificationProvider>
+              <TooltipProvider>{children}</TooltipProvider>
+            </NotificationProvider>
+            <Toaster />
+            <CookieConsentBanner />
+          </MotionConfig>
+        </ThemeProvider>
       </QueryClientProvider>
     </SessionProvider>
   );
-}
-
-function AuthTokenSync() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
-  const pathname = usePathname();
-
-  useEffect(() => {
-    // If we have a session ID, set it for API calls
-    const sessionId = session?.sessionId ?? session?.user?.sessionId ?? null;
-    setClientToken(sessionId);
-
-    // Check for 2FA requirement
-    if (status === "authenticated" && session?.requiresTwoFactor) {
-      if (pathname !== "/authentication/2fa") {
-        router.push("/authentication/2fa");
-        return;
-      }
-    }
-
-    // Explicit Session Validation on Load via /Api/Authentication/Sessions
-    if (status === "authenticated" && sessionId) {
-      accountSecurityApiFactory.getSessions().catch((err) => {
-        // 401 errors are handled by Instance interceptor (triggering signOut)
-        // Other errors are ignored (e.g. network error)
-        if (process.env.NODE_ENV === "development") {
-          console.warn("[AuthTokenSync] Session check failed", err);
-        }
-      });
-    }
-  }, [session, status, router, pathname]);
-
-  return null;
 }

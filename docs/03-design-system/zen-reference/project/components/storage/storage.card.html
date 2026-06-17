@@ -1,0 +1,73 @@
+<!-- @dsCard group="Components" viewport="700x860" name="Storage" subtitle="FileRow, FileCard, SmartGrid + FileTile, Breadcrumb, UsageBar, BulkActionBar" -->
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../../styles.css" />
+<script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<style>
+  body { padding: 20px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { FileRow, FileCard, SmartGrid, FileTile, Breadcrumb, UsageBar, BulkActionBar } = window.ZenStorageDesignSystem_33e1f8;
+const T = "../../assets/thumbs/";
+const noop = () => {};
+
+function StorageCard() {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      <Breadcrumb segments={["Projects", "Q2 launch"]} onNavigate={noop} />
+      <div className="zs-file-list">
+        <div className="zs-file-list__head" aria-hidden="true">
+          <span className="zs-file-list__head-spacer"></span>
+          <span className="zs-file-list__head-main">
+            <span className="zs-file-list__head-name">Name</span>
+            <span className="zs-file-list__head-size">Size</span>
+            <span className="zs-file-list__head-date">Modified</span>
+          </span>
+          <span className="zs-file-list__head-actions"></span>
+        </div>
+        <FileRow name="Documents" kind="dir" onOpen={noop} onToggleSelect={noop} onAction={noop} />
+        <FileRow name="Vault" kind="dir" encrypted locked onOpen={noop} />
+        <FileRow name="Archive" kind="dir" encrypted childCount={3} onOpen={noop} onToggleSelect={noop} onAction={noop} />
+        <FileRow name="Private" kind="dir" hidden onOpen={noop} onToggleSelect={noop} onAction={noop} />
+        <FileRow name="quarterly-report.pdf" size={4200000} modified="2026-05-12" selected selecting onToggleSelect={noop} onAction={noop} />
+        <FileRow name="backup-2026.zip" size={734000000} modified="2026-04-02" task={{ label: "Extracting…", progress: 42 }} onToggleSelect={noop} onAction={noop} />
+        <FileRow name="spring-photos.tar.gz" size={48000000} modified="2026-06-13" task={{ label: "Queued — extracts next" }} onToggleSelect={noop} onAction={noop} />
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
+        <FileCard name="Photos" kind="dir" onOpen={noop} onToggleSelect={noop} onAction={noop} />
+        <FileCard name="Vault" kind="dir" encrypted locked onOpen={noop} />
+        <FileCard name="demo-final.mp4" size={734000000} selected selecting onToggleSelect={noop} onAction={noop} />
+        <FileCard name="notes.md" size={2400} onToggleSelect={noop} onAction={noop} />
+      </div>
+      <SmartGrid rowHeight={120}>
+        <FileTile name="Albums" kind="dir" childCount={3} onOpen={noop} onToggleSelect={noop} onAction={noop} />
+        <FileTile name="dunes.jpg" thumb={T + "dunes.jpg"} ratio={16 / 9} size={4100000} onOpen={noop} onToggleSelect={noop} onAction={noop} />
+        <FileTile name="fern-portrait.jpg" thumb={T + "fern-portrait.jpg"} ratio={2 / 3} size={2900000} onOpen={noop} onToggleSelect={noop} onAction={noop} />
+        <FileTile name="matsuri-clip.mp4" thumb={T + "video-demo.jpg"} ratio={16 / 9} duration="0:42" selected selecting size={184000000} onOpen={noop} onToggleSelect={noop} onAction={noop} />
+        <FileTile name="terracotta-wall.jpg" thumb={T + "terracotta-wall.jpg"} ratio={1} size={3200000} onOpen={noop} onToggleSelect={noop} onAction={noop} />
+        <FileTile name="coastline.jpg" thumb={T + "coastline.jpg"} ratio={21 / 9} size={6800000} onOpen={noop} onToggleSelect={noop} onAction={noop} />
+        <FileTile name="kyoto-garden.jpg" thumb={T + "kyoto-garden.jpg"} ratio={3 / 2} size={5400000} onOpen={noop} onToggleSelect={noop} onAction={noop} />
+      </SmartGrid>
+      <div style={{ display: "flex", justifyContent: "center" }}>
+        <BulkActionBar count={3} onSelectAll={noop} onMove={noop} onDownload={noop} onDelete={noop} onClear={noop} />
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+        <UsageBar used={42.5e9} max={100e9} />
+        <UsageBar used={91e9} max={100e9} />
+      </div>
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById("root")).render(<StorageCard />);
+</script>
+</body>
+</html>

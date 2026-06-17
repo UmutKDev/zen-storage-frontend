@@ -1,0 +1,8 @@
+[
+  {
+    "name": "App client JS (all chunks, gzip — incl. the lazy CodeMirror editor chunk)",
+    "path": ".next/static/chunks/**/*.js",
+    "limit": "820 KB",
+    "gzip": true
+  }
+]

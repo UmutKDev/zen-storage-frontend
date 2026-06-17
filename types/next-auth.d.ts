@@ -1,21 +1,18 @@
-// Project-wide next-auth typings and access token shape
-import "next-auth";
+import type { DefaultSession } from "next-auth";
 
+/**
+ * Session/JWT shape for the session-id model (auth-integration §1). The client
+ * never sees a refresh token; we carry the backend `sessionId` + `expiresAt`.
+ */
 declare module "next-auth" {
-  interface User {
-    id?: string;
-    sessionId?: string;
-    expiresAt?: string;
-    requiresTwoFactor?: boolean;
-    role?: string;
-  }
-
   interface Session {
     sessionId?: string;
     expiresAt?: string;
-    requiresTwoFactor?: boolean;
-    error?: string | null;
-    user?: User;
+    user: DefaultSession["user"] & { id?: string };
+  }
+  interface User {
+    sessionId?: string;
+    expiresAt?: string;
   }
 }
 
@@ -23,7 +20,8 @@ declare module "next-auth/jwt" {
   interface JWT {
     sessionId?: string;
     expiresAt?: string;
-    requiresTwoFactor?: boolean;
     id?: string;
   }
 }
+
+export {};
