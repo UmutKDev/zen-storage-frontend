@@ -4,18 +4,21 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("@/features/jobs/api/jobs.queries", () => ({
   fetchArchiveStatus: vi.fn(),
   fetchDuplicateScanStatus: vi.fn(),
+  fetchDirectoryCreateStatus: vi.fn(),
 }));
 
 import { ApiError } from "@/lib/api";
 import { reconcileActiveJobs, useJobsStore } from "@/features/jobs";
 import {
   fetchArchiveStatus,
+  fetchDirectoryCreateStatus,
   fetchDuplicateScanStatus,
 } from "@/features/jobs/api/jobs.queries";
 import { useWorkspaceStore } from "@/stores";
 
 const archiveMock = vi.mocked(fetchArchiveStatus);
 const scanMock = vi.mocked(fetchDuplicateScanStatus);
+const folderCreateMock = vi.mocked(fetchDirectoryCreateStatus);
 
 function makeQc() {
   return { invalidateQueries: vi.fn(), setQueryData: vi.fn() };
@@ -97,5 +100,62 @@ describe("reconcileActiveJobs — polling fallback", () => {
     await reconcileActiveJobs(asQc(makeQc()));
 
     expect(useJobsStore.getState().jobs.j1.status).toBe("cancelled");
+  });
+
+  it("advances a running folder-create job from its status poll", async () => {
+    useJobsStore.getState().track({ id: "f1", kind: "folder-create", title: "new" });
+    folderCreateMock.mockResolvedValueOnce({
+      JobId: "f1",
+      Status: "active",
+      Percentage: 30,
+    } as never);
+
+    await reconcileActiveJobs(asQc(makeQc()));
+
+    expect(folderCreateMock).toHaveBeenCalledWith("f1");
+    const job = useJobsStore.getState().jobs.f1;
+    expect(job.status).toBe("running");
+    expect(job.percentage).toBe(30);
+  });
+
+  it("settles a completed folder-create job and invalidates storage", async () => {
+    useJobsStore.getState().track({ id: "f1", kind: "folder-create", title: "new" });
+    folderCreateMock.mockResolvedValueOnce({
+      JobId: "f1",
+      Status: "completed",
+      Percentage: 100,
+    } as never);
+
+    const qc = makeQc();
+    await reconcileActiveJobs(asQc(qc));
+
+    expect(useJobsStore.getState().jobs.f1.status).toBe("complete");
+    expect(qc.invalidateQueries).toHaveBeenCalled();
+  });
+
+  it("settles a failed folder-create job, surfacing the error", async () => {
+    useJobsStore.getState().track({ id: "f1", kind: "folder-create", title: "new" });
+    folderCreateMock.mockResolvedValueOnce({
+      JobId: "f1",
+      Status: "failed",
+      Error: "disk full",
+    } as never);
+
+    await reconcileActiveJobs(asQc(makeQc()));
+
+    const job = useJobsStore.getState().jobs.f1;
+    expect(job.status).toBe("failed");
+    expect(job.error).toBe("disk full");
+  });
+
+  it("settles a folder-create job as cancelled when its status 404s", async () => {
+    useJobsStore.getState().track({ id: "f1", kind: "folder-create", title: "new" });
+    folderCreateMock.mockRejectedValueOnce(
+      new ApiError({ code: "NOT_FOUND", messages: ["gone"] }),
+    );
+
+    await reconcileActiveJobs(asQc(makeQc()));
+
+    expect(useJobsStore.getState().jobs.f1.status).toBe("cancelled");
   });
 });

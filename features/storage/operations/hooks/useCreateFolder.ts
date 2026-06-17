@@ -12,9 +12,10 @@ import { invalidateFolder } from "../lib/invalidate";
 import { usePendingOpsStore } from "../stores/pendingOps.store";
 import { useConflictMutation } from "./useConflictMutation";
 
-/** True when the async create-Start endpoint isn't reachable yet (client not
- *  regenerated → method shim throws TypeError, or backend route missing → 404),
- *  so the caller should fall back to the synchronous create. */
+/** True when the async create-Start endpoint isn't reachable (backend route
+ *  missing → 404, or the client method absent → TypeError), so the caller falls
+ *  back to the synchronous create. A real conflict is 409 (CONFLICT) and flows to
+ *  the conflict prompt instead — never here. */
 function isMissingEndpoint(err: unknown): boolean {
   return (
     err instanceof TypeError || (isApiError(err) && err.code === "NOT_FOUND")

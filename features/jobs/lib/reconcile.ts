@@ -5,6 +5,7 @@ import {
   ArchiveStatusKindEnum,
   CloudArchiveStatusResponseModelStatusEnum,
   CloudDuplicateScanStatusResponseModelStatusEnum,
+  DirectoryCreateStatusResponseModelStatusEnum,
 } from "@/service/models";
 import { useJobsStore, type Job, type JobStatus } from "../stores/jobs.store";
 import {
@@ -29,6 +30,14 @@ function scanStatusToJob(status: string): JobStatus {
     return "failed";
   if (status === CloudDuplicateScanStatusResponseModelStatusEnum.Cancelled)
     return "cancelled";
+  return "running";
+}
+
+function directoryCreateStatusToJob(status: string): JobStatus {
+  if (status === DirectoryCreateStatusResponseModelStatusEnum.Completed)
+    return "complete";
+  if (status === DirectoryCreateStatusResponseModelStatusEnum.Failed)
+    return "failed";
   return "running";
 }
 
@@ -101,7 +110,7 @@ async function reconcileDirectoryCreate(
 ): Promise<void> {
   try {
     const res = await fetchDirectoryCreateStatus(job.id);
-    const status = archiveStatusToJob(res.Status);
+    const status = directoryCreateStatusToJob(res.Status);
     if (status === "running") {
       useJobsStore.getState().applyEvent(job.id, "folder-create", {
         percentage: res.Percentage,
@@ -113,8 +122,8 @@ async function reconcileDirectoryCreate(
       .settle(job.id, status, { error: res.Error ?? undefined });
     invalidateAfterJob(qc);
   } catch (err) {
-    // 404 = job evicted/finished → cancelled. A TypeError (status endpoint not in
-    // the client yet) leaves the job running for the socket events to settle.
+    // 404 = job evicted/finished → cancelled. Other errors leave the job running
+    // for the next tick / the socket FOLDER_CREATE_* events to settle.
     if (isApiError(err) && err.code === "NOT_FOUND") {
       useJobsStore.getState().settle(job.id, "cancelled");
       invalidateAfterJob(qc);
