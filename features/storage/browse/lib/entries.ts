@@ -113,6 +113,22 @@ export function filterEntries(
   });
 }
 
+/**
+ * Client-side "This folder" search: a case-insensitive filename substring match
+ * over the loaded entries (folders + files). The folder listing is a single
+ * non-paginated call, so this sees every entry in the folder — the match is
+ * complete, with no API round-trip. "Everywhere" (global) escalates to
+ * `Cloud/Search`. Order is preserved (it filters the already-arranged list).
+ */
+export function matchEntries(
+  entries: ReadonlyArray<FolderEntry>,
+  query: string,
+): FolderEntry[] {
+  const q = query.trim().toLowerCase();
+  if (!q) return entries.slice();
+  return entries.filter((e) => e.name.toLowerCase().includes(q));
+}
+
 /** The view preferences that shape a browse/search entry list. */
 export interface ArrangePrefs {
   sortKey: SortKey;

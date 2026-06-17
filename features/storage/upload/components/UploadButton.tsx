@@ -10,8 +10,9 @@ import { UploadDialog } from "./UploadDialog";
 
 /**
  * The storage browser's hero action — the single `upload` Button variant
- * (engraved icon well + ⌘U chip). Opens the premium UploadDialog, which feeds
- * the existing multipart queue + background tray. Exactly ONE per view.
+ * (engraved icon well). Opens the premium UploadDialog, which feeds the existing
+ * multipart queue + background tray. Exactly ONE per view. ⌘U (in the tooltip +
+ * help overlay) opens it via the central shortcut dispatcher.
  *
  * The dialog's open state lives in the uploads store so the background tray can
  * hide while the dialog is open (the dialog already shows the queue). ⌘U is
@@ -51,9 +52,6 @@ export function UploadButton({ path }: { path: string }) {
           <Upload />
         </span>
         {t("storage.upload.menu.button")}
-        <kbd className="zs-btn-upload__kbd" aria-hidden>
-          ⌘U
-        </kbd>
       </Button>
       <UploadDialog path={path} open={open} onOpenChange={setOpen} />
     </>

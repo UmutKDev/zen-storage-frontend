@@ -161,7 +161,10 @@ export function DuplicateScanPanel({
     body = (
       <div className="space-y-6 py-1">
         <div className="flex items-center justify-between gap-4 rounded-xl border border-border/60 bg-muted/20 px-4 py-3">
-          <Label htmlFor="dup-recursive" className="flex flex-col gap-0.5">
+          <Label
+            htmlFor="dup-recursive"
+            className="flex flex-col gap-0.5 items-start"
+          >
             <span className="text-sm font-medium">
               {t("storage.duplicate.recursive")}
             </span>
@@ -200,7 +203,9 @@ export function DuplicateScanPanel({
     );
     footer = (
       <div className="flex justify-end">
-        <Button onClick={() => start({ recursive, threshold: PRESETS[preset] })}>
+        <Button
+          onClick={() => start({ recursive, threshold: PRESETS[preset] })}
+        >
           {t("storage.duplicate.start")}
         </Button>
       </div>
@@ -282,7 +287,11 @@ export function DuplicateScanPanel({
         className="min-h-0 flex-1 px-6 py-4"
         renderRow={(g) => (
           <div className="pb-4">
-            <DuplicateGroupCard group={g} selected={selected} onToggle={toggle} />
+            <DuplicateGroupCard
+              group={g}
+              selected={selected}
+              onToggle={toggle}
+            />
           </div>
         )}
       />
@@ -343,7 +352,9 @@ export function DuplicateScanPanel({
           {isResults ? (
             body
           ) : (
-            <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">{body}</div>
+            <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">
+              {body}
+            </div>
           )}
 
           {/* Footer */}

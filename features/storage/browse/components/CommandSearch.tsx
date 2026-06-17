@@ -51,6 +51,18 @@ export function CommandSearch() {
     if (urlQuery.trim() !== raw.trim()) setRaw(urlQuery);
   }
 
+  // URL → scope toggle: the URL is the source of truth (the ⌘K "search
+  // everywhere" command, a shared link, or clearing the query — which drops the
+  // scope back to "This folder"). Mirroring external scope changes keeps the
+  // toggle from disagreeing with the results, and makes every fresh search start
+  // local ("This folder" is instant; "Everywhere" is the explicit escalation).
+  const urlScope = (params.get("scope") as SearchScope) ?? "current";
+  const [lastUrlScope, setLastUrlScope] = useState(urlScope);
+  if (urlScope !== lastUrlScope) {
+    setLastUrlScope(urlScope);
+    if (urlScope !== scope) setScope(urlScope);
+  }
+
   // Local echo (debounced) + scope → URL. Guarded so our own writes don't loop.
   useEffect(() => {
     const q = debounced.trim();

@@ -15,11 +15,15 @@ export const SEARCH_MIN_CHARS = 2;
 const SEARCH_TAKE = 100;
 
 /**
- * Filename search via `Cloud/Search`, scoped to the current folder or global.
+ * Global ("Everywhere") filename search via `Cloud/Search`. The "This folder"
+ * scope is handled **client-side** in `StorageBrowser` (a `matchEntries` filter
+ * over the already-loaded listing — the folder is a single non-paginated call, so
+ * that match is complete and instant), so this query only enables for
+ * `scope === "global"` and never round-trips for an in-folder search.
+ *
  * Results map through the same `toEntries` + arrange pipeline as folder browse,
- * so the active sort/filter apply and `ListView`/`GridView` render them as-is.
- * The query only fires when ≥2 chars (the backend rejects shorter); switching
- * scope changes the query key so the in-flight request is abandoned.
+ * so the active sort/filter apply and `ListView`/`SmartGridView` render them as-is.
+ * The query only fires when ≥2 chars (the backend rejects shorter).
  */
 export function useSearch(opts: {
   query: string;
@@ -30,7 +34,10 @@ export function useSearch(opts: {
   const ownerId = useOwnerId();
   const query = opts.query.trim();
   const extension = (opts.extension ?? "").trim().toLowerCase();
-  const enabled = Boolean(ownerId) && query.length >= SEARCH_MIN_CHARS;
+  const enabled =
+    Boolean(ownerId) &&
+    query.length >= SEARCH_MIN_CHARS &&
+    opts.scope === "global";
 
   const sortKey = useViewPrefs((s) => s.sortKey);
   const sortDir = useViewPrefs((s) => s.sortDir);
@@ -49,7 +56,8 @@ export function useSearch(opts: {
       getSearch(
         {
           query,
-          path: opts.scope === "current" ? opts.path : undefined,
+          // Always a global search — folder-scoped search never reaches here.
+          path: undefined,
           extension: extension || undefined,
           take: SEARCH_TAKE,
         },

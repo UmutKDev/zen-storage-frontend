@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   applyOwnedUnlocks,
+  matchEntries,
   sortEntries,
   toEntries,
 } from "@/features/storage/browse/lib/entries";
@@ -77,6 +78,47 @@ describe("applyOwnedUnlocks", () => {
     );
     expect(dirs[0].IsLocked).toBe(false); // work/secret → has token → unlocked
     expect(dirs[1].IsLocked).toBe(true); // work/other → no token → stays locked
+  });
+});
+
+describe("matchEntries", () => {
+  const entries = toEntries(
+    [dir("Reports"), dir("Photos")],
+    [file("report.txt", 1), file("notes.md", 2), file("README", 3)],
+  );
+
+  it("matches folders and files by case-insensitive name substring", () => {
+    expect(matchEntries(entries, "re").map((e) => e.name)).toEqual([
+      "Reports",
+      "report.txt",
+      "README",
+    ]);
+  });
+
+  it("is case-insensitive", () => {
+    expect(matchEntries(entries, "REPORT").map((e) => e.name)).toEqual([
+      "Reports",
+      "report.txt",
+    ]);
+  });
+
+  it("preserves the incoming order (filters an already-arranged list)", () => {
+    const out = matchEntries(entries, "o"); // Reports, Photos, report.txt, notes.md
+    expect(out.map((e) => e.name)).toEqual([
+      "Reports",
+      "Photos",
+      "report.txt",
+      "notes.md",
+    ]);
+  });
+
+  it("returns every entry for an empty/whitespace query", () => {
+    expect(matchEntries(entries, "   ")).toHaveLength(entries.length);
+    expect(matchEntries(entries, "")).toHaveLength(entries.length);
+  });
+
+  it("returns an empty list when nothing matches", () => {
+    expect(matchEntries(entries, "zzz")).toEqual([]);
   });
 });
 

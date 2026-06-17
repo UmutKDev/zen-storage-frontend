@@ -25,6 +25,7 @@ import { SEARCH_MIN_CHARS, useSearch, type SearchScope } from "../hooks/useSearc
 import { useStorageCommands } from "../hooks/useStorageCommands";
 import { usePreviewNavStore } from "../stores/previewNav.store";
 import { useViewPrefs } from "../stores/viewPrefs.store";
+import { matchEntries } from "../lib/entries";
 import { pathHref } from "../lib/href";
 import { BreadcrumbBar } from "./BreadcrumbBar";
 import {
@@ -37,9 +38,10 @@ import {
 } from "./BrowserStates";
 import { CommandSearch } from "./CommandSearch";
 import { FilterMenu } from "./FilterMenu";
-import { GridView } from "./GridView";
+import { GridSizeSlider } from "./GridSizeSlider";
 import { ListView } from "./ListView";
-import { ScanButton } from "./ScanButton";
+import { MoreMenu } from "./MoreMenu";
+import { SmartGridView } from "./SmartGridView";
 import { SortMenu } from "./SortMenu";
 import { ViewToggle } from "./ViewToggle";
 
@@ -54,12 +56,24 @@ export function StorageBrowser({ path }: { path: string }) {
   const scope = (params.get("scope") as SearchScope) ?? "current";
   const searching = query.length >= SEARCH_MIN_CHARS;
 
-  // Both queries are always mounted (folder browse is cached, search is gated by
-  // `enabled`); we render whichever mode the URL is in.
+  // Folder browse is always mounted (cached). Search has two modes:
+  //  • "This folder" (default) — an instant client-side filter over the loaded
+  //    listing (`matchEntries`); the folder is a single non-paginated call, so the
+  //    local match is complete and never hits the network.
+  //  • "Everywhere" — escalates to `Cloud/Search` across all folders; the only
+  //    mode that round-trips (`useSearch` stays disabled until then).
   const folder = useFolderEntries(path);
   const search = useSearch({ query, scope, path });
-  const active = searching ? search : folder;
-  const entries = active.entries;
+  const globalSearch = searching && scope === "global";
+  const localResults = useMemo(
+    () => matchEntries(folder.entries, query),
+    [folder.entries, query],
+  );
+  const entries = !searching
+    ? folder.entries
+    : globalSearch
+      ? search.entries
+      : localResults;
 
   const selection = useItemSelection(entries, path);
   useStorageCommands({ path, selection });
@@ -109,18 +123,22 @@ export function StorageBrowser({ path }: { path: string }) {
   }
 
   // Search result count, announced politely (separate region — it changes
-  // independently of selection). Gated on `!isFetching` so a refetch that keeps
+  // independently of selection). Local "This folder" results are always ready
+  // (synchronous); "Everywhere" is gated on `!isFetching` so a refetch that keeps
   // the previous results on screen (placeholderData) doesn't announce a stale
   // count before the new one settles.
-  const searchLive =
-    searching && !search.isFetching && !search.isError
-      ? entries.length === 1
-        ? t("storage.search.oneResult")
-        : `${entries.length} ${t("storage.search.resultsSuffix")}`
-      : "";
+  const countReady =
+    searching &&
+    (globalSearch ? !search.isFetching && !search.isError : true);
+  const searchLive = countReady
+    ? entries.length === 1
+      ? t("storage.search.oneResult")
+      : `${entries.length} ${t("storage.search.resultsSuffix")}`
+    : "";
 
   let content: ReactNode;
-  if (searching) {
+  if (globalSearch) {
+    // "Everywhere" — server-side results from Cloud/Search.
     content = search.isError ? (
       <BrowserError onRetry={search.refetch} />
     ) : search.isPending ? (
@@ -128,12 +146,40 @@ export function StorageBrowser({ path }: { path: string }) {
     ) : entries.length === 0 ? (
       <SearchEmpty
         query={query}
-        scope={scope}
+        scope="global"
         onBroaden={broadenSearch}
         onClear={clearSearch}
       />
     ) : view === "grid" ? (
-      <GridView entries={entries} path={path} selection={selection} />
+      <SmartGridView entries={entries} path={path} selection={selection} />
+    ) : (
+      <ListView entries={entries} path={path} selection={selection} />
+    );
+  } else if (searching) {
+    // "This folder" — instant client-side filter over the loaded listing. The
+    // folder's own loading/locked/error states still gate it (we're filtering its
+    // rows); an empty match offers escalation to a global "Everywhere" search.
+    content = folder.isLocked ? (
+      <FolderLocked
+        onUnlock={() =>
+          useSecureFolderUiStore
+            .getState()
+            .open({ kind: "unlock", path, mode: "folder" })
+        }
+      />
+    ) : folder.isError ? (
+      <BrowserError onRetry={folder.refetch} />
+    ) : folder.isPending ? (
+      <BrowserSkeleton />
+    ) : entries.length === 0 ? (
+      <SearchEmpty
+        query={query}
+        scope="current"
+        onBroaden={broadenSearch}
+        onClear={clearSearch}
+      />
+    ) : view === "grid" ? (
+      <SmartGridView entries={entries} path={path} selection={selection} />
     ) : (
       <ListView entries={entries} path={path} selection={selection} />
     );
@@ -158,7 +204,7 @@ export function StorageBrowser({ path }: { path: string }) {
         <EmptyFolder />
       )
     ) : view === "grid" ? (
-      <GridView entries={entries} path={path} selection={selection} />
+      <SmartGridView entries={entries} path={path} selection={selection} />
     ) : (
       <ListView entries={entries} path={path} selection={selection} />
     );
@@ -168,19 +214,20 @@ export function StorageBrowser({ path }: { path: string }) {
     <div className="flex min-h-0 flex-1 flex-col gap-4">
       <DndMoveLayer entries={entries} path={path} selection={selection}>
         <div className="flex flex-col gap-3">
+          <BreadcrumbBar path={path} />
+          {/* Actions anchor the left (where the eye lands); search + view controls
+              sit on the right — one balanced toolbar under the breadcrumb. */}
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <BreadcrumbBar path={path} />
             <div className="flex items-center gap-2">
               <UploadButton path={path} />
-              <ScanButton />
               <CreateMenu path={path} />
+              <MoreMenu />
             </div>
-          </div>
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <CommandSearch />
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center justify-end gap-2">
+              <CommandSearch />
               <FilterMenu />
               <SortMenu />
+              {view === "grid" ? <GridSizeSlider /> : null}
               <ViewToggle />
             </div>
           </div>

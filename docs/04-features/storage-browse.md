@@ -7,10 +7,11 @@
 
 **Layout**
 ```
-[breadcrumb ........................ view toggle | filter | sort | search]
+[ breadcrumb .......................................................... ]
+[ Upload · New · ⋯more ........... search · filter · sort · list/grid ]
 [ ─────────────────────── content ─────────────────────── ]
-  list view:  FileRow × n (virtualized)
-  grid view:  FileCard × n (virtualized, responsive auto-fill)
+  list view:  BrowseRow × n (virtualized)
+  grid view:  TileCard × n (justified smart grid, virtualized) + tile-size slider
 [ usage bar (shell) ]   [ upload tray (global, floating) ]
 ```
 
@@ -22,8 +23,11 @@
 
 **Views**
 - **List:** dense rows (`sm`), columns name/size/modified/actions; sortable headers.
-- **Smart grid:** responsive cards with thumbnail (images via CDN `?w=&h=`), name, meta; badges for encrypted/hidden/AV.
-- View toggle persists per session (`ui` store).
+- **Smart grid:** a Yandex-style **justified** grid (`SmartGridView` + `justifyRows` → one `.zs-smartgrid` per
+  packed row, virtualized). Image tiles keep their aspect ratio (`TileCard`/`FileTile`; thumbnail via CDN `?h=`,
+  ratio from `Metadata.Width/Height`); folders/docs/video are square tinted icon tiles. Name + meta + the
+  encrypted/hidden status chip. Drag/select/actions parity with the list via the shared `useEntryInteraction` hook.
+- View toggle + a grid **tile-size** slider persist per session (`viewPrefs` store).
 
 **Navigation**
 - Folder click → push URL segment (`/storage/a/b`); breadcrumb reflects path; back/forward work (deep‑linking,

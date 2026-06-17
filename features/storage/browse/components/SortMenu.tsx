@@ -56,7 +56,7 @@ export function SortMenu() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
-          variant="outline"
+          variant="ghost"
           size="sm"
           aria-label={t("storage.sort.label")}
           title={`${t("storage.sort.label")} — ${t(`storage.sort.${sortKey}`)} · ${dirLabel}`}

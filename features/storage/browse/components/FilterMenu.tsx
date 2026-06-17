@@ -56,11 +56,12 @@ export function FilterMenu() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
-          variant="outline"
+          variant="ghost"
           size="sm"
-          // Accent the trigger while a filter is active so files never look
-          // "missing" — the active type is also read aloud via the label/title.
-          className={active ? "border-primary/40 text-foreground" : undefined}
+          // A quiet view-control by default; while a filter is active, fill it so
+          // files never look "missing" — the active type is also read via the
+          // label/title.
+          className={active ? "bg-accent text-foreground" : undefined}
           aria-label={t("storage.filter.label")}
           title={`${t("storage.filter.label")} — ${t(`storage.filter.${filterType}`)}`}
         >

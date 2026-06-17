@@ -105,7 +105,8 @@
   "storage": {
     "title": "Storage",
     "breadcrumb": { "home": "Home", "label": "Folder path" },
-    "view": { "list": "List view", "grid": "Grid view" },
+    "view": { "list": "List view", "grid": "Grid view", "tileSize": "Tile size" },
+    "more": { "label": "More actions" },
     "sort": {
       "label": "Sort",
       "name": "Name",
@@ -166,6 +167,7 @@
     },
     "duplicate": {
       "button": "Find duplicates",
+      "menuDesc": "Scan this folder for identical or similar files.",
       "title": "Find duplicate files",
       "subtitle": "Scan this folder for identical and visually similar files, then free up space.",
       "recursive": "Scan subfolders",
