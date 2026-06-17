@@ -60,6 +60,24 @@ describe("secureFolderRequestInterceptor", () => {
     expect(received).toContain("work");
   });
 
+  it("extracts Key from a multipart FormData body (UploadPart into an encrypted folder)", () => {
+    // `UploadPart` is the one Cloud mutation that sends its Key via
+    // multipart/form-data, so `config.data` is a FormData instance (not a JSON
+    // string / plain object) — the token must still resolve, or uploads into an
+    // unlocked encrypted folder 403.
+    const data = new FormData();
+    data.append("Key", "work/file.txt");
+    data.append("UploadId", "u1");
+    data.append("PartNumber", "1");
+    const { config, set } = mockConfig({
+      url: "/Api/Cloud/Upload/UploadPart",
+      data,
+    });
+    secureFolderRequestInterceptor(config);
+    expect(received).toContain("work/file.txt");
+    expect(set).toHaveBeenCalledWith("X-Folder-Session", "ENC");
+  });
+
   it("extracts Path from a nested request-model wrapper (stringified)", () => {
     const { config } = mockConfig({
       url: "/Api/Cloud/Directory/Lock",

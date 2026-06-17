@@ -31,6 +31,17 @@ function extractTargetPath(config: InternalAxiosRequestConfig): string | null {
     if (typeof fromParams === "string") return fromParams;
   }
 
+  // Multipart bodies (the `UploadPart` proxy) carry the target in a FormData
+  // field, NOT in the URL or a JSON body — and FormData exposes its values via
+  // `.get()`, not as own properties, so the plain-object/JSON path below can't see
+  // them. Read it directly, else an upload into an unlocked encrypted folder loses
+  // its `X-Folder-Session` and 403s.
+  if (typeof FormData !== "undefined" && config.data instanceof FormData) {
+    const fromForm = config.data.get("Path") ?? config.data.get("Key");
+    if (typeof fromForm === "string") return fromForm;
+    return null;
+  }
+
   // POST/PUT/DELETE body. The generated client **pre-serializes** the request
   // model to a JSON string before the interceptor chain runs (factories built
   // with no `configuration` → `serializeDataIfNeeded` always stringifies), so
