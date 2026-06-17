@@ -5,7 +5,7 @@
 >
 > Legend: ⏳ not started · 🚧 in progress · ✅ done · 🚫 blocked.
 
-**Updated:** 2026-06-17 · **Branch:** `v2` · **Round:** **Phase 6 (Advanced) COMPLETE (closed 2026-06-17) — job transport + §6.2 duplicate scan + §6.3 archive UI + §6.4 notifications inbox & quota all landed (D-P6.1–D-P6.4); AV scanning removed (D-P6.5). Phases 0–6 done. Only carry-forward: the live-backend E2E acceptance walkthrough (pending creds). Next: Phase 7.**
+**Updated:** 2026-06-17 · **Branch:** `v2` · **Round:** **Phase 6 (Advanced) COMPLETE & LIVE-VERIFIED (closed 2026-06-17) — job transport + §6.2 duplicate scan + §6.3 archive UI + §6.4 notifications inbox & quota all landed (D-P6.1–D-P6.4); AV scanning removed (D-P6.5). The carry-forward live-backend E2E walkthrough is now DONE: drove the running app vs the live backend (Track 2), verifying the job transport (archive create/extract, notification fan-out) + the new folder-create job end-to-end — which surfaced + fixed a backend 403 on `Cloud/Directory/Create/Status` (CASL). Post-P6 refinement (2026-06-17, cross-cutting on P3/P6): inline pending/busy rows + a plain-folder-create BullMQ job + client-side search + smart grid. Phases 0–6 done. Next: Phase 7.**
 
 ## Where we are
 
@@ -197,7 +197,7 @@ live backend contract smoke passed. Authenticated end-to-end walkthrough pending
 | 3     | Storage Core                        | ✅     | **Staged in 4 parts, all done.** A (browse) ✅ · B1 (single-item ops) ✅ · B2 (multi-select + bulk + DnD) ✅ · C (upload pipeline) ✅ · D (search + filter + ⌘K palette + central shortcut dispatcher + help overlay + touch bottom-sheet + server-seam ESLint) ✅ 2026-06-14 |
 | 4     | Preview + Share                     | ✅     | Full: preview modal (image/video/PDF/audio/office) + share (presigned URL) + CDN resize + CodeMirror editor + object & document versions/diff/restore; Zen lightbox redesign + office-Escape fix. Done 2026-06-14/15 (D-P4.0–D-P4.9)                                          |
 | 5     | Secure Folders                      | ✅     | Full: token spine + encrypted + hidden (unlock/reveal/hide/conceal, ⇧⇧) + auto-refresh/TTL re-lock; session token `sessionStorage`-scoped (D-P5.7 amends the never-persist guarantee). Done 2026-06-14/15 (D-P5.1–D-P5.8)                                                     |
-| 6     | Advanced                            | ✅     | Full: realtime/job transport (D-P6.2/D-P6.3) + duplicate-scan panel (D-P6.4) + archive create/extract UI + notifications inbox & quota (D-P6.1). AV scanning removed (D-P6.5). Done 2026-06-17 (D-P6.1–D-P6.5). Live-backend E2E acceptance walkthrough deferred (pending creds)                                          |
+| 6     | Advanced                            | ✅     | Full: realtime/job transport (D-P6.2/D-P6.3) + duplicate-scan panel (D-P6.4) + archive create/extract UI + notifications inbox & quota (D-P6.1). AV scanning removed (D-P6.5). Done 2026-06-17 (D-P6.1–D-P6.5). **Live-verified 2026-06-17** (Track 2): folder-create async path (201), archive create/extract jobs, notification fan-out, search modes, busy rows — all end-to-end; found+fixed a backend `Create/Status` 403 (`a237073`, CASL Read on the wrong subject). Remaining live checks (duplicate-scan, quota ≥80%, kill-socket reconnect) are optional non-blocking regressions |
 | 7     | Public & Polish                     | ⏳     | **MVP completes here** (+ onboarding, observability finish)                                                                                                                                                                                                                   |
 | 8     | Teams (post‑MVP)                    | ⏳     | architect‑for now, build last                                                                                                                                                                                                                                                 |
 | 9     | Organization & Discovery (post‑MVP) | ⏳     | **backend‑gated**: favorites/recents/tags/global‑insights/real‑share                                                                                                                                                                                                          |
@@ -219,10 +219,10 @@ live backend contract smoke passed. Authenticated end-to-end walkthrough pending
 
 ## What's next
 
-1. **Phase 7 (Public & Polish) — MVP completes here.** Phase 6 (Advanced) closed 2026-06-17 (job transport + duplicate
-   scan + archive + notifications/quota; AV removed — D-P6.5). Next up: onboarding/first-run, Data Export + Delete
-   Account (KVKK/GDPR), performance/observability verification, public-page polish. See
-   [Phase 7](./phases/phase-7-public-polish.md).
+1. **Phase 7 (Public & Polish) — MVP completes here.** Phase 6 (Advanced) closed **& live-verified** 2026-06-17 (job
+   transport + duplicate scan + archive + notifications/quota; AV removed — D-P6.5; Track 2 live walkthrough done, one
+   backend 403 fixed). Next up: onboarding/first-run, Data Export + Delete Account (KVKK/GDPR),
+   performance/observability verification, public-page polish. See [Phase 7](./phases/phase-7-public-polish.md).
 2. **Deferred live-backend walkthroughs (need login creds):** the Phase 3 upload matrix (small + large multipart w/
    progress, pause/resume, cancel→server Abort, kill-tab-at-50%→resume without re-sending part 1, forced 409
    REPLACE/KEEP_BOTH/SKIP + apply-to-all, quota/max-size pre-flight, folder drop/picker, zero-byte) + the B1/B2 ops matrix;
@@ -230,6 +230,29 @@ live backend contract smoke passed. Authenticated end-to-end walkthrough pending
 
 ## Recent status entries
 
+- **2026-06-17 (Post-P6 refinement — inline pending/busy rows + folder-create job + Track 2 live E2E)** — A
+  cross-cutting storage-list refinement on top of Phases 3/6 (not a new phase), then the live walkthrough that
+  was Phase 6's last carry-forward. **Inline pending rows:** in-flight list ops render an instant inline loading
+  row via a generic `usePendingEntries(path)` pipeline fed by two sources — durable `useJobsStore` jobs (archive
+  extract/create + the new folder-create) + a feature-local `pendingOps` store (optimistic create rows); the
+  separate `PendingEntry` render model keeps selection/DnD/preview untouched. **Busy treatment** dims + spins the
+  source row for move/rename/**delete** (delete switched from optimistic-remove to busy-then-drop; inert to mouse
+  AND keyboard). **Client-side search:** "This folder" filters the loaded listing client-side (zero API);
+  "Everywhere" hits `Cloud/Search`; filter-aware empty states. **Plain folder create is now an async BullMQ job**
+  (`Cloud/Directory/Create/Start` + `/Status`, full-stack — encrypted create stays synchronous, passphrase never
+  enters a Redis job per rule #5) so its inline row survives refresh; the client was **regenerated** (purely
+  additive, no drift) and the hand-typed shims tightened to the generated `directoryCreateStart/Status` +
+  `NotificationType.FolderCreate*` (`455e384` regen / `0a3ca0b` wiring). **Track 2 live E2E (Chrome MCP vs the
+  running backend):** verified the folder-create async path → 201 (not the sync fallback), client-side ↔ Everywhere
+  search, rename + bulk-delete busy treatment, and archive create/extract jobs end-to-end. **Bug found + fixed
+  live:** `GET Cloud/Directory/Create/Status` guarded on `Read+CloudDirectory` — a CASL permission the ability
+  factory never grants (cloud reads go through the generic `Cloud` subject) — so every status poll 403'd, breaking
+  the polling-fallback reconcile (masked because the socket FOLDER_CREATE_COMPLETE settles the happy path). Fixed
+  to `Read+Cloud` (`a237073` on nestjs `main`), re-verified 200 live. Commits: frontend `dd9e2b5`/`455e384`/
+  `0a3ca0b`/`fca3739` (UploadPart token), backend `c60e400`/`a237073`. Green: `tsc`/`lint` + **371 vitest**.
+  Two pre-existing observations surfaced (not from this work): global `Cloud/Search` returns no filename matches
+  (e.g. "Umut" → 200 but empty — backend search isn't name-indexed); the bulk-select bar keeps a stale "N
+  selected" count after a delete (minor cosmetic — follow-up task chip).
 - **2026-06-16 (Phase 6 — §6.2 duplicate-scan panel, D-P6.4)** — The first consumer of the job plumbing. New
   `features/storage/duplicates/` (kept inside storage; consumes `@/features/jobs` one-way): `useDuplicateScan` (start →
   `useJobsStore.track(ScanId)` so the socket fan-out + `reconcileActiveJobs` drive progress; result via `useQuery` gated on
@@ -431,6 +454,8 @@ Cloud/Documents/Versions` was `void` → added `@ApiSuccessResponse` + regenerat
 
 ## Blockers / waiting on
 
-- **Login creds** for the deferred live-backend walkthroughs (Phases 3/4/5 — non‑blocking; code is unit-verified).
+- **Login creds** — RESOLVED for this session (drove the live app vs the running backend in Track 2, closing the
+  Phase 6 walkthrough). The Phase 3/4/5 live matrices (upload, preview/editor, secure-folder unlock/reveal) are now
+  unblocked but not yet exhaustively re-run — non‑blocking; code is unit-verified.
 - **API team** on the backend‑gated org features (Q10 favorites, Q11 recents, Q12 tags, Q13 insights) + Q2 (webhook HMAC)
   - activating the avatar endpoint (Q7) — all **non‑blocking for MVP**. (Q1 sharing + Q5 CDN resize are resolved.)
