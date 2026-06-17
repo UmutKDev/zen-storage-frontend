@@ -6,15 +6,19 @@ import { t } from "@/lib/i18n";
 import type { ItemSelection } from "../../operations";
 import type { FolderEntry } from "../lib/entries";
 import type { PendingEntry } from "../lib/pending";
-import { justifyRows } from "../lib/justify";
+import { justifyRows, justifiedRowHeight } from "../lib/justify";
 import { resolveTileMedia } from "../lib/tile";
 import { useViewPrefs } from "../stores/viewPrefs.store";
+import { useVideoDims } from "../stores/videoDims.store";
 import { useContainerWidth } from "../hooks/useContainerWidth";
 import { TileCard } from "./TileCard";
 import { PendingTile } from "./PendingTile";
 
 /** Matches `.zs-smartgrid { gap }` so the JS wrap-points agree with the CSS. */
 const GRID_GAP = 8;
+/** Cap how tall the left-aligned last row may grow to match the row above it
+ *  (a sparse last row's own justified height can be huge — don't follow it). */
+const MAX_LAST_ROW_H_FACTOR = 2;
 
 /** A grid tile is either an in-flight pending placeholder (square) or a real
  *  entry tile (image thumbnail or icon). Both carry a `ratio` for justification. */
@@ -44,16 +48,23 @@ export function SmartGridView({
 }) {
   const rowHeight = useViewPrefs((s) => s.gridRowH);
   const { ref, width } = useContainerWidth();
+  // Client-measured video frame sizes — a freshly measured video re-justifies
+  // its row to the real aspect ratio (FileTile reports them on loadedmetadata).
+  const videoDims = useVideoDims((s) => s.dims);
 
   const tiles = useMemo<Tile[]>(
     () => [
       ...pending.map((p) => ({ pending: p, ratio: 1 })),
-      ...entries.map((entry) => ({ entry, ...resolveTileMedia(entry, rowHeight) })),
+      ...entries.map((entry) => ({
+        entry,
+        ...resolveTileMedia(entry, rowHeight, videoDims),
+      })),
     ],
-    [pending, entries, rowHeight],
+    [pending, entries, rowHeight, videoDims],
   );
   const rows = useMemo(
-    () => justifyRows(tiles, { containerWidth: width, rowHeight, gap: GRID_GAP }),
+    () =>
+      justifyRows(tiles, { containerWidth: width, rowHeight, gap: GRID_GAP }),
     [tiles, width, rowHeight],
   );
 
@@ -67,38 +78,61 @@ export function SmartGridView({
         itemCount={entries.length + pending.length}
         estimateSize={Math.round(rowHeight * 1.05 + GRID_GAP)}
         rowRole="none"
-        renderRow={(row, index) => (
-          <div
-            className="zs-smartgrid pb-2"
-            // nowrap on a measured row: rows are pre-packed to fit, so a sub-pixel
-            // overflow (scrollbar) should shrink tiles, never wrap one onto a stray
-            // line. Pre-measure (single row) we DO want flex-wrap.
-            style={
-              {
-                "--zs-row-h": `${rowHeight}px`,
-                ...(width > 0 ? { flexWrap: "nowrap" } : {}),
-              } as CSSProperties
-            }
-          >
-            {row.map((tile) =>
-              "pending" in tile ? (
-                <PendingTile key={`pending:${tile.pending.id}`} entry={tile.pending} />
-              ) : (
-                <TileCard
-                  key={`${tile.entry.kind}:${tile.entry.key}`}
-                  entry={tile.entry}
-                  path={path}
-                  selection={selection}
-                  thumbnailUrl={tile.url}
-                  ratio={tile.ratio}
-                />
-              ),
-            )}
-            {index === rows.length - 1 ? (
-              <span className="zs-smartgrid__spacer" aria-hidden />
-            ) : null}
-          </div>
-        )}
+        renderRow={(row, index) => {
+          const isLast = index === rows.length - 1;
+          // The last row is left-aligned and does NOT flex-grow (the spacer eats
+          // the slack), so it would sit at the base height while the full rows
+          // above justified taller. Size it to match the row above instead.
+          const rowH =
+            isLast && rows.length > 1 && width > 0
+              ? Math.min(
+                  rowHeight * MAX_LAST_ROW_H_FACTOR,
+                  Math.max(
+                    rowHeight,
+                    justifiedRowHeight(rows[index - 1], {
+                      containerWidth: width,
+                      gap: GRID_GAP,
+                      fallback: rowHeight,
+                    }),
+                  ),
+                )
+              : rowHeight;
+          return (
+            <div
+              className="zs-smartgrid pb-2"
+              // nowrap on a measured row: rows are pre-packed to fit, so a sub-pixel
+              // overflow (scrollbar) should shrink tiles, never wrap one onto a stray
+              // line. Pre-measure (single row) we DO want flex-wrap.
+              style={
+                {
+                  "--zs-row-h": `${rowH}px`,
+                  ...(width > 0 ? { flexWrap: "nowrap" } : {}),
+                } as CSSProperties
+              }
+            >
+              {row.map((tile) =>
+                "pending" in tile ? (
+                  <PendingTile
+                    key={`pending:${tile.pending.id}`}
+                    entry={tile.pending}
+                  />
+                ) : (
+                  <TileCard
+                    key={`${tile.entry.kind}:${tile.entry.key}`}
+                    entry={tile.entry}
+                    path={path}
+                    selection={selection}
+                    thumbnailUrl={tile.url}
+                    ratio={tile.ratio}
+                  />
+                ),
+              )}
+              {index === rows.length - 1 ? (
+                <span className="zs-smartgrid__spacer" aria-hidden />
+              ) : null}
+            </div>
+          );
+        }}
         getRowKey={(row, index) =>
           row[0]
             ? "pending" in row[0]
