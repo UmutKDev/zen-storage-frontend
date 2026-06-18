@@ -760,6 +760,33 @@
     "video": {
       "codecUnsupported": "This video format can’t be played here. Download it to view."
     },
+    "player": {
+      "play": "Play",
+      "pause": "Pause",
+      "mute": "Mute",
+      "unmute": "Unmute",
+      "volume": "Volume",
+      "seek": "Seek",
+      "back10": "Back 10 seconds",
+      "forward10": "Forward 10 seconds",
+      "speed": "Playback speed",
+      "source": "Source",
+      "captions": "Captions",
+      "captionsOff": "Off",
+      "loop": "Loop",
+      "ambient": "Ambient glow",
+      "pip": "Picture-in-picture",
+      "airplay": "AirPlay",
+      "cast": "Cast",
+      "castNoDevices": "No cast devices found on your network",
+      "castFailed": "Couldn’t start casting",
+      "settings": "Settings",
+      "fullscreen": "Enter fullscreen",
+      "exitFullscreen": "Exit fullscreen",
+      "buffering": "Buffering…",
+      "errorBody": "Playback was interrupted.",
+      "reload": "Reload"
+    },
     "audio": {
       "codecUnsupported": "This audio format can’t be played here. Download it to view."
     },

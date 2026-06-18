@@ -18,18 +18,21 @@ export function PreviewBody({
   object,
   zoom,
   onZoomChange,
+  onReload,
 }: {
   object: CloudObjectModel;
   /** Image-only: the lightbox zoom level + setter (owned by the modal so it
    *  resets on prev/next nav). Ignored by every non-image viewer. */
   zoom?: number;
   onZoomChange?: (zoom: number) => void;
+  /** Video-only: re-fetch a fresh signed URL (mid-watch expiry recovery). */
+  onReload?: () => void;
 }) {
   switch (viewerKindForName(object.Name)) {
     case "image":
       return <ImageViewer object={object} zoom={zoom} onZoomChange={onZoomChange} />;
     case "video":
-      return <VideoViewer object={object} />;
+      return <VideoViewer object={object} onReload={onReload} />;
     case "audio":
       return <AudioViewer object={object} />;
     case "pdf":

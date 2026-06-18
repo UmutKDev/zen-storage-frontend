@@ -99,12 +99,21 @@ export function FilePreviewModal({
 
   const { object, isPending, isFetching, isError, refetch } =
     usePreviewObject(activeKey);
-  const nav = usePreviewNavigation(activeKey, selectKey);
 
   const isEditor = object ? viewerKindForName(object.Name) === "editor" : false;
+  // For a video, the player owns ←/→ (seek) + `F` (browser fullscreen); file
+  // nav moves to Shift+←/→ and the modal's layout-fullscreen `F` stands down.
+  const isVideo = object ? viewerKindForName(object.Name) === "video" : false;
 
-  // `F` toggles layout-fullscreen (not while typing / with modifiers).
+  const nav = usePreviewNavigation(activeKey, selectKey, {
+    arrowsClaimed: isVideo,
+  });
+
+  // `F` toggles layout-fullscreen (not while typing / with modifiers / on video,
+  // where the player owns `F` for browser fullscreen). Re-subscribes when the
+  // active file's viewer kind flips between video and non-video.
   useEffect(() => {
+    if (isVideo) return;
     const onKey = (e: KeyboardEvent) => {
       if (
         (e.key === "f" || e.key === "F") &&
@@ -122,7 +131,7 @@ export function FilePreviewModal({
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, []);
+  }, [isVideo]);
 
   const navigate = () => {
     if (mode === "overlay") router.back();
@@ -144,6 +153,12 @@ export function FilePreviewModal({
           showCloseButton={false}
           overlayClassName="zs-preview-backdrop"
           onEscapeKeyDown={(e) => {
+            // Browser fullscreen (the video player) consumes Escape first — keep
+            // the modal open underneath so Escape just exits fullscreen.
+            if (document.fullscreenElement) {
+              e.preventDefault();
+              return;
+            }
             if (layoutFullscreen) {
               e.preventDefault();
               setLayoutFullscreen(false);
@@ -219,6 +234,7 @@ export function FilePreviewModal({
                   onNext={nav.goNext}
                   diffFor={diffFor}
                   onCloseDiff={() => setDiffFor(null)}
+                  onReload={refetch}
                 />
                 <PreviewDetailsRail
                   open={railOpen}

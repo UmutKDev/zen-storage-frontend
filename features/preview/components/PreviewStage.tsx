@@ -76,6 +76,7 @@ export function PreviewStage({
   onNext,
   diffFor,
   onCloseDiff,
+  onReload,
 }: {
   object: CloudObjectModel;
   zoom: number;
@@ -86,6 +87,8 @@ export function PreviewStage({
   onNext: () => void;
   diffFor: { docKey: string; versionId: string } | null;
   onCloseDiff: () => void;
+  /** Video-only: re-fetch a fresh signed URL (mid-watch expiry recovery). */
+  onReload?: () => void;
 }) {
   return (
     <div className="relative flex min-h-0 flex-1 flex-col bg-background">
@@ -98,6 +101,7 @@ export function PreviewStage({
         object={object}
         zoom={zoom}
         onZoomChange={onZoomChange}
+        onReload={onReload}
       />
       <PreviewNavButtons
         hasPrev={hasPrev}

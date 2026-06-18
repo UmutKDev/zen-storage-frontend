@@ -15,10 +15,17 @@ function isEditableTarget(target: EventTarget | null): boolean {
  * (internal state + `history.replaceState`) rather than a Next route change, so
  * the dialog never remounts (fullscreen/rail/zoom survive, no loading flash). On
  * a cold deep-link the list is empty → both directions disabled.
+ *
+ * `arrowsClaimed` (set when the active viewer is a video) reserves the plain
+ * ←/→ keys for the player's scrubbing — file navigation then requires
+ * **Shift**+←/→. The video player's capture-phase handler already swallows plain
+ * arrows; this guard makes the Shift convention explicit and keeps non-video
+ * viewers on plain-arrow navigation (no regression).
  */
 export function usePreviewNavigation(
   currentKey: string,
   onNavigate: (key: string) => void,
+  { arrowsClaimed = false }: { arrowsClaimed?: boolean } = {},
 ) {
   const keys = usePreviewNavStore((s) => s.keys);
 
@@ -38,6 +45,8 @@ export function usePreviewNavigation(
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.defaultPrevented || isEditableTarget(e.target)) return;
+      // When a video claims the arrows, only Shift+Arrow navigates files.
+      if (arrowsClaimed && !e.shiftKey) return;
       if (e.key === "ArrowLeft" && prevKey) {
         e.preventDefault();
         goTo(prevKey);
@@ -48,7 +57,7 @@ export function usePreviewNavigation(
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [prevKey, nextKey, goTo]);
+  }, [prevKey, nextKey, goTo, arrowsClaimed]);
 
   return { hasPrev: Boolean(prevKey), hasNext: Boolean(nextKey), goPrev, goNext };
 }
