@@ -96,6 +96,28 @@ export const toast: Variants = {
   },
 };
 
+/**
+ * Bulk-selection action bar — a touch heavier than `toast`: it rises and settles
+ * from a subtle scale-down so the floating glass pill reads as arriving with
+ * weight. Token-based, no spring (a spring scale on a wide bar feels bouncy). The
+ * global `MotionConfig reducedMotion="user"` strips the transforms to opacity.
+ */
+export const bulkBar: Variants = {
+  hidden: { opacity: 0, y: distance.rise, scale: 0.98 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { duration: duration.base, ease: easing.decelerate },
+  },
+  exit: {
+    opacity: 0,
+    y: distance.rise,
+    scale: 0.98,
+    transition: { duration: duration.fast, ease: easing.accelerate },
+  },
+};
+
 /** Progress bars use a tween (precision), never spring. */
 export const progress: Variants = {
   initial: { scaleX: 0 },

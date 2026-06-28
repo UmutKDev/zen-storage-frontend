@@ -8,10 +8,6 @@ import type { PendingEntry } from "../lib/pending";
 import { BrowseRow } from "./BrowseRow";
 import { PendingRow } from "./PendingRow";
 
-/** A list row is either an in-flight pending placeholder (rendered above) or a
- *  real entry. Kept local to the render so selection/DnD never see pending. */
-type ListRow = { pending: PendingEntry } | { entry: FolderEntry };
-
 export function ListView({
   entries,
   path,
@@ -24,10 +20,6 @@ export function ListView({
   /** In-flight operations shown as non-interactive rows above the real entries. */
   pending?: PendingEntry[];
 }) {
-  const rows: ListRow[] = [
-    ...pending.map((p) => ({ pending: p })),
-    ...entries.map((e) => ({ entry: e })),
-  ];
   return (
     <div className="zs-file-panel flex h-full flex-col">
       {/* Visual column header — decorative over the virtualized list, so it's
@@ -40,21 +32,31 @@ export function ListView({
         </span>
         <span className="w-[40px] shrink-0" />
       </div>
+      {/* Pending rows render ABOVE the virtualized list (not inside it): a
+          virtualized list only renders its scroll window, so an in-flight row at
+          index 0 vanishes once the user scrolls — but a background job must stay
+          visible the whole time. This also matches the intended layout ("pending
+          rows above the real entries"). Selection/DnD never see these rows. */}
+      {pending.length > 0 ? (
+        <div
+          role="list"
+          aria-label={t("storage.pending.label")}
+          className="shrink-0"
+        >
+          {pending.map((p) => (
+            <div role="listitem" key={`pending:${p.id}`}>
+              <PendingRow entry={p} />
+            </div>
+          ))}
+        </div>
+      ) : null}
       <VirtualList
-        rows={rows}
+        rows={entries}
         estimateSize={57}
-        renderRow={(row) =>
-          "pending" in row ? (
-            <PendingRow entry={row.pending} />
-          ) : (
-            <BrowseRow entry={row.entry} path={path} selection={selection} />
-          )
-        }
-        getRowKey={(row) =>
-          "pending" in row
-            ? `pending:${row.pending.id}`
-            : `${row.entry.kind}:${row.entry.key}`
-        }
+        renderRow={(entry) => (
+          <BrowseRow entry={entry} path={path} selection={selection} />
+        )}
+        getRowKey={(entry) => `${entry.kind}:${entry.key}`}
         ariaLabel={t("storage.list.label")}
         className="min-h-0 flex-1"
       />

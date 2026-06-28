@@ -2,28 +2,48 @@
 
 import { useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Download, FileArchive, FolderInput, Trash2, X } from "lucide-react";
+import {
+  ArchiveRestore,
+  CheckCheck,
+  Download,
+  FileArchive,
+  FolderInput,
+  Trash2,
+  X,
+} from "lucide-react";
 import { t } from "@/lib/i18n";
-import { toast as toastVariant } from "@/lib/motion";
-import { Button, Separator } from "@/components/ui";
+import { bulkBar as bulkBarVariant } from "@/lib/motion";
+import {
+  Button,
+  Separator,
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui";
 import type { ItemSelection } from "../hooks/useItemSelection";
 import { useDelete } from "../hooks/useDelete";
 import { useDownload } from "../hooks/useDownload";
 import { focusBrowseContent } from "../lib/feedback";
 import { useStorageUiStore } from "../stores/storageUi.store";
+import { isExtractableArchive } from "../../archive/lib/archive";
 import { ArchiveCreateDialog } from "../../archive/components/ArchiveCreateDialog";
+import { ArchiveExtractDialog } from "../../archive/components/ArchiveExtractDialog";
+import { ArchiveExtractBulkDialog } from "../../archive/components/ArchiveExtractBulkDialog";
 import { DeleteConfirmDialog } from "./DeleteConfirmDialog";
 import { MoveDialog } from "./MoveDialog";
 
 /**
- * Floating bar shown while a selection exists: count, select-all, then bulk
- * move / download / delete over the selected entries. Each bulk mutation is a
- * single backend call; download loops presigns over files only (dirs are
- * skipped, the button disables when the selection holds no files).
+ * Floating bulk-selection bar shown while a selection exists: a glass pill with a
+ * tinted count anchor, then select-all + bulk move / archive / extract / download
+ * / delete over the selected entries. Each bulk mutation is a single backend call;
+ * download loops presigns over files only, and Extract appears only when the
+ * selection holds archives (acting on that archive subset, like download does for
+ * files). 1 archive → the preview/subset dialog; 2+ → the ordered bulk dialog
+ * (one `archive-extract` job each).
  *
- * The move/delete dialogs are driven by the `storageUi` store so the ⌘K palette
- * can open them too — but they always operate on THIS surface's resolved
- * `selection.selectedEntries`, so the bulk path is identical either way.
+ * The move/delete/archive/extract dialogs are driven by the `storageUi` store so
+ * the ⌘K palette can open them too — but they always operate on THIS surface's
+ * resolved `selection.selectedEntries`, so the bulk path is identical either way.
  */
 export function BulkActionBar({
   path,
@@ -39,6 +59,7 @@ export function BulkActionBar({
   const { downloadMany, isPending: downloading } = useDownload();
   const files = selection.selectedEntries.filter((e) => e.kind === "file");
   const noFiles = files.length === 0;
+  const archives = files.filter((e) => isExtractableArchive(e.name));
 
   // A bulk dialog must never outlive its selection — otherwise an intent left
   // over from a prior selection would auto-reopen on the next one. Close it when
@@ -46,6 +67,12 @@ export function BulkActionBar({
   useEffect(() => {
     if (selection.count === 0) closeDialog();
   }, [selection.count, closeDialog]);
+
+  // Extract is archive-specific: if the user deselects the last archive (while
+  // keeping other files), close the extract dialog so it can't render mismatched.
+  useEffect(() => {
+    if (dialog === "extract" && archives.length === 0) closeDialog();
+  }, [dialog, archives.length, closeDialog]);
 
   // Clearing unmounts this bar — hand focus to the browse surface first, so a
   // keyboard user (or Radix's dialog-close restore) doesn't land on <body>.
@@ -59,14 +86,22 @@ export function BulkActionBar({
       <AnimatePresence>
         {selection.count > 0 ? (
           <motion.div
-            variants={toastVariant}
+            variants={bulkBarVariant}
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="flex flex-wrap items-center gap-1.5 self-center rounded-lg border border-border bg-surface-elevated px-3 py-1.5 shadow-e2"
+            className="glass-overlay flex flex-wrap items-center gap-1 self-center rounded-full px-2.5 py-1.5"
           >
-            <span className="px-1 text-sm font-medium tabular-nums text-foreground">
-              {selection.count} {t("storage.ops.selection.selectedSuffix")}
+            <span className="flex items-center gap-2 pl-1 pr-0.5">
+              <span
+                className="zs-tile-icon zs-tone-brand size-6 rounded-md"
+                aria-hidden
+              >
+                <CheckCheck className="size-3.5" />
+              </span>
+              <span className="text-sm font-medium tabular-nums text-foreground">
+                {selection.count} {t("storage.ops.selection.selectedSuffix")}
+              </span>
             </span>
             {selection.allSelected ? null : (
               <Button variant="ghost" size="sm" onClick={selection.selectAll}>
@@ -108,6 +143,16 @@ export function BulkActionBar({
               <FileArchive className="size-4" />
               {t("storage.ops.menu.archive")}
             </Button>
+            {archives.length > 0 ? (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setDialog("extract")}
+              >
+                <ArchiveRestore className="size-4" />
+                {t("storage.ops.menu.extract")}
+              </Button>
+            ) : null}
             <Button
               variant="ghost-destructive"
               size="sm"
@@ -117,15 +162,22 @@ export function BulkActionBar({
               {t("storage.ops.menu.delete")}
             </Button>
             <Separator orientation="vertical" className="mx-1 h-5" />
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-7"
-              aria-label={t("storage.ops.selection.clear")}
-              onClick={clearAndRefocus}
-            >
-              <X className="size-4" />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-7"
+                  aria-label={t("storage.ops.selection.clear")}
+                  onClick={clearAndRefocus}
+                >
+                  <X className="size-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                {t("storage.ops.selection.clear")}
+              </TooltipContent>
+            </Tooltip>
           </motion.div>
         ) : null}
       </AnimatePresence>
@@ -160,6 +212,25 @@ export function BulkActionBar({
           open
           onOpenChange={(o) => !o && closeDialog()}
           onArchived={clearAndRefocus}
+        />
+      ) : null}
+      {dialog === "extract" && archives.length === 1 ? (
+        <ArchiveExtractDialog
+          archiveKey={archives[0].key}
+          archiveName={archives[0].name}
+          path={path}
+          open
+          onOpenChange={(o) => !o && closeDialog()}
+          onExtracted={clearAndRefocus}
+        />
+      ) : null}
+      {dialog === "extract" && archives.length >= 2 ? (
+        <ArchiveExtractBulkDialog
+          archives={archives}
+          path={path}
+          open
+          onOpenChange={(o) => !o && closeDialog()}
+          onExtracted={clearAndRefocus}
         />
       ) : null}
     </>

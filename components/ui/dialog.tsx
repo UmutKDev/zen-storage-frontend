@@ -67,7 +67,11 @@ function DialogContent({
         className={cn(
           // Modal = glass-overlay (signature). Glass utility supplies the bg,
           // hairline border, top highlight rim, and e3 elevation.
-          "glass-overlay fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg p-6 duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg",
+          // `grid-cols-[minmax(0,1fr)]`: the single column is min-width 0, not
+          // `auto` — otherwise a long unbreakable child (e.g. a .zip filename)
+          // sizes the column to its min-content and blows the content out past
+          // the dialog's `max-w`, spilling rows outside the glass panel.
+          "glass-overlay fixed top-[50%] left-[50%] z-50 grid grid-cols-[minmax(0,1fr)] w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg p-6 duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg",
           className
         )}
         {...props}

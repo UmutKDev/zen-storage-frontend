@@ -2,15 +2,14 @@
 
 import type { CSSProperties } from "react";
 import { Loader2 } from "lucide-react";
+import { cn, toneClass } from "@/lib/utils";
 import { t } from "@/lib/i18n";
 import type { PendingEntry } from "../lib/pending";
 
-/** Square tile (`--zs-ratio: 1`) with a neutral tint reusing the real
- *  `.zs-tile__icon` shape, so a pending tile sits flush in the justified grid. */
-const PENDING_STYLE = {
-  "--zs-ratio": 1,
-  "--tile": "var(--muted-foreground)",
-} as CSSProperties;
+/** Square tile (`--zs-ratio: 1`) reusing the real `.zs-tile__icon` shape, so a
+ *  pending tile sits flush in the justified grid. Tint comes from the entry's
+ *  `tone` (amber archives / blue folders), matching the row it stands in for. */
+const PENDING_STYLE = { "--zs-ratio": 1 } as CSSProperties;
 
 /**
  * A non-interactive "in progress" grid tile — mirrors a plain icon
@@ -28,7 +27,7 @@ export function PendingTile({ entry }: { entry: PendingEntry }) {
       aria-label={`${entry.label} — ${entry.detail ?? t("storage.pending.inProgress")}`}
       role="listitem"
       style={PENDING_STYLE}
-      className="zs-tile zs-tile--plain"
+      className={cn("zs-tile zs-tile--plain", toneClass(entry.tone ?? "slate"))}
     >
       <div className="zs-tile__inner">
         <span className="zs-tile__icon">

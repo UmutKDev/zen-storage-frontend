@@ -199,7 +199,7 @@ export function MoveDialog({
                             ) : (
                               <Folder className="size-4 shrink-0 text-brand" />
                             )}
-                            <span className="flex-1 truncate">{dir.Name}</span>
+                            <span className="min-w-0 flex-1 truncate">{dir.Name}</span>
                             <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
                           </button>
                         </li>

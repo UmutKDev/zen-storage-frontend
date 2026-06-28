@@ -132,7 +132,9 @@ describe("StorageBrowser pending rows", () => {
         j1: job({
           id: "j1",
           kind: "archive-extract",
-          title: "Extracting archive",
+          // The title is the archive's name (which archive is extracting); the
+          // action label moves to the secondary line.
+          title: "movie.zip",
           percentage: 42,
           path: "",
         }),
@@ -141,7 +143,8 @@ describe("StorageBrowser pending rows", () => {
 
     renderWithProviders(<StorageBrowser path="" />);
 
-    expect(await screen.findByText("Extracting archive")).toBeInTheDocument();
+    expect(await screen.findByText("movie.zip")).toBeInTheDocument();
+    expect(screen.getByText("Extracting archive")).toBeInTheDocument();
     expect(screen.getByText("42%")).toBeInTheDocument();
   });
 

@@ -96,7 +96,7 @@ describe("useArchiveExtract.start", () => {
   it("forwards Strategy + selected entries + CreateFolder and tracks the job", async () => {
     extractStartMock.mockResolvedValueOnce({ data: { JobId: "job-2" } } as never);
     const { result } = renderHook(
-      () => useArchiveExtract("docs/a.zip", "docs", false),
+      () => useArchiveExtract("docs/a.zip", "a.zip", "docs", false),
       { wrapper },
     );
 

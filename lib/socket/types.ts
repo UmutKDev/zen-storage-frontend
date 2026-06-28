@@ -33,6 +33,11 @@ export interface ArchiveJobEventData {
   Phase?: string;
   EntriesProcessed?: number;
   TotalEntries?: number | null;
+  /** Bytes read / total for the archive (extract). Used to derive a percentage
+   *  when `TotalEntries` is unknown — a streaming full-archive extract can't know
+   *  the entry count up front, but the compressed byte total is always known. */
+  BytesRead?: number;
+  TotalBytes?: number;
   Key?: string;
   OutputKey?: string;
   ExtractedPath?: string;

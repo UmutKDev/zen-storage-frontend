@@ -34,6 +34,7 @@ export function usePendingEntries(path: string): PendingEntry[] {
       .map((o) => ({
         id: o.id,
         label: o.name,
+        tone: o.kind === "create-folder" ? "blue" : "slate",
         detail:
           o.kind === "create-folder"
             ? t("storage.pending.creatingFolder")
@@ -47,7 +48,20 @@ export function usePendingEntries(path: string): PendingEntry[] {
           j.path === path &&
           INLINE_JOB_KINDS.has(j.kind),
       )
-      .map((j) => ({ id: j.id, label: j.title, percentage: j.percentage }));
+      .map((j) => ({
+        id: j.id,
+        label: j.title,
+        percentage: j.percentage,
+        // Archive jobs read as archive tiles (amber); a folder-create job as a
+        // folder (blue) — matching the real entry the row stands in for.
+        tone: j.kind === "folder-create" ? "blue" : "amber",
+        // The extract job's title is the archive name, so name the action on the
+        // secondary line ("Extracting archive") instead of the generic "In progress…".
+        detail:
+          j.kind === "archive-extract"
+            ? t("storage.archive.extract.jobTitle")
+            : undefined,
+      }));
 
     return [...optimistic, ...fromJobs];
   }, [ops, jobs, path]);

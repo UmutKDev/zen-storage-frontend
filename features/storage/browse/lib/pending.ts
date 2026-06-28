@@ -1,3 +1,5 @@
+import type { FileTone } from "@/lib/utils";
+
 /**
  * A non-interactive "in progress" row in the listing — a fast optimistic create
  * (from `pendingOps`) or a durable job (from `useJobsStore`), rendered the same
@@ -14,4 +16,7 @@ export interface PendingEntry {
   detail?: string;
   /** 0–100 when known (jobs with progress). */
   percentage?: number;
+  /** Icon tint — matches the real entry it stands in for (amber archives, blue
+   *  folders); defaults to a neutral slate when unset. */
+  tone?: FileTone;
 }

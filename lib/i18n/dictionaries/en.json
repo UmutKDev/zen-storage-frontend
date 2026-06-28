@@ -148,6 +148,8 @@
         "into": "Extracts into",
         "intoThisFolder": "Extracts into this folder",
         "newFolder": "Extract into a new folder",
+        "previewContents": "Preview contents",
+        "previewHint": "Extract the whole archive, or preview to choose specific files.",
         "loading": "Reading archive…",
         "previewError": "Couldn't read this archive.",
         "retry": "Try again",
@@ -162,7 +164,11 @@
         "replace": "Replace",
         "cancel": "Cancel",
         "submit": "Extract",
-        "jobTitle": "Extracting archive"
+        "jobTitle": "Extracting archive",
+        "bulkTitle": "Extract archives",
+        "bulkCountSuffix": "archives selected",
+        "bulkOrderNote": "Archives extract one at a time, in order.",
+        "bulkNewFolderHint": "Each archive into its own folder"
       }
     },
     "duplicate": {
@@ -215,6 +221,7 @@
       "description": "Upload files or create a folder to get started."
     },
     "pending": {
+      "label": "In-progress operations",
       "inProgress": "In progress…",
       "creatingFolder": "Creating folder…",
       "creatingFile": "Creating file…"

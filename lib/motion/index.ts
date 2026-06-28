@@ -9,6 +9,7 @@ export {
   hover,
   press,
   toast,
+  bulkBar,
   progress,
 } from "./variants";
 export { useReducedMotion } from "./useReducedMotion";

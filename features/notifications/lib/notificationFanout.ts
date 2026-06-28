@@ -70,13 +70,21 @@ function applyJobEvent(
     return;
   }
 
-  // Archive progress carries entry counts but no percentage — derive it.
+  // Archive progress carries entry counts but no percentage — derive it. A
+  // full-archive EXTRACT streams and can't know the entry count up front
+  // (`TotalEntries` is null), so fall back to the byte ratio, which is always
+  // known (compressed total = the S3 object size). Without this the bar sticks
+  // at 0% for the whole extract even though it's progressing.
   const total = data.TotalEntries ?? undefined;
   const processed = data.EntriesProcessed;
+  const bytesRead = data.BytesRead;
+  const totalBytes = data.TotalBytes;
   const percentage =
     total && total > 0 && processed != null
       ? Math.round((processed / total) * 100)
-      : undefined;
+      : totalBytes && totalBytes > 0 && bytesRead != null
+        ? Math.min(100, Math.round((bytesRead / totalBytes) * 100))
+        : undefined;
   useJobsStore.getState().applyEvent(id, event.kind, {
     percentage,
     entriesProcessed: processed,
